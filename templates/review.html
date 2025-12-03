@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipment Rental - Reviews</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a6cfa;
+            --primary-dark: #3a5bd9;
+            --secondary: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --light-gray: #e2e8f0;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .content-section {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .section-header h2 {
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            opacity: 0.9;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            opacity: 0.9;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.875rem;
+        }
+
+        /* Review Item Styles */
+        .review-item {
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            background: white;
+            transition: transform 0.2s;
+        }
+
+        .review-item:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            align-items: flex-start;
+        }
+
+        .review-equipment {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+
+        .review-date {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .review-rating {
+            color: #f8ce0b;
+            margin-bottom: 10px;
+        }
+
+        .review-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .review-comment {
+            color: #555;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .review-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .rating-stars .star {
+            font-size: 1.8rem;
+            color: #e2e8f0;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .rating-stars .star.active,
+        .rating-stars .star:hover {
+            color: #f8ce0b;
+        }
+
+        /* No Reviews State */
+        .no-reviews {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray);
+        }
+
+        .no-reviews i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--light-gray);
+        }
+
+        .no-reviews h3 {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .review-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .review-actions {
+                justify-content: flex-start;
+            }
+            
+            .modal-content {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Reviews Section -->
+        <div class="content-section" id="reviews-section">
+            <div class="section-header">
+                <h2>My Reviews</h2>
+                <button class="btn btn-primary" id="addReviewBtn">
+                    <i class="fas fa-plus"></i> Add Review
+                </button>
+            </div>
+            
+            <div id="reviewsContainer">
+                <!-- Reviews will be loaded here -->
+                <div class="no-reviews">
+                    <i class="fas fa-star"></i>
+                    <h3>No Reviews Yet</h3>
+                    <p>You haven't written any reviews yet. Share your experience with others!</p>
+                </div>
+                
+                <div class="reviews-list">
+                    <!-- Reviews will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Review Modal -->
+        <div class="modal" id="reviewModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Write a Review</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                
+                <div class="modal-body">
+                    <form id="reviewForm">
+                        <div class="form-group">
+                            <label for="reviewEquipment">Select Equipment *</label>
+                            <select id="reviewEquipment" class="form-control" required>
+                                <option value="">-- Select Equipment --</option>
+                                <!-- Options will be populated with completed bookings -->
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reviewRating">Rating *</label>
+                            <div class="rating-stars">
+                                <i class="fas fa-star star" data-rating="1"></i>
+                                <i class="fas fa-star star" data-rating="2"></i>
+                                <i class="fas fa-star star" data-rating="3"></i>
+                                <i class="fas fa-star star" data-rating="4"></i>
+                                <i class="fas fa-star star" data-rating="5"></i>
+                            </div>
+                            <input type="hidden" id="reviewRating" value="0" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reviewTitle">Review Title *</label>
+                            <input type="text" id="reviewTitle" class="form-control" placeholder="Great equipment!" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reviewComment">Your Review *</label>
+                            <textarea id="reviewComment" class="form-control" rows="4" placeholder="Share your experience with this equipment..." required></textarea>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn btn-danger" id="cancelReviewBtn">Cancel</button>
+                    <button class="btn btn-success" id="submitReviewBtn">Submit Review</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const reviewsContainer = document.getElementById('reviewsContainer');
+            const reviewsList = document.querySelector('.reviews-list');
+            const noReviews = document.querySelector('.no-reviews');
+            const addReviewBtn = document.getElementById('addReviewBtn');
+            const reviewModal = document.getElementById('reviewModal');
+            const closeModalBtn = document.querySelector('.close-modal');
+            const cancelReviewBtn = document.getElementById('cancelReviewBtn');
+            const submitReviewBtn = document.getElementById('submitReviewBtn');
+            const reviewForm = document.getElementById('reviewForm');
+            const reviewEquipment = document.getElementById('reviewEquipment');
+            const reviewRatingInput = document.getElementById('reviewRating');
+            const stars = document.querySelectorAll('.star');
+            
+            // Sample equipment data (in a real app, this would come from your backend)
+            const equipmentOptions = [
+                { id: 1, name: 'Canon EOS R5 Camera' },
+                { id: 2, name: 'Sony FX6 Cinema Camera' },
+                { id: 3, name: 'DJI Ronin-S Gimbal' },
+                { id: 4, name: 'Rode NTG5 Shotgun Mic' },
+                { id: 5, name: 'Aputure 300D Light' }
+            ];
+            
+            // Sample reviews data (in a real app, this would come from your backend)
+            let reviews = [
+                {
+                    id: 1,
+                    equipmentId: 1,
+                    equipmentName: 'Canon EOS R5 Camera',
+                    rating: 5,
+                    title: 'Excellent camera for professional work',
+                    comment: 'The Canon EOS R5 exceeded my expectations. The image quality is stunning and the autofocus is incredibly reliable. I used it for a wedding shoot and it performed flawlessly.',
+                    date: '2023-10-15'
+                },
+                {
+                    id: 2,
+                    equipmentId: 4,
+                    equipmentName: 'Rode NTG5 Shotgun Mic',
+                    rating: 4,
+                    title: 'Great sound quality',
+                    comment: 'The Rode NTG5 delivered clean, professional audio for my documentary project. The build quality is excellent and it\'s very directional, which helps reduce background noise.',
+                    date: '2023-09-22'
+                }
+            ];
+            
+            // Initialize the page
+            function init() {
+                populateEquipmentDropdown();
+                renderReviews();
+                setupEventListeners();
+            }
+            
+            // Populate equipment dropdown
+            function populateEquipmentDropdown() {
+                reviewEquipment.innerHTML = '<option value="">-- Select Equipment --</option>';
+                equipmentOptions.forEach(equipment => {
+                    const option = document.createElement('option');
+                    option.value = equipment.id;
+                    option.textContent = equipment.name;
+                    reviewEquipment.appendChild(option);
+                });
+            }
+            
+            // Render reviews to the page
+            function renderReviews() {
+                // Clear existing reviews
+                reviewsList.innerHTML = '';
+                
+                // Show no reviews message if there are no reviews
+                if (reviews.length === 0) {
+                    noReviews.style.display = 'block';
+                    return;
+                }
+                
+                // Hide no reviews message
+                noReviews.style.display = 'none';
+                
+                // Add each review to the page
+                reviews.forEach(review => {
+                    const reviewElement = createReviewElement(review);
+                    reviewsList.appendChild(reviewElement);
+                });
+            }
+            
+            // Create HTML for a single review
+            function createReviewElement(review) {
+                const reviewItem = document.createElement('div');
+                reviewItem.className = 'review-item';
+                reviewItem.dataset.id = review.id;
+                
+                // Generate star rating HTML
+                let starsHtml = '';
+                for (let i = 1; i <= 5; i++) {
+                    starsHtml += `<i class="fas fa-star ${i <= review.rating ? 'active' : ''}"></i>`;
+                }
+                
+                reviewItem.innerHTML = `
+                    <div class="review-header">
+                        <div class="review-equipment">${review.equipmentName}</div>
+                        <div class="review-date">${formatDate(review.date)}</div>
+                    </div>
+                    <div class="review-rating">
+                        ${starsHtml}
+                    </div>
+                    <h3 class="review-title">${review.title}</h3>
+                    <p class="review-comment">${review.comment}</p>
+                    <div class="review-actions">
+                        <button class="btn btn-danger btn-sm delete-review">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                `;
+                
+                // Add event listener for delete button
+                const deleteBtn = reviewItem.querySelector('.delete-review');
+                deleteBtn.addEventListener('click', () => deleteReview(review.id));
+                
+                return reviewItem;
+            }
+            
+            // Format date for display
+            function formatDate(dateString) {
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                return new Date(dateString).toLocaleDateString(undefined, options);
+            }
+            
+            // Setup event listeners
+            function setupEventListeners() {
+                // Modal open/close
+                addReviewBtn.addEventListener('click', openModal);
+                closeModalBtn.addEventListener('click', closeModal);
+                cancelReviewBtn.addEventListener('click', closeModal);
+                
+                // Star rating
+                stars.forEach(star => {
+                    star.addEventListener('click', setRating);
+                    star.addEventListener('mouseover', hoverRating);
+                    star.addEventListener('mouseout', resetStars);
+                });
+                
+                // Form submission
+                submitReviewBtn.addEventListener('click', submitReview);
+                
+                // Close modal when clicking outside
+                window.addEventListener('click', (e) => {
+                    if (e.target === reviewModal) {
+                        closeModal();
+                    }
+                });
+            }
+            
+            // Open modal
+            function openModal() {
+                reviewModal.style.display = 'flex';
+                reviewForm.reset();
+                reviewRatingInput.value = '0';
+                resetStars();
+            }
+            
+            // Close modal
+            function closeModal() {
+                reviewModal.style.display = 'none';
+            }
+            
+            // Set rating
+            function setRating(e) {
+                const rating = parseInt(e.target.dataset.rating);
+                reviewRatingInput.value = rating;
+                
+                stars.forEach(star => {
+                    const starRating = parseInt(star.dataset.rating);
+                    if (starRating <= rating) {
+                        star.classList.add('active');
+                    } else {
+                        star.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Hover effect for stars
+            function hoverRating(e) {
+                const hoverRating = parseInt(e.target.dataset.rating);
+                
+                stars.forEach(star => {
+                    const starRating = parseInt(star.dataset.rating);
+                    if (starRating <= hoverRating) {
+                        star.classList.add('active');
+                    } else {
+                        star.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Reset stars to selected rating
+            function resetStars() {
+                const currentRating = parseInt(reviewRatingInput.value);
+                
+                stars.forEach(star => {
+                    const starRating = parseInt(star.dataset.rating);
+                    if (starRating <= currentRating) {
+                        star.classList.add('active');
+                    } else {
+                        star.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Submit review form
+            function submitReview() {
+                // Basic form validation
+                if (!reviewForm.checkValidity()) {
+                    reviewForm.reportValidity();
+                    return;
+                }
+                
+                if (reviewRatingInput.value === '0') {
+                    alert('Please select a rating');
+                    return;
+                }
+                
+                // Get form values
+                const equipmentId = parseInt(reviewEquipment.value);
+                const equipment = equipmentOptions.find(e => e.id === equipmentId);
+                
+                // Create new review object
+                const newReview = {
+                    id: Date.now(), // Using timestamp as ID for simplicity
+                    equipmentId: equipmentId,
+                    equipmentName: equipment.name,
+                    rating: parseInt(reviewRatingInput.value),
+                    title: document.getElementById('reviewTitle').value,
+                    comment: document.getElementById('reviewComment').value,
+                    date: new Date().toISOString().split('T')[0] // Current date in YYYY-MM-DD format
+                };
+                
+                // Add to reviews array
+                reviews.push(newReview);
+                
+                // Update UI
+                renderReviews();
+                
+                // Close modal and show success message
+                closeModal();
+                alert('Review submitted successfully!');
+            }
+            
+            // Delete a review
+            function deleteReview(reviewId) {
+                if (confirm('Are you sure you want to delete this review?')) {
+                    reviews = reviews.filter(review => review.id !== reviewId);
+                    renderReviews();
+                }
+            }
+            
+            // Initialize the application
+            init();
+        });
+    </script>
+</body>
+</html>

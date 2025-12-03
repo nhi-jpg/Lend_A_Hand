@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Farmer Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2E7D32;
+            --secondary: #4CAF50;
+            --accent: #8BC34A;
+            --light: #F1F8E9;
+            --dark: #1B5E20;
+            --danger: #D32F2F;
+            --warning: #FBC02D;
+            --info: #0288D1;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .sidebar {
+            background: linear-gradient(to bottom, var(--primary), var(--dark));
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding-top: 20px;
+            box-shadow: 3px 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar .logo {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 20px;
+            margin: 5px 15px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        .header {
+            background-color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            font-weight: 600;
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0 !important;
+        }
+        
+        .stats-card {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .stats-card i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .stats-card h2 {
+            font-size: 2rem;
+            margin: 10px 0;
+            color: var(--dark);
+        }
+        
+        .stats-card p {
+            color: #666;
+            margin: 0;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--dark);
+            border-color: var(--dark);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .table th {
+            font-weight: 600;
+            color: #444;
+        }
+        
+        .badge-success {
+            background-color: var(--primary);
+        }
+        
+        .badge-warning {
+            background-color: var(--warning);
+        }
+        
+        .badge-danger {
+            background-color: var(--danger);
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .recent-activity {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .recent-activity li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .recent-activity li:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-badge {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        .activity-success {
+            background-color: var(--primary);
+        }
+        
+        .activity-warning {
+            background-color: var(--warning);
+        }
+        
+        .activity-danger {
+            background-color: var(--danger);
+        }
+        
+        .farmer-detail-card {
+            padding: 20px;
+        }
+        
+        .farmer-detail-card .profile-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 20px;
+            display: block;
+            border: 4px solid var(--primary);
+        }
+        
+        .detail-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            color: #333;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar">
+                <div class="logo">
+                    <h3><i class="fas fa-tractor"></i> AgriCoop Admin</h3>
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#dashboard" data-bs-target="dashboard">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#farmers" data-bs-target="farmers">
+                            <i class="fas fa-user-tie"></i> Farmer Management
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#vendors" data-bs-target="vendors">
+                            <i class="fas fa-store"></i> Vendor Management
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#machinery" data-bs-target="machinery">
+                            <i class="fas fa-tools"></i> Machinery Management
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#financial" data-bs-target="financial">
+                            <i class="fas fa-money-bill-wave"></i> Financial Management
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#booking" data-bs-target="booking">
+                            <i class="fas fa-calendar-check"></i> Booking Oversight
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#reports" data-bs-target="reports">
+                            <i class="fas fa-chart-bar"></i> Reports & Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#communication" data-bs-target="communication">
+                            <i class="fas fa-comments"></i> Communication
+                            <span class="notification-badge">5</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#settings" data-bs-target="settings">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                    </li>
+                    <li class="nav-item mt-4">
+                        <a class="nav-link" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <!-- Header -->
+                <div class="header">
+                    <h4>Farmer Management</h4>
+                    <div class="d-flex align-items-center">
+                        <div class="dropdown me-3">
+                            <button class="btn btn-light dropdown-toggle" type="button" id="notificationsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge">3</span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="notificationsDropdown">
+                                <li><a class="dropdown-item" href="#">New farmer registration request</a></li>
+                                <li><a class="dropdown-item" href="#">Maintenance scheduled for tractor TR-102</a></li>
+                                <li><a class="dropdown-item" href="#">Payment received from John Doe</a></li>
+                            </ul>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle me-2"></i> Admin User
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Farmer Management Content -->
+                <div class="dashboard-content">
+                    <!-- Stats Overview -->
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card stats-card">
+                                <i class="fas fa-users"></i>
+                                <h2>142</h2>
+                                <p>Total Farmers</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stats-card">
+                                <i class="fas fa-calendar-check"></i>
+                                <h2>87</h2>
+                                <p>Active Bookings</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stats-card">
+                                <i class="fas fa-tools"></i>
+                                <h2>203</h2>
+                                <p>Equipment Rentals</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card stats-card">
+                                <i class="fas fa-star"></i>
+                                <h2>4.7/5</h2>
+                                <p>Average Rating</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Farmers List -->
+                        <div class="col-md-5">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <span>Farmers List</span>
+                                    <div class="input-group" style="width: 200px;">
+                                        <input type="text" class="form-control form-control-sm" placeholder="Search farmers...">
+                                        <button class="btn btn-sm btn-outline-secondary" type="button"><i class="fas fa-search"></i></button>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="list-group list-group-flush">
+                                        <a href="#" class="list-group-item list-group-item-action farmer-item active" data-farmer-id="1">
+                                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">Sarah Johnson</h6>
+                                                    <small class="text-muted">sarah@example.com</small>
+                                                </div>
+                                                <span class="badge bg-success">Active</span>
+                                            </div>
+                                        </a>
+                                        <a href="#" class="list-group-item list-group-item-action farmer-item" data-farmer-id="2">
+                                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">Robert Brown</h6>
+                                                    <small class="text-muted">robert@example.com</small>
+                                                </div>
+                                                <span class="badge bg-success">Active</span>
+                                            </div>
+                                        </a>
+                                        <a href="#" class="list-group-item list-group-item-action farmer-item" data-farmer-id="3">
+                                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">Mike Wilson</h6>
+                                                    <small class="text-muted">mike@example.com</small>
+                                                </div>
+                                                <span class="badge bg-warning">Inactive</span>
+                                            </div>
+                                        </a>
+                                        <a href="#" class="list-group-item list-group-item-action farmer-item" data-farmer-id="4">
+                                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">Emma Davis</h6>
+                                                    <small class="text-muted">emma@example.com</small>
+                                                </div>
+                                                <span class="badge bg-success">Active</span>
+                                            </div>
+                                        </a>
+                                        <a href="#" class="list-group-item list-group-item-action farmer-item" data-farmer-id="5">
+                                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">James Miller</h6>
+                                                    <small class="text-muted">james@example.com</small>
+                                                </div>
+                                                <span class="badge bg-danger">Suspended</span>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Farmer Details -->
+                        <div class="col-md-7">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <span>Farmer Details</span>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i> Edit</button>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-ban"></i> Suspend</button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4 text-center">
+                                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" class="profile-img" alt="Farmer Profile">
+                                            <h5 class="mt-2">Sarah Johnson</h5>
+                                            <p class="text-muted">Member since: Jan 2023</p>
+                                            <span class="badge bg-success">Active</span>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <h6 class="mb-3">Personal Information</h6>
+                                            <div class="row">
+                                                <div class="col-6 detail-item">
+                                                    <div class="detail-label">Email</div>
+                                                    <div class="detail-value">sarah@example.com</div>
+                                                </div>
+                                                <div class="col-6 detail-item">
+                                                    <div class="detail-label">Phone</div>
+                                                    <div class="detail-value">+91 9876543210</div>
+                                                </div>
+                                                <div class="col-12 detail-item">
+                                                    <div class="detail-label">Address</div>
+                                                    <div class="detail-value">123 Farm Road, Bangalore, Karnataka</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <h6 class="mb-3 mt-4">Farming Details</h6>
+                                            <div class="row">
+                                                <div class="col-6 detail-item">
+                                                    <div class="detail-label">Farm Size</div>
+                                                    <div class="detail-value">12 acres</div>
+                                                </div>
+                                                <div class="col-6 detail-item">
+                                                    <div class="detail-label">Main Crops</div>
+                                                    <div class="detail-value">Rice, Wheat</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <h6 class="mb-3 mt-4">Platform Activity</h6>
+                                            <div class="row">
+                                                <div class="col-4 detail-item">
+                                                    <div class="detail-label">Bookings</div>
+                                                    <div class="detail-value">14</div>
+                                                </div>
+                                                <div class="col-4 detail-item">
+                                                    <div class="detail-label">Reviews</div>
+                                                    <div class="detail-value">8</div>
+                                                </div>
+                                                <div class="col-4 detail-item">
+                                                    <div class="detail-label">Rating</div>
+                                                    <div class="detail-value">4.8/5</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Farmer Stats -->
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <span>Booking History</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <canvas id="bookingChart" height="150"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <span>Equipment Preferences</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <canvas id="equipmentChart" height="150"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Sample data for demonstration
+        const farmersData = {
+            1: {
+                name: "Sarah Johnson",
+                email: "sarah@example.com",
+                phone: "+91 9876543210",
+                address: "123 Farm Road, Bangalore, Karnataka",
+                joinDate: "Jan 2023",
+                status: "Active",
+                farmSize: "12 acres",
+                mainCrops: "Rice, Wheat",
+                bookings: 14,
+                reviews: 8,
+                rating: "4.8/5",
+                profileImg: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
+            },
+            2: {
+                name: "Robert Brown",
+                email: "robert@example.com",
+                phone: "+91 9765432109",
+                address: "456 Green Fields, Pune, Maharashtra",
+                joinDate: "Mar 2023",
+                status: "Active",
+                farmSize: "8 acres",
+                mainCrops: "Cotton, Sugarcane",
+                bookings: 9,
+                reviews: 5,
+                rating: "4.5/5",
+                profileImg: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
+            },
+            3: {
+                name: "Mike Wilson",
+                email: "mike@example.com",
+                phone: "+91 9654321098",
+                address: "789 Harvest Lane, Hyderabad, Telangana",
+                joinDate: "Feb 2023",
+                status: "Inactive",
+                farmSize: "15 acres",
+                mainCrops: "Corn, Vegetables",
+                bookings: 6,
+                reviews: 3,
+                rating: "4.2/5",
+                profileImg: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
+            }
+        };
+
+        // Initialize charts
+        function initCharts() {
+            // Booking History Chart
+            const bookingCtx = document.getElementById('bookingChart').getContext('2d');
+            new Chart(bookingCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Bookings per Month',
+                        data: [3, 2, 4, 1, 2, 2],
+                        backgroundColor: '#2E7D32',
+                        borderColor: '#1B5E20',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Equipment Preferences Chart
+            const equipmentCtx = document.getElementById('equipmentChart').getContext('2d');
+            new Chart(equipmentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Tractors', 'Harvesters', 'Plows', 'Irrigation'],
+                    datasets: [{
+                        data: [45, 25, 15, 15],
+                        backgroundColor: [
+                            '#2E7D32',
+                            '#4CAF50',
+                            '#8BC34A',
+                            '#AED581'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load farmer details
+        function loadFarmerDetails(farmerId) {
+            const farmer = farmersData[farmerId];
+            if (!farmer) return;
+            
+            // Update UI with farmer details
+            document.querySelector('.profile-img').src = farmer.profileImg;
+            document.querySelector('.card-body h5').textContent = farmer.name;
+            document.querySelector('.text-muted').textContent = `Member since: ${farmer.joinDate}`;
+            document.querySelector('.badge').className = `badge bg-${farmer.status === 'Active' ? 'success' : farmer.status === 'Inactive' ? 'warning' : 'danger'}`;
+            document.querySelector('.badge').textContent = farmer.status;
+            
+            // Update personal info
+            document.querySelectorAll('.detail-value')[0].textContent = farmer.email;
+            document.querySelectorAll('.detail-value')[1].textContent = farmer.phone;
+            document.querySelectorAll('.detail-value')[2].textContent = farmer.address;
+            
+            // Update farming details
+            document.querySelectorAll('.detail-value')[3].textContent = farmer.farmSize;
+            document.querySelectorAll('.detail-value')[4].textContent = farmer.mainCrops;
+            
+            // Update platform activity
+            document.querySelectorAll('.detail-value')[5].textContent = farmer.bookings;
+            document.querySelectorAll('.detail-value')[6].textContent = farmer.reviews;
+            document.querySelectorAll('.detail-value')[7].textContent = farmer.rating;
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            
+            // Add click event to farmer items
+            document.querySelectorAll('.farmer-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all items
+                    document.querySelectorAll('.farmer-item').forEach(i => {
+                        i.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // Load farmer details
+                    const farmerId = this.getAttribute('data-farmer-id');
+                    loadFarmerDetails(farmerId);
+                });
+            });
+            
+            // Load first farmer by default
+            loadFarmerDetails(1);
+        });
+    </script>
+</body>
+</html>
