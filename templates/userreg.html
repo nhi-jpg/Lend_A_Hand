@@ -423,47 +423,99 @@
             font-size: 0.9rem;
         }
         
-        /* OCR Results Styles */
-        .ocr-results {
-            margin-top: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            background-color: #f9f9f9;
-            display: none;
-        }
-        
-        .ocr-results h3 {
-            margin-bottom: 10px;
-            color: #2E7D32;
-        }
-        
-        .text-box {
-            border: 1px solid #ddd;
-            padding: 10px;
-            margin: 10px 0;
-            min-height: 100px;
-            background-color: white;
-            border-radius: 4px;
-            white-space: pre-wrap;
-        }
-        
-        .processing-indicator {
-            display: none;
-            text-align: center;
-            margin: 10px 0;
-            color: #2E7D32;
-        }
+       /* Keep only essential file upload styles */
+.file-upload {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.file-upload:hover {
+    border-color: #2E7D32;
+}
+.phone-validation {
+    font-size: 0.9rem;
+    margin-top: 5px;
+    display: none;
+}
+.email-validation {
+    font-size: 0.9rem;
+    margin-top: 5px;
+    display: none;
+}
+.language-selector {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.lang-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lang-btn.english {
+    background: #007bff;
+    color: white;
+}
+
+.lang-btn.kannada {
+    background: #ff9800;
+    color: white;
+}
+
+.lang-btn.active {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 2px white, 0 0 0 4px currentColor;
+}
+
+.lang-btn i {
+    font-size: 1rem;
+}
+
+/* Hide Google Translate elements */
+#google_translate_element, 
+.goog-te-banner-frame, 
+.goog-te-menu-frame, 
+.goog-te-ftab-frame,
+.skiptranslate {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    width: 0 !important;
+    opacity: 0 !important;
+    position: absolute !important;
+    z-index: -9999 !important;
+}
+
+body {
+    top: 0 !important;
+}
     </style>
 </head>
 <body>
-    <!-- Language Switcher -->
-<div style="position: fixed; top: 10px; right: 10px; z-index: 1000;">
-    <button onclick="window.location.href='/dashboard?lang=en'" style="padding: 5px 10px;">EN</button>
-    <button onclick="window.location.href='/dashboard?lang=kn'" style="padding: 5px 10px;">ಕನ್ನಡ</button>
+   <!-- Add this inside your login-container or at the top of the page -->
+<div class="language-selector" style="position: absolute; top: 20px; right: 20px; z-index: 1000;">
+    <button class="lang-btn english active" onclick="setLanguage('en')" style="padding: 8px 20px; border: none; border-radius: 20px; background: #007bff; color: white; cursor: pointer; font-weight: bold; margin-right: 10px;">
+        <i class="fas fa-globe-americas"></i> English
+    </button>
+    <button class="lang-btn kannada" onclick="setLanguage('kn')" style="padding: 8px 20px; border: none; border-radius: 20px; background: #ff9800; color: white; cursor: pointer; font-weight: bold;">
+        <i class="fas fa-globe-asia"></i> ಕನ್ನಡ
+    </button>
 </div>
-<!-- Google Translate for this page -->
-<div id="google_translate_element"></div>
+<div id="google_translate_element" style="display: none !important;"></div>
     <div class="header">
         <h1>Farmer Registration</h1>
         <p>Join our farming cooperative as a grower and access resources</p>
@@ -514,15 +566,21 @@
                         <input type="text" id="last_name" name="last_name" required>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email">
-                    </div>
+                  <div class="form-group">
+    <label for="email">Email Address</label>
+    <input type="email" id="email" name="email">
+    <div class="email-validation" id="emailValidation" style="font-size:0.9rem; margin-top:5px; display:none;">
+        Only @gmail.com emails are allowed
+    </div>
+</div>
                     
-                    <div class="form-group">
-                        <label for="phone">Phone Number *</label>
-                        <input type="tel" id="phone" name="phone" required>
-                    </div>
+                  <div class="form-group">
+    <label for="phone">Phone Number *</label>
+    <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" maxlength="10" required>
+    <div class="phone-validation" id="phoneValidation" style="font-size:0.9rem; margin-top:5px; display:none;">
+        Phone number must be exactly 10 digits
+    </div>
+</div>
                     
                     <div class="form-group">
                         <label for="password">Password *</label>
@@ -620,18 +678,7 @@
                             <i class="fas fa-spinner fa-spin"></i> Processing document...
                         </div>
                         
-                        <!-- OCR Results Section -->
-                        <div class="ocr-results" id="ocrResults">
-                            <h3>Extracted Text from RTC Document</h3>
-                            <div>
-                                <h4>Kannada Text:</h4>
-                                <div id="kannadaText" class="text-box"></div>
-                            </div>
-                            <div>
-                                <h4>English Translation:</h4>
-                                <div id="englishText" class="text-box"></div>
-                            </div>
-                        </div>
+                        
                         
                         <div class="file-requirements">
                             Please upload a clear copy of your Record of Rights, Tenancy and Crops (RTC) document
@@ -650,342 +697,546 @@
             </div>
         </div>
     </div>
+<script>
+  
+    // Toggle password visibility
+    const togglePassword = document.querySelector('#togglePassword');
+    const toggleConfirmPassword = document.querySelector('#toggleConfirmPassword');
+    const password = document.querySelector('#password');
+    const confirmPassword = document.querySelector('#confirm_password');
+    const passwordMatch = document.querySelector('#passwordMatch');
+    const passwordMismatch = document.querySelector('#passwordMismatch');
+    const passwordStrength = document.querySelector('#passwordStrength');
+    const submitButton = document.querySelector('#submitButton');
+    const form = document.querySelector('#farmerForm');
+    const rtcUploadArea = document.querySelector('#rtcUploadArea');
+    const rtcDocument = document.querySelector('#rtc_document');
+    const fileName = document.querySelector('#fileName');
     
-    <script>
-        // Toggle password visibility
-        const togglePassword = document.querySelector('#togglePassword');
-        const toggleConfirmPassword = document.querySelector('#toggleConfirmPassword');
-        const password = document.querySelector('#password');
-        const confirmPassword = document.querySelector('#confirm_password');
-        const passwordMatch = document.querySelector('#passwordMatch');
-        const passwordMismatch = document.querySelector('#passwordMismatch');
-        const passwordStrength = document.querySelector('#passwordStrength');
-        const submitButton = document.querySelector('#submitButton');
-        const form = document.querySelector('#farmerForm');
-        const rtcUploadArea = document.querySelector('#rtcUploadArea');
-        const rtcDocument = document.querySelector('#rtc_document');
-        const fileName = document.querySelector('#fileName');
-        const processingIndicator = document.querySelector('#processingIndicator');
-        const ocrResults = document.querySelector('#ocrResults');
-        const kannadaText = document.querySelector('#kannadaText');
-        const englishText = document.querySelector('#englishText');
+    // Phone validation elements - ADDED
+    const phoneInput = document.getElementById('phone');
+    const phoneValidation = document.getElementById('phoneValidation');
+    
+    // Step navigation functions
+    function nextStep(currentStep) {
+        // Validate current step before proceeding
+        if (currentStep === 1) {
+            if (!validateStep1()) {
+                return;
+            }
+        } else if (currentStep === 2) {
+            if (!validateStep2()) {
+                return;
+            }
+        }
         
-        // Step navigation functions
-        function nextStep(currentStep) {
-            // Validate current step before proceeding
-            if (currentStep === 1) {
-                if (!validateStep1()) {
-                    return;
-                }
-            } else if (currentStep === 2) {
-                if (!validateStep2()) {
-                    return;
+        // Hide current step
+        document.getElementById(`formStep${currentStep}`).classList.remove('active');
+        document.getElementById(`step${currentStep}`).classList.remove('active');
+        
+        // Show next step
+        document.getElementById(`formStep${currentStep + 1}`).classList.add('active');
+        document.getElementById(`step${currentStep + 1}`).classList.add('active');
+        
+        // Mark current step as completed
+        document.getElementById(`step${currentStep}`).classList.add('completed');
+    }
+    
+ // ============================================
+// LANGUAGE MANAGEMENT SYSTEM
+// ============================================
+
+// 1. Function to save language preference
+function saveLanguagePreference(lang) {
+    localStorage.setItem('selectedLanguage', lang);
+    document.cookie = `user_language=${lang}; path=/; max-age=31536000`;
+    sessionStorage.setItem('selectedLanguage', lang);
+}
+
+// 2. Function to apply language translation
+function applyLanguage(lang) {
+    if (lang === 'kn') {
+        // Kannada translation
+        window.location.hash = '#googtrans(kn|en)';
+        
+        setTimeout(function() {
+            if (window.google && google.translate && google.translate.TranslateElement) {
+                try {
+                    var select = document.querySelector('.goog-te-combo');
+                    if (select) {
+                        select.value = 'kn';
+                        select.dispatchEvent(new Event('change'));
+                    }
+                } catch(e) {
+                    console.log('Translation applied');
                 }
             }
-            
-            // Hide current step
-            document.getElementById(`formStep${currentStep}`).classList.remove('active');
-            document.getElementById(`step${currentStep}`).classList.remove('active');
-            
-            // Show next step
-            document.getElementById(`formStep${currentStep + 1}`).classList.add('active');
-            document.getElementById(`step${currentStep + 1}`).classList.add('active');
-            
-            // Mark current step as completed
-            document.getElementById(`step${currentStep}`).classList.add('completed');
-        }
-        function googleTranslateElementInit() {
+        }, 500);
+    } else {
+        // English (default)
+        window.location.hash = '#googtrans(en)';
+        
+        setTimeout(function() {
+            if (window.google && google.translate && google.translate.TranslateElement) {
+                try {
+                    var select = document.querySelector('.goog-te-combo');
+                    if (select) {
+                        select.value = 'en';
+                        select.dispatchEvent(new Event('change'));
+                    }
+                } catch(e) {
+                    console.log('English applied');
+                }
+            }
+        }, 500);
+    }
+}
+
+// 3. Main language switching function
+function setLanguage(lang) {
+    // Update button UI
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Save the preference
+    saveLanguagePreference(lang);
+    
+    // Apply immediately
+    applyLanguage(lang);
+}
+
+// 4. Initialize Google Translate
+function googleTranslateElementInit() {
     new google.translate.TranslateElement({
         pageLanguage: 'en',
         includedLanguages: 'en,kn',
-        autoDisplay: false
+        layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL,
+        autoDisplay: false,
+        disableAutoTranslation: false
     }, 'google_translate_element');
     
-    // Apply saved language
-    const savedLang = localStorage.getItem('selectedLanguage');
-    if(savedLang === 'kn') {
-        setTimeout(() => {
-            var iframe = document.querySelector('.goog-te-menu-frame');
-            if(iframe) {
-                var select = iframe.contentWindow.document.querySelector('.goog-te-menu2-select');
-                if(select) {
-                    select.value = 'kn';
-                    select.dispatchEvent(new Event('change'));
-                }
-            }
-        }, 1000);
-    }
+    // Hide the Google Translate widget immediately
+    setTimeout(function() {
+        var elements = document.querySelectorAll('.goog-te-banner, .skiptranslate, .goog-te-gadget');
+        elements.forEach(function(el) {
+            el.style.display = 'none';
+            el.style.visibility = 'hidden';
+            el.style.height = '0';
+            el.style.overflow = 'hidden';
+        });
+        
+        document.body.style.top = '0';
+    }, 100);
 }
-var script = document.createElement('script');
-script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-document.head.appendChild(script);
-        function prevStep(currentStep) {
-            // Hide current step
-            document.getElementById(`formStep${currentStep}`).classList.remove('active');
-            document.getElementById(`step${currentStep}`).classList.remove('active');
-            
-            // Show previous step
-            document.getElementById(`formStep${currentStep - 1}`).classList.add('active');
-            document.getElementById(`step${currentStep - 1}`).classList.add('active');
+
+// 5. Load Google Translate script
+function loadGoogleTranslate() {
+    if (window.google && google.translate) {
+        googleTranslateElementInit();
+        return;
+    }
+    
+    var script = document.createElement('script');
+    script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    script.type = 'text/javascript';
+    document.head.appendChild(script);
+}
+
+// 6. On page load - Apply saved language
+document.addEventListener('DOMContentLoaded', function() {
+    // Load Google Translate
+    loadGoogleTranslate();
+    
+    // Check for saved language preference
+    const savedLang = localStorage.getItem('selectedLanguage') || 'en';
+    
+    // Set active button
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if ((savedLang === 'en' && btn.classList.contains('english')) || 
+            (savedLang === 'kn' && btn.classList.contains('kannada'))) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Apply saved language after a short delay
+    setTimeout(function() {
+        applyLanguage(savedLang);
+    }, 1000);
+});
+
+    
+    function prevStep(currentStep) {
+        // Hide current step
+        document.getElementById(`formStep${currentStep}`).classList.remove('active');
+        document.getElementById(`step${currentStep}`).classList.remove('active');
+        
+        // Show previous step
+        document.getElementById(`formStep${currentStep - 1}`).classList.add('active');
+        document.getElementById(`step${currentStep - 1}`).classList.add('active');
+    }
+    
+    function validateStep1() {
+        // Basic validation for step 1
+        const requiredFields = ['full_name', 'last_name', 'phone', 'password', 'confirm_password'];
+        let isValid = true;
+        
+        for (const field of requiredFields) {
+            const input = document.getElementById(field);
+            if (!input.value.trim()) {
+                input.style.borderColor = '#e74c3c';
+                isValid = false;
+            } else {
+                input.style.borderColor = '#ddd';
+            }
         }
         
-        function validateStep1() {
-            // Basic validation for step 1
-            const requiredFields = ['full_name', 'last_name', 'phone', 'password', 'confirm_password'];
-            let isValid = true;
-            
-            for (const field of requiredFields) {
-                const input = document.getElementById(field);
-                if (!input.value.trim()) {
-                    input.style.borderColor = '#e74c3c';
-                    isValid = false;
-                } else {
-                    input.style.borderColor = '#ddd';
-                }
-            }
-            
-            // Validate email format if provided
-            const emailInput = document.getElementById('email');
-            if (emailInput.value.trim()) {
-                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailPattern.test(emailInput.value)) {
+        // Validate phone number has exactly 10 digits - ADDED
+        const phoneValue = phoneInput.value.replace(/\D/g, '');
+        if (phoneValue.length !== 10) {
+            phoneInput.style.borderColor = '#e74c3c';
+            phoneValidation.style.display = 'block';
+            phoneValidation.style.color = '#e74c3c';
+            isValid = false;
+        } else {
+            phoneValidation.style.display = 'none';
+        }
+        
+        // Validate email format if provided - CHANGED TO @gmail.com ONLY
+        const emailInput = document.getElementById('email');
+        if (emailInput.value.trim()) {
+            // Check if email ends with @gmail.com
+            if (!emailInput.value.toLowerCase().endsWith('@gmail.com')) {
+                emailInput.style.borderColor = '#e74c3c';
+                isValid = false;
+                // Show validation message
+                showEmailValidationMessage('Only @gmail.com emails are allowed');
+            } else {
+                // Additional validation for proper email format
+                const emailPattern = /^[^\s@]+@gmail\.com$/;
+                if (!emailPattern.test(emailInput.value.toLowerCase())) {
                     emailInput.style.borderColor = '#e74c3c';
                     isValid = false;
-                }
-            }
-            
-            // Validate password match
-            if (!validatePassword()) {
-                isValid = false;
-            }
-            
-            return isValid;
-        }
-        
-        function validateStep2() {
-            // Basic validation for step 2
-            const requiredFields = ['farm_location'];
-            let isValid = true;
-            
-            for (const field of requiredFields) {
-                const input = document.getElementById(field);
-                if (!input.value.trim()) {
-                    input.style.borderColor = '#e74c3c';
-                    isValid = false;
+                    showEmailValidationMessage('Please enter a valid @gmail.com email');
                 } else {
-                    input.style.borderColor = '#ddd';
+                    hideEmailValidationMessage();
                 }
             }
-            
-            // Validate at least one crop type is selected
-            const cropCheckboxes = document.querySelectorAll('input[name="crop_types"]:checked');
-            if (cropCheckboxes.length === 0) {
-                alert('Please select at least one crop type');
+        } else {
+            hideEmailValidationMessage();
+        }
+        
+        // Validate password match
+        if (!validatePassword()) {
+            isValid = false;
+        }
+        
+        return isValid;
+    }
+    
+    // Helper function to show email validation message
+    function showEmailValidationMessage(message) {
+        let validationDiv = document.getElementById('emailValidation');
+        if (!validationDiv) {
+            validationDiv = document.createElement('div');
+            validationDiv.id = 'emailValidation';
+            validationDiv.className = 'email-validation';
+            validationDiv.style.color = '#e74c3c';
+            validationDiv.style.fontSize = '0.9rem';
+            validationDiv.style.marginTop = '5px';
+            document.getElementById('email').parentNode.appendChild(validationDiv);
+        }
+        validationDiv.textContent = message;
+        validationDiv.style.display = 'block';
+    }
+    
+    // Helper function to hide email validation message
+    function hideEmailValidationMessage() {
+        const validationDiv = document.getElementById('emailValidation');
+        if (validationDiv) {
+            validationDiv.style.display = 'none';
+        }
+    }
+    
+    // Real-time email validation - ADDED
+    const emailInput = document.getElementById('email');
+    emailInput.addEventListener('input', function() {
+        const emailValue = this.value.trim();
+        
+        if (emailValue === '') {
+            this.style.borderColor = '#ddd';
+            hideEmailValidationMessage();
+            return;
+        }
+        
+        // Check if email ends with @gmail.com
+        if (!emailValue.toLowerCase().endsWith('@gmail.com')) {
+            this.style.borderColor = '#e74c3c';
+            showEmailValidationMessage('Only @gmail.com emails are allowed');
+        } else {
+            // Additional validation for proper email format
+            const emailPattern = /^[^\s@]+@gmail\.com$/;
+            if (!emailPattern.test(emailValue.toLowerCase())) {
+                this.style.borderColor = '#e74c3c';
+                showEmailValidationMessage('Please enter a valid @gmail.com email');
+            } else {
+                this.style.borderColor = '#27ae60';
+                hideEmailValidationMessage();
+            }
+        }
+    });
+    
+    function validateStep2() {
+        // Basic validation for step 2
+        const requiredFields = ['farm_location'];
+        let isValid = true;
+        
+        for (const field of requiredFields) {
+            const input = document.getElementById(field);
+            if (!input.value.trim()) {
+                input.style.borderColor = '#e74c3c';
                 isValid = false;
+            } else {
+                input.style.borderColor = '#ddd';
             }
-            
-            return isValid;
         }
         
-        togglePassword.addEventListener('click', function() {
-            // Toggle the type attribute
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
-            
-            // Toggle the eye icon
-            this.classList.toggle('fa-eye');
-            this.classList.toggle('fa-eye-slash');
-        });
-        
-        toggleConfirmPassword.addEventListener('click', function() {
-            // Toggle the type attribute
-            const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
-            confirmPassword.setAttribute('type', type);
-            
-            // Toggle the eye icon
-            this.classList.toggle('fa-eye');
-            this.classList.toggle('fa-eye-slash');
-        });
-        
-        // Check password strength
-        function checkPasswordStrength(password) {
-            let strength = 0;
-            let messages = [];
-            
-            if (password.length < 8) {
-                messages.push("At least 8 characters");
-            } else {
-                strength++;
-            }
-            
-            if (!password.match(/[a-z]+/)) {
-                messages.push("Lowercase letter");
-            } else {
-                strength++;
-            }
-            
-            if (!password.match(/[A-Z]+/)) {
-                messages.push("Uppercase letter");
-            } else {
-                strength++;
-            }
-            
-            if (!password.match(/[0-9]+/)) {
-                messages.push("Number");
-            } else {
-                strength++;
-            }
-            
-            if (!password.match(/[!@#$%^&*]+/)) {
-                messages.push("Special character");
-            } else {
-                strength++;
-            }
-            
-            return { strength, messages };
+        // Validate at least one crop type is selected
+        const cropCheckboxes = document.querySelectorAll('input[name="crop_types"]:checked');
+        if (cropCheckboxes.length === 0) {
+            alert('Please select at least one crop type');
+            isValid = false;
         }
         
-        // Validate password matching in real-time
-        function validatePassword() {
-            if (password.value && confirmPassword.value) {
-                if (password.value === confirmPassword.value) {
-                    passwordMatch.style.display = 'block';
-                    passwordMismatch.style.display = 'none';
-                    return true;
-                } else {
-                    passwordMatch.style.display = 'none';
-                    passwordMismatch.style.display = 'block';
-                    return false;
-                }
-            }
-            return false;
+        return isValid;
+    }
+    
+    // Phone number validation - ADDED
+    phoneInput.addEventListener('input', function() {
+        const phoneValue = this.value.replace(/\D/g, ''); // Remove non-digits
+        
+        // Allow only 10 digits
+        if (phoneValue.length > 10) {
+            this.value = phoneValue.substring(0, 10);
+        } else {
+            this.value = phoneValue;
         }
         
-        // Update password strength indicator
-        password.addEventListener('input', function() {
-            const result = checkPasswordStrength(password.value);
-            
-            if (password.value === '') {
-                passwordStrength.textContent = '';
-                passwordStrength.className = 'password-strength';
-                return;
-            }
-            
-            if (result.strength < 3) {
-                passwordStrength.textContent = 'Weak: ' + result.messages.join(', ');
-                passwordStrength.style.color = '#e74c3c';
-            } else if (result.strength < 5) {
-                passwordStrength.textContent = 'Medium: ' + result.messages.join(', ');
-                passwordStrength.style.color = '#f39c12';
-            } else {
-                passwordStrength.textContent = 'Strong password!';
-                passwordStrength.style.color = '#27ae60';
-            }
-        });
-        
-        // Check passwords on input
-        confirmPassword.addEventListener('input', validatePassword);
-        password.addEventListener('input', validatePassword);
-        
-        // File upload handling
-        rtcUploadArea.addEventListener('click', function() {
-            rtcDocument.click();
-        });
-        
-        rtcUploadArea.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            this.style.borderColor = '#2E7D32';
-        });
-        
-        rtcUploadArea.addEventListener('dragleave', function() {
+        // Show validation message
+        if (phoneValue.length > 0 && phoneValue.length !== 10) {
+            phoneValidation.style.display = 'block';
+            phoneValidation.style.color = '#e74c3c';
+            this.style.borderColor = '#e74c3c';
+        } else if (phoneValue.length === 10) {
+            phoneValidation.style.display = 'none';
+            this.style.borderColor = '#27ae60';
+        } else {
+            phoneValidation.style.display = 'none';
             this.style.borderColor = '#ddd';
-        });
+        }
+    });
+    
+    togglePassword.addEventListener('click', function() {
+        // Toggle the type attribute
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
         
-        rtcUploadArea.addEventListener('drop', function(e) {
-            e.preventDefault();
-            this.style.borderColor = '#ddd';
-            
-            if (e.dataTransfer.files.length) {
-                rtcDocument.files = e.dataTransfer.files;
-                handleFileSelection(e.dataTransfer.files[0]);
+        // Toggle the eye icon
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
+    });
+    
+    toggleConfirmPassword.addEventListener('click', function() {
+        // Toggle the type attribute
+        const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirmPassword.setAttribute('type', type);
+        
+        // Toggle the eye icon
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
+    });
+    
+    // Check password strength
+    function checkPasswordStrength(password) {
+        let strength = 0;
+        let messages = [];
+        
+        if (password.length < 8) {
+            messages.push("At least 8 characters");
+        } else {
+            strength++;
+        }
+        
+        if (!password.match(/[a-z]+/)) {
+            messages.push("Lowercase letter");
+        } else {
+            strength++;
+        }
+        
+        if (!password.match(/[A-Z]+/)) {
+            messages.push("Uppercase letter");
+        } else {
+            strength++;
+        }
+        
+        if (!password.match(/[0-9]+/)) {
+            messages.push("Number");
+        } else {
+            strength++;
+        }
+        
+        if (!password.match(/[!@#$%^&*]+/)) {
+            messages.push("Special character");
+        } else {
+            strength++;
+        }
+        
+        return { strength, messages };
+    }
+    
+    // Validate password matching in real-time
+    function validatePassword() {
+        if (password.value && confirmPassword.value) {
+            if (password.value === confirmPassword.value) {
+                passwordMatch.style.display = 'block';
+                passwordMismatch.style.display = 'none';
+                return true;
+            } else {
+                passwordMatch.style.display = 'none';
+                passwordMismatch.style.display = 'block';
+                return false;
             }
-        });
+        }
+        return false;
+    }
+    
+    // Update password strength indicator
+    password.addEventListener('input', function() {
+        const result = checkPasswordStrength(password.value);
         
-        rtcDocument.addEventListener('change', function() {
-            if (this.files.length) {
-                handleFileSelection(this.files[0]);
-            }
-        });
+        if (password.value === '') {
+            passwordStrength.textContent = '';
+            passwordStrength.className = 'password-strength';
+            return;
+        }
         
-        async function handleFileSelection(file) {
-            // Check file size (max 5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                alert('File size exceeds 5MB limit. Please choose a smaller file.');
-                rtcDocument.value = '';
-                fileName.textContent = '';
+        if (result.strength < 3) {
+            passwordStrength.textContent = 'Weak: ' + result.messages.join(', ');
+            passwordStrength.style.color = '#e74c3c';
+        } else if (result.strength < 5) {
+            passwordStrength.textContent = 'Medium: ' + result.messages.join(', ');
+            passwordStrength.style.color = '#f39c12';
+        } else {
+            passwordStrength.textContent = 'Strong password!';
+            passwordStrength.style.color = '#27ae60';
+        }
+    });
+    
+    // Check passwords on input
+    confirmPassword.addEventListener('input', validatePassword);
+    password.addEventListener('input', validatePassword);
+    
+    // File upload handling - REMOVED OCR
+    rtcUploadArea.addEventListener('click', function() {
+        rtcDocument.click();
+    });
+    
+    rtcUploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#2E7D32';
+    });
+    
+    rtcUploadArea.addEventListener('dragleave', function() {
+        this.style.borderColor = '#ddd';
+    });
+    
+    rtcUploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#ddd';
+        
+        if (e.dataTransfer.files.length) {
+            rtcDocument.files = e.dataTransfer.files;
+            handleFileSelection(e.dataTransfer.files[0]);
+        }
+    });
+    
+    rtcDocument.addEventListener('change', function() {
+        if (this.files.length) {
+            handleFileSelection(this.files[0]);
+        }
+    });
+    
+    // SIMPLIFIED - NO OCR - MODIFIED
+    function handleFileSelection(file) {
+        // Check file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('File size exceeds 5MB limit. Please choose a smaller file.');
+            rtcDocument.value = '';
+            fileName.textContent = '';
+            return;
+        }
+        
+        // Check file type
+        const fileType = file.type.toLowerCase();
+        if (!fileType.includes('pdf') && !fileType.includes('image')) {
+            alert('Please upload a PDF or image file (JPG, PNG)');
+            rtcDocument.value = '';
+            fileName.textContent = '';
+            return;
+        }
+        
+        // Display file name
+        fileName.textContent = `Selected file: ${file.name}`;
+        
+        // No OCR processing - just simple file upload
+    }
+    
+    // Form submission validation
+    form.addEventListener('submit', function(event) {
+        // Final phone validation - ADDED
+        const phoneValue = phoneInput.value.replace(/\D/g, '');
+        if (phoneValue.length !== 10) {
+            event.preventDefault();
+            alert('Phone number must be exactly 10 digits.');
+            phoneInput.focus();
+            return;
+        }
+        
+        // Final email validation if email is provided - CHANGED TO @gmail.com ONLY
+        const emailInput = document.getElementById('email');
+        if (emailInput.value.trim()) {
+            if (!emailInput.value.toLowerCase().endsWith('@gmail.com')) {
+                event.preventDefault();
+                alert('Only @gmail.com emails are allowed.');
+                emailInput.focus();
                 return;
             }
             
-            // Check file type
-            const fileType = file.type.toLowerCase();
-            if (!fileType.includes('pdf') && !fileType.includes('image')) {
-                alert('Please upload a PDF or image file (JPG, PNG)');
-                rtcDocument.value = '';
-                fileName.textContent = '';
+            const emailPattern = /^[^\s@]+@gmail\.com$/;
+            if (!emailPattern.test(emailInput.value.toLowerCase())) {
+                event.preventDefault();
+                alert('Please enter a valid @gmail.com email.');
+                emailInput.focus();
                 return;
-            }
-            
-            // Display file name
-            fileName.textContent = `Selected file: ${file.name}`;
-            
-            // Show processing indicator
-            processingIndicator.style.display = 'block';
-            ocrResults.style.display = 'none';
-            
-            try {
-                // Send file to server for OCR processing
-                const formData = new FormData();
-                formData.append('image', file);
-                
-                const response = await fetch('/extract', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                
-                // Display OCR results
-                kannadaText.textContent = data.kannada || 'No text could be extracted';
-                englishText.textContent = data.english || 'No translation available';
-                ocrResults.style.display = 'block';
-                
-            } catch (error) {
-                console.error('Error processing document:', error);
-                kannadaText.textContent = 'Error processing document. Please try again.';
-                englishText.textContent = 'Error processing document. Please try again.';
-                ocrResults.style.display = 'block';
-            } finally {
-                // Hide processing indicator
-                processingIndicator.style.display = 'none';
             }
         }
         
-        // Form submission validation
-        form.addEventListener('submit', function(event) {
-            if (!validatePassword()) {
-                event.preventDefault();
-                alert('Please make sure your passwords match.');
-                return;
-            }
-            
-            const result = checkPasswordStrength(password.value);
-            if (result.strength < 5) {
-                event.preventDefault();
-                alert('Please make sure your password meets all the strength requirements.');
-                return;
-            }
-        });
-    </script>
+        if (!validatePassword()) {
+            event.preventDefault();
+            alert('Please make sure your passwords match.');
+            return;
+        }
+        
+        const result = checkPasswordStrength(password.value);
+        if (result.strength < 5) {
+            event.preventDefault();
+            alert('Please make sure your password meets all the strength requirements.');
+            return;
+        }
+    });
+</script>
     <style>.goog-te-banner-frame{display:none!important;}.goog-te-gadget{font-size:0!important;}</style>
 </body>
 </html>
