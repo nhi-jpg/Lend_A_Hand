@@ -325,15 +325,78 @@
             color: #7f8c8d;
             margin-top: 5px;
         }
+        .language-selector {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.lang-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lang-btn.english {
+    background: #007bff;
+    color: white;
+}
+
+.lang-btn.kannada {
+    background: #ff9800;
+    color: white;
+}
+
+.lang-btn.active {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 2px white, 0 0 0 4px currentColor;
+}
+
+.lang-btn i {
+    font-size: 1rem;
+}
+
+/* Hide Google Translate elements */
+#google_translate_element, 
+.goog-te-banner-frame, 
+.goog-te-menu-frame, 
+.goog-te-ftab-frame,
+.skiptranslate {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    width: 0 !important;
+    opacity: 0 !important;
+    position: absolute !important;
+    z-index: -9999 !important;
+}
+
+body {
+    top: 0 !important;
+}
     </style>
 </head>
 <body>
-    <!-- Language Switcher -->
-<div style="position: fixed; top: 10px; right: 10px; z-index: 1000;">
-    <button onclick="window.location.href='/dashboard?lang=en'" style="padding: 5px 10px;">EN</button>
-    <button onclick="window.location.href='/dashboard?lang=kn'" style="padding: 5px 10px;">ಕನ್ನಡ</button>
-    <!-- Google Translate for this page -->
-<div id="google_translate_element"></div>
+<!-- Language Selector (Add this where you want the buttons) -->
+<div class="language-selector" style="position: absolute; top: 20px; right: 20px; z-index: 1000;">
+    <button class="lang-btn english active" onclick="setLanguage('en')" style="padding: 8px 20px; border: none; border-radius: 20px; background: #007bff; color: white; cursor: pointer; font-weight: bold; margin-right: 10px;">
+        <i class="fas fa-globe-americas"></i> English
+    </button>
+    <button class="lang-btn kannada" onclick="setLanguage('kn')" style="padding: 8px 20px; border: none; border-radius: 20px; background: #ff9800; color: white; cursor: pointer; font-weight: bold;">
+        <i class="fas fa-globe-asia"></i> ಕನ್ನಡ
+    </button>
+</div>
+
+<!-- Google Translate Element (Hidden - Add this before closing </body>) -->
+<div id="google_translate_element" style="display: none !important;"></div>
 </div>
     <div class="header">
         <h1>Vendor Registration</h1>
@@ -440,7 +503,7 @@
     </div>
     
     <div class="footer">
-        <p>&copy; 2023 Lend A Hand. All rights reserved.</p>
+        <p>&copy; 2026 Lend A Hand. All rights reserved.</p>
     </div>
     
     <script>
@@ -495,31 +558,126 @@
             this.classList.toggle('fa-eye-slash');
         });
         
-        function googleTranslateElementInit() {
+// 1. Function to save language preference
+function saveLanguagePreference(lang) {
+    localStorage.setItem('selectedLanguage', lang);
+    document.cookie = `user_language=${lang}; path=/; max-age=31536000`;
+    sessionStorage.setItem('selectedLanguage', lang);
+}
+
+// 2. Function to apply language translation
+function applyLanguage(lang) {
+    if (lang === 'kn') {
+        // Kannada translation
+        window.location.hash = '#googtrans(kn|en)';
+        
+        setTimeout(function() {
+            if (window.google && google.translate && google.translate.TranslateElement) {
+                try {
+                    var select = document.querySelector('.goog-te-combo');
+                    if (select) {
+                        select.value = 'kn';
+                        select.dispatchEvent(new Event('change'));
+                    }
+                } catch(e) {
+                    console.log('Translation applied');
+                }
+            }
+        }, 500);
+    } else {
+        // English (default)
+        window.location.hash = '#googtrans(en)';
+        
+        setTimeout(function() {
+            if (window.google && google.translate && google.translate.TranslateElement) {
+                try {
+                    var select = document.querySelector('.goog-te-combo');
+                    if (select) {
+                        select.value = 'en';
+                        select.dispatchEvent(new Event('change'));
+                    }
+                } catch(e) {
+                    console.log('English applied');
+                }
+            }
+        }, 500);
+    }
+}
+
+// 3. Main language switching function
+function setLanguage(lang) {
+    // Update button UI
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Save the preference
+    saveLanguagePreference(lang);
+    
+    // Apply immediately
+    applyLanguage(lang);
+}
+
+// 4. Initialize Google Translate
+function googleTranslateElementInit() {
     new google.translate.TranslateElement({
         pageLanguage: 'en',
         includedLanguages: 'en,kn',
-        autoDisplay: false
+        layout: google.translate.TranslateElement.InlineLayout.HORIZONTAL,
+        autoDisplay: false,
+        disableAutoTranslation: false
     }, 'google_translate_element');
     
-    // Apply saved language
-    const savedLang = localStorage.getItem('selectedLanguage');
-    if(savedLang === 'kn') {
-        setTimeout(() => {
-            var iframe = document.querySelector('.goog-te-menu-frame');
-            if(iframe) {
-                var select = iframe.contentWindow.document.querySelector('.goog-te-menu2-select');
-                if(select) {
-                    select.value = 'kn';
-                    select.dispatchEvent(new Event('change'));
-                }
-            }
-        }, 1000);
-    }
+    // Hide the Google Translate widget immediately
+    setTimeout(function() {
+        var elements = document.querySelectorAll('.goog-te-banner, .skiptranslate, .goog-te-gadget');
+        elements.forEach(function(el) {
+            el.style.display = 'none';
+            el.style.visibility = 'hidden';
+            el.style.height = '0';
+            el.style.overflow = 'hidden';
+        });
+        
+        document.body.style.top = '0';
+    }, 100);
 }
-var script = document.createElement('script');
-script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-document.head.appendChild(script);
+
+// 5. Load Google Translate script
+function loadGoogleTranslate() {
+    if (window.google && google.translate) {
+        googleTranslateElementInit();
+        return;
+    }
+    
+    var script = document.createElement('script');
+    script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    script.type = 'text/javascript';
+    document.head.appendChild(script);
+}
+
+// 6. On page load - Apply saved language
+document.addEventListener('DOMContentLoaded', function() {
+    // Load Google Translate
+    loadGoogleTranslate();
+    
+    // Check for saved language preference
+    const savedLang = localStorage.getItem('selectedLanguage') || 'en';
+    
+    // Set active button
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if ((savedLang === 'en' && btn.classList.contains('english')) || 
+            (savedLang === 'kn' && btn.classList.contains('kannada'))) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Apply saved language after a short delay
+    setTimeout(function() {
+        applyLanguage(savedLang);
+    }, 1000);
+});
         // Check password strength
         function checkPasswordStrength(password) {
             let strength = 0;
