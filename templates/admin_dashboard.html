@@ -842,15 +842,6 @@
                 <option value="rejected">Rejected</option>
             </select>
         </div>
-        
-        <div class="filter-dropdown">
-            <select id="vendorDocFilter" class="form-control">
-                <option value="all">All Documents</option>
-                <option value="verified">Verified</option>
-                <option value="pending">Pending Verification</option>
-                <option value="rejected">Rejected</option>
-            </select>
-        </div>
     </div>
     
     <div style="overflow-x: auto;">
@@ -863,8 +854,8 @@
             <th>Email</th>
             <th>Phone</th>
             <th>Service Type</th>
-            <th>Document</th> <!-- Keep this -->
-            <th>Doc Status</th> <!-- Keep this -->
+            <th>Document</th>
+            <th>Doc Status</th>
             <th>Registration Date</th>
             <th>Account Status</th>
             <th>Actions</th>
@@ -942,40 +933,8 @@
         </div>
     </div>
     
-    <!-- Recent Broadcasts History -->
-    <div class="card" style="margin-top: 30px;">
-        <div class="section-header">
-            <h3><i class="fas fa-history"></i> Broadcast History</h3>
-        </div>
-        
-        <div style="padding: 20px;">
-            <div class="search-filter">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="broadcastSearch" placeholder="Search broadcast history...">
-                </div>
-            </div>
-            
-            <div style="overflow-x: auto; margin-top: 15px;">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Title</th>
-                            <th>Type</th>
-                            <th>Recipients</th>
-                            <th>Status</th>
-                            <th>Sent Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="broadcastHistory">
-                        <!-- History will be loaded here -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+   
+    
 </div>
           <!-- Equipment Section -->
 <div class="content-section" id="equipment-section">
@@ -1068,8 +1027,7 @@
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>
                 <option value="confirmed">Confirmed</option>
-                <option value="active">Active</option>
-                <option value="completed">Completed</option>
+
                 <option value="cancelled">Cancelled</option>
             </select>
         </div>
@@ -1079,8 +1037,7 @@
                 <option value="all">All Dates</option>
                 <option value="today">Today</option>
                 <option value="week">This Week</option>
-                <option value="month">This Month</option>
-                <option value="upcoming">Upcoming</option>
+               
                 <option value="past">Past Bookings</option>
             </select>
         </div>
@@ -1125,667 +1082,472 @@
         </div>
     </div>
 </div>
-            
-    <!-- Reports Section -->
+    <!-- Reports Section - REAL DATA ONLY -->
 <div class="content-section" id="reports-section">
     <div class="section-header">
-        <h2><i class="fas fa-chart-bar"></i> Platform Analytics & Reports</h2>
-        <p>Comprehensive overview of platform performance and statistics</p>
+        <h2><i class="fas fa-chart-bar"></i> Platform Analytics</h2>
+        <p>Real-time data from database</p>
     </div>
     
-    <!-- Date Range Filter -->
-    <div class="search-filter" style="margin-bottom: 30px;">
-        <div style="display: flex; gap: 15px; align-items: center;">
-            <div>
-                <label for="reportPeriod" style="font-weight: 500; margin-bottom: 5px; display: block;">Time Period</label>
-                <select id="reportPeriod" class="form-control" style="width: 200px;">
-                    <option value="last_7_days">Last 7 Days</option>
-                    <option value="last_30_days" selected>Last 30 Days</option>
-                    <option value="last_90_days">Last 90 Days</option>
-                    <option value="this_month">This Month</option>
-                    <option value="last_month">Last Month</option>
-                    <option value="this_year">This Year</option>
-                    <option value="all_time">All Time</option>
-                </select>
-            </div>
-            
-            <button class="btn btn-primary" id="generateReportBtn" style="margin-top: 24px;">
-                <i class="fas fa-sync-alt"></i> Refresh Data
+    <!-- Loading and Refresh -->
+    <div style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <button class="btn btn-primary" id="loadRealReportsBtn">
+                <i class="fas fa-sync-alt"></i> Load Data
             </button>
-            
-            <div style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
-                <span id="lastUpdated" style="color: var(--gray); font-size: 0.9rem;">
-                    Last updated: Loading...
-                </span>
-                <div id="dataLoading" style="display: none;">
-                    <i class="fas fa-spinner fa-spin"></i> Loading data...
-                </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div id="reportsLoading" style="display: none; color: var(--primary);">
+                <i class="fas fa-spinner fa-spin"></i> Loading real data...
             </div>
+            <span id="dataLastUpdated" style="color: var(--gray); font-size: 0.9rem;">
+                Data not loaded
+            </span>
         </div>
     </div>
     
-    <!-- Summary Stats Cards -->
+    <!-- Summary Stats -->
     <div class="stats-grid" style="margin-bottom: 30px;">
         <div class="stat-card">
             <div class="stat-icon blue">
-                <i class="fas fa-rupee-sign"></i>
+                <i class="fas fa-user-tie"></i>
             </div>
             <div class="stat-info">
-                <h3 id="totalRevenue">₹0</h3>
-                <p>Total Revenue</p>
-                <small id="revenueGrowth" style="font-size: 0.8rem;">
-                    <i class="fas fa-chart-line"></i> <span id="growthValue">0%</span> growth
-                </small>
+                <h3 id="realTotalFarmers">0</h3>
+                <p>Approved Farmers</p>
             </div>
         </div>
         
         <div class="stat-card">
             <div class="stat-icon green">
-                <i class="fas fa-shopping-cart"></i>
+                <i class="fas fa-store"></i>
             </div>
             <div class="stat-info">
-                <h3 id="totalOrders">0</h3>
-                <p>Total Orders</p>
-                <small id="orderStats" style="font-size: 0.8rem;">
-                    <span id="completedOrders">0</span> completed • <span id="cancelledOrders">0</span> cancelled
-                </small>
+                <h3 id="realTotalVendors">0</h3>
+                <p>Approved Vendors</p>
             </div>
         </div>
         
         <div class="stat-card">
             <div class="stat-icon orange">
-                <i class="fas fa-users"></i>
+                <i class="fas fa-tractor"></i>
             </div>
             <div class="stat-info">
-                <h3 id="activeUsers">0</h3>
-                <p>Active Users</p>
-                <small id="userStats" style="font-size: 0.8rem;">
-                    <span id="totalFarmers">0</span> farmers • <span id="totalVendors">0</span> vendors
+                <h3 id="realTotalEquipment">0</h3>
+                <p>Total Equipment</p>
+                <small style="font-size: 0.8rem; color: #38a169;">
+                    <i class="fas fa-check-circle"></i> <span id="realAvailableEquipment">0</span> available
                 </small>
             </div>
         </div>
         
         <div class="stat-card">
             <div class="stat-icon red">
-                <i class="fas fa-percentage"></i>
+                <i class="fas fa-exchange-alt"></i>
             </div>
             <div class="stat-info">
-                <h3 id="conversionRate">0%</h3>
-                <p>Conversion Rate</p>
-                <small id="cancellationRate" style="font-size: 0.8rem;">
-                    Cancellation: <span id="cancelRate">0%</span>
+                <h3 id="realTotalOrders">0</h3>
+                <p>Total Orders</p>
+                <small style="font-size: 0.8rem;">
+                    <span id="realTotalBookings">0</span> bookings • <span id="realTotalRents">0</span> rents
                 </small>
             </div>
         </div>
     </div>
     
-    <!-- Main Charts Grid -->
+    <!-- Charts -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 25px; margin-bottom: 30px;">
-        <!-- Revenue Chart -->
-        <div class="card" style="padding: 20px;">
-            <div class="section-header" style="margin-bottom: 20px; padding-bottom: 10px;">
-                <h3><i class="fas fa-rupee-sign"></i> Revenue Trend (Last 30 Days)</h3>
+        
+        <!-- Chart 1: Registration Timeline -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3><i class="fas fa-user-plus"></i> Registration Timeline (Last 6 Months)</h3>
             </div>
-            <div style="height: 300px;">
-                <canvas id="revenueChart"></canvas>
+            <div class="chart-container">
+                <canvas id="realRegistrationChart"></canvas>
             </div>
-            <div id="revenueChartEmpty" style="display: none; height: 300px; display: flex; align-items: center; justify-content: center; color: var(--gray);">
-                <div style="text-align: center;">
-                    <i class="fas fa-chart-line" style="font-size: 3rem; margin-bottom: 10px;"></i>
-                    <p>No revenue data available for this period</p>
-                </div>
+            <div class="chart-empty" id="registrationEmpty">
+                <i class="fas fa-users"></i>
+                <p>No registration data</p>
             </div>
         </div>
         
-        <!-- Registration Growth Chart -->
-        <div class="card" style="padding: 20px;">
-            <div class="section-header" style="margin-bottom: 20px; padding-bottom: 10px;">
-                <h3><i class="fas fa-user-plus"></i> User Registration Trend</h3>
+        <!-- Chart 2: Equipment Categories -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3><i class="fas fa-tractor"></i> Equipment by Category</h3>
             </div>
-            <div style="height: 300px;">
-                <canvas id="registrationChart"></canvas>
+            <div class="chart-container">
+                <canvas id="realEquipmentChart"></canvas>
             </div>
-            <div id="registrationChartEmpty" style="display: none; height: 300px; display: flex; align-items: center; justify-content: center; color: var(--gray);">
-                <div style="text-align: center;">
-                    <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 10px;"></i>
-                    <p>No registration data available for this period</p>
-                </div>
+            <div class="chart-empty" id="equipmentEmpty">
+                <i class="fas fa-tractor"></i>
+                <p>No equipment data</p>
             </div>
         </div>
+        
     </div>
     
-    <!-- Secondary Charts Grid -->
+    <!-- Status Distribution Charts -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px; margin-bottom: 30px;">
-        <!-- Category Distribution -->
-        <div class="card" style="padding: 20px;">
-            <div class="section-header" style="margin-bottom: 20px; padding-bottom: 10px;">
-                <h3><i class="fas fa-tags"></i> Equipment Category Distribution</h3>
+        
+        <!-- Chart 3: Booking Status -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3><i class="fas fa-calendar-check"></i> Booking Status</h3>
+                <small>Total: <span id="bookingCount">0</span></small>
             </div>
-            <div style="height: 250px;">
-                <canvas id="categoryChart"></canvas>
+            <div class="chart-container">
+                <canvas id="realBookingChart"></canvas>
             </div>
-            <div id="categoryChartEmpty" style="display: none; height: 250px; display: flex; align-items: center; justify-content: center; color: var(--gray);">
-                <div style="text-align: center;">
-                    <i class="fas fa-tractor" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                    <p>No equipment categories found</p>
-                </div>
+            <div class="chart-empty" id="bookingEmpty">
+                <i class="fas fa-calendar"></i>
+                <p>No booking data</p>
             </div>
         </div>
         
-        <!-- Status Distribution -->
-        <div class="card" style="padding: 20px;">
-            <div class="section-header" style="margin-bottom: 20px; padding-bottom: 10px;">
-                <h3><i class="fas fa-tasks"></i> Order Status Distribution</h3>
+        <!-- Chart 4: Rent Request Status -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3><i class="fas fa-exchange-alt"></i> Rent Request Status</h3>
+                <small>Total: <span id="rentCount">0</span></small>
             </div>
-            <div style="height: 250px;">
-                <canvas id="statusChart"></canvas>
+            <div class="chart-container">
+                <canvas id="realRentChart"></canvas>
             </div>
-            <div id="statusChartEmpty" style="display: none; height: 250px; display: flex; align-items: center; justify-content: center; color: var(--gray);">
-                <div style="text-align: center;">
-                    <i class="fas fa-clipboard-list" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                    <p>No order data available</p>
-                </div>
+            <div class="chart-empty" id="rentEmpty">
+                <i class="fas fa-handshake"></i>
+                <p>No rent request data</p>
             </div>
         </div>
         
-        <!-- Top Vendors -->
+    </div>
+    
+    <!-- Recent Activities -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px;">
+        
+        <!-- Recent Bookings -->
         <div class="card" style="padding: 20px;">
-            <div class="section-header" style="margin-bottom: 20px; padding-bottom: 10px;">
-                <h3><i class="fas fa-crown"></i> Top Performing Vendors</h3>
+            <div class="section-header" style="margin-bottom: 15px;">
+                <h3><i class="fas fa-history"></i> Recent Bookings</h3>
             </div>
-            <div style="height: 250px; overflow-y: auto;">
-                <table class="data-table" style="font-size: 0.9rem;">
+            <div style="max-height: 300px; overflow-y: auto;">
+                <table class="data-table" style="font-size: 0.85rem;">
                     <thead>
                         <tr>
-                            <th>Vendor</th>
-                            <th>Orders</th>
-                            <th>Revenue</th>
-                            <th>Rating</th>
+                            <th>ID</th>
+                            <th>Equipment</th>
+                            <th>User</th>
+                            <th>Amount</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody id="topVendorsTable">
-                        <tr><td colspan="4" style="text-align: center; padding: 20px; color: var(--gray);">
-                            <i class="fas fa-spinner fa-spin"></i> Loading vendor data...
-                        </td></tr>
+                    <tbody id="recentBookingsTable">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">
+                                <i class="fas fa-spinner fa-spin"></i> Loading...
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
-                <div id="topVendorsEmpty" style="display: none; text-align: center; padding: 20px; color: var(--gray);">
-                    <i class="fas fa-store-slash" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                    <p>No vendor performance data available</p>
-                </div>
             </div>
-        </div>
-    </div>
-    
-    <!-- Detailed Statistics -->
-    <div class="card" style="padding: 20px;">
-        <div class="section-header" style="margin-bottom: 20px;">
-            <h3><i class="fas fa-chart-pie"></i> Detailed Platform Statistics</h3>
         </div>
         
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-            <!-- User Statistics -->
-            <div>
-                <h4 style="margin-bottom: 15px; color: var(--primary); border-bottom: 2px solid var(--primary-light); padding-bottom: 5px;">
-                    <i class="fas fa-users"></i> User Statistics
-                </h4>
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span><i class="fas fa-user-tie"></i> Total Farmers:</span>
-                        <strong id="statsFarmers">0</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span><i class="fas fa-store"></i> Total Vendors:</span>
-                        <strong id="statsVendors">0</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span><i class="fas fa-user-check"></i> Active This Month:</span>
-                        <strong id="activeThisMonth">0</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span><i class="fas fa-chart-line"></i> Avg. Orders per User:</span>
-                        <strong id="avgOrdersUser">0.0</strong>
-                    </div>
-                </div>
+        <!-- Recent Rent Requests -->
+        <div class="card" style="padding: 20px;">
+            <div class="section-header" style="margin-bottom: 15px;">
+                <h3><i class="fas fa-exchange-alt"></i> Recent Rent Requests</h3>
             </div>
-            
-            <!-- Order Statistics -->
-            <div>
-                <h4 style="margin-bottom: 15px; color: var(--primary); border-bottom: 2px solid var(--primary-light); padding-bottom: 5px;">
-                    <i class="fas fa-shopping-cart"></i> Order Statistics
-                </h4>
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span><i class="fas fa-clipboard-list"></i> Total Orders:</span>
-                        <strong id="statsOrders">0</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span><i class="fas fa-check-circle" style="color: var(--secondary);"></i> Completed:</span>
-                        <strong id="statsCompleted">0</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span><i class="fas fa-times-circle" style="color: var(--accent);"></i> Cancelled:</span>
-                        <strong id="statsCancelled">0</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span><i class="fas fa-calendar-alt"></i> Avg. Duration:</span>
-                        <strong id="statsAvgDuration">0 days</strong>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Financial Statistics -->
-            <div>
-                <h4 style="margin-bottom: 15px; color: var(--primary); border-bottom: 2px solid var(--primary-light); padding-bottom: 5px;">
-                    <i class="fas fa-money-bill-wave"></i> Financial Statistics
-                </h4>
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span><i class="fas fa-rupee-sign"></i> Total Revenue:</span>
-                        <strong id="statsRevenue">₹0</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span><i class="fas fa-calculator"></i> Avg. Order Value:</span>
-                        <strong id="statsAvgOrderValue">₹0</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span><i class="fas fa-hand-holding-usd"></i> Platform Commission:</span>
-                        <strong id="statsCommission">₹0</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span><i class="fas fa-chart-line"></i> Revenue Growth:</span>
-                        <strong id="statsRevenueGrowth" style="color: var(--secondary);">0%</strong>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Equipment Statistics -->
-            <div>
-                <h4 style="margin-bottom: 15px; color: var(--primary); border-bottom: 2px solid var(--primary-light); padding-bottom: 5px;">
-                    <i class="fas fa-tractor"></i> Equipment Statistics
-                </h4>
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span><i class="fas fa-list"></i> Total Equipment:</span>
-                        <strong id="statsTotalEquipment">0</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span><i class="fas fa-check" style="color: var(--secondary);"></i> Available:</span>
-                        <strong id="statsAvailableEquipment">0</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span><i class="fas fa-percentage"></i> Utilization Rate:</span>
-                        <strong id="statsUtilization">0%</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span><i class="fas fa-boxes"></i> Categories:</span>
-                        <strong id="statsCategories">0</strong>
-                    </div>
-                </div>
+            <div style="max-height: 300px; overflow-y: auto;">
+                <table class="data-table" style="font-size: 0.85rem;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Equipment</th>
+                            <th>User</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentRentsTable">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">
+                                <i class="fas fa-spinner fa-spin"></i> Loading...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
+        
+        <!-- Recent Registrations -->
+        <div class="card" style="padding: 20px;">
+            <div class="section-header" style="margin-bottom: 15px;">
+                <h3><i class="fas fa-user-plus"></i> Recent Registrations</h3>
+            </div>
+            <div style="max-height: 300px; overflow-y: auto;">
+                <table class="data-table" style="font-size: 0.85rem;">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Name</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentRegTable">
+                        <tr>
+                            <td colspan="3" style="text-align: center; padding: 20px; color: var(--gray);">
+                                <i class="fas fa-spinner fa-spin"></i> Loading...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
     </div>
 </div>
 
 <style>
-/* Add these styles to your existing CSS */
-#dataLoading {
-    color: var(--primary);
-    font-size: 0.9rem;
+/* Chart Styles */
+.chart-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    border: 1px solid #eaeaea;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.chart-header h3 {
+    font-size: 1.1rem;
+    color: #2d3748;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .chart-container {
+    height: 300px;
     position: relative;
-    height: 100%;
+    width: 100%;
 }
 
-.no-data-message {
+.chart-empty {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
-    color: var(--gray);
+    height: 300px;
+    color: #a0aec0;
     text-align: center;
 }
 
-.no-data-message i {
+.chart-empty i {
     font-size: 3rem;
     margin-bottom: 10px;
     opacity: 0.5;
 }
-</style>
-    <!-- Farmer Detail Modal -->
-    <div class="modal" id="farmerModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="farmerModalTitle">Farmer Details</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            
-            <div class="modal-body" id="farmerModalBody">
-                <!-- Farmer details will be loaded here -->
-            </div>
-            
-            <div class="modal-footer" id="farmerModalFooter">
-                <!-- Action buttons will be loaded here -->
-            </div>
-        </div>
-    </div>
-    
-    <!-- Vendor Detail Modal -->
-    <div class="modal" id="vendorModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="vendorModalTitle">Vendor Details</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            
-            <div class="modal-body" id="vendorModalBody">
-                <!-- Vendor details will be loaded here -->
-            </div>
-            
-            <div class="modal-footer" id="vendorModalFooter">
-                <!-- Action buttons will be loaded here -->
-            </div>
-        </div>
-    </div>
+
+.chart-empty p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+</style>        
+  
 
     <script>
-        // Global data storage
-        let farmersData = [];
-        let vendorsData = [];
-        let statsData = {};
-        
-        // DOM Elements
-        const navLinks = document.querySelectorAll('.nav-link');
-        const contentSections = document.querySelectorAll('.content-section');
-        const farmersTable = document.getElementById('farmersTable');
-        const vendorsTable = document.getElementById('vendorsTable');
-        const farmerModal = document.getElementById('farmerModal');
-        const vendorModal = document.getElementById('vendorModal');
-        const farmerSearch = document.getElementById('farmerSearch');
-        const vendorSearch = document.getElementById('vendorSearch');
-        const farmerStatusFilter = document.getElementById('farmerStatusFilter');
-        const vendorStatusFilter = document.getElementById('vendorStatusFilter');
-        // Global data storage
-let bookingsData = [];
-
-// DOM Elements for bookings
-const bookingsTable = document.getElementById('bookingsTable');
-const bookingModal = document.getElementById('bookingModal');
-const bookingSearch = document.getElementById('bookingSearch');
-const bookingStatusFilter = document.getElementById('bookingStatusFilter');
-const bookingDateFilter = document.getElementById('bookingDateFilter');
-// Global data storage
-let equipmentData = [];
-
-// DOM Elements for equipment
-const equipmentTable = document.getElementById('equipmentTable');
-const equipmentModal = document.getElementById('equipmentModal');
-const equipmentSearch = document.getElementById('equipmentSearch');
-const equipmentStatusFilter = document.getElementById('equipmentStatusFilter');
-const equipmentCategoryFilter = document.getElementById('equipmentCategoryFilter');
-
-// Add this to your Global data storage
-let broadcastHistory = [];
-
-// Add to your existing DOM Elements section
-const broadcastHistoryTable = document.getElementById('broadcastHistory');
-const broadcastForm = document.getElementById('broadcastForm');
-const sendBroadcastBtn = document.getElementById('sendBroadcastBtn');
-const previewMessageBtn = document.getElementById('previewMessageBtn');
-const messagePreview = document.getElementById('messagePreview');
-const previewContent = document.getElementById('previewContent');
-// Global variables for charts
-let revenueChart = null;
-let registrationChart = null;
-let categoryChart = null;
-let statusChart = null;
-let reportsData = null;
-
-// DOM Elements for reports
-const generateReportBtn = document.getElementById('generateReportBtn');
-const reportPeriod = document.getElementById('reportPeriod');
-const lastUpdated = document.getElementById('lastUpdated');
-const dataLoading = document.getElementById('dataLoading');
-
-// Show loading state
-function showLoading(show) {
-    if (dataLoading) {
-        dataLoading.style.display = show ? 'block' : 'none';
-    }
-    if (generateReportBtn) {
-        generateReportBtn.disabled = show;
-        if (show) {
-            generateReportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-        } else {
-            generateReportBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Data';
-        }
-    }
-}
-
-// Format currency
-function formatCurrency(amount) {
-    if (!amount) return '₹0';
-    if (amount >= 10000000) {
-        return '₹' + (amount / 10000000).toFixed(1) + 'Cr';
-    } else if (amount >= 100000) {
-        return '₹' + (amount / 100000).toFixed(1) + 'L';
-    } else if (amount >= 1000) {
-        return '₹' + (amount / 1000).toFixed(1) + 'K';
-    }
-    return '₹' + Math.round(amount).toLocaleString('en-IN');
-}
-
-// Update last updated time
-function updateLastUpdated() {
-    if (lastUpdated) {
-        const now = new Date();
-        lastUpdated.textContent = `Last updated: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
-    }
-}
-
-// Load reports data
-async function loadReports() {
+    // Global data storage
+    let farmersData = [];
+    let vendorsData = [];
+    let statsData = {};
+    let equipmentData = [];
+    let bookingsData = [];
+    let broadcastHistory = [];
+    
+    
+ let realRegistrationChart = null;
+let realEquipmentChart = null;
+let realBookingChart = null;
+let realRentChart = null;
+    
+    // DOM Elements
+    const navLinks = document.querySelectorAll('.nav-link');
+    const contentSections = document.querySelectorAll('.content-section');
+    const farmersTable = document.getElementById('farmersTable');
+    const vendorsTable = document.getElementById('vendorsTable');
+    const farmerModal = document.getElementById('farmerModal');
+    const vendorModal = document.getElementById('vendorModal');
+    const farmerSearch = document.getElementById('farmerSearch');
+    const vendorSearch = document.getElementById('vendorSearch');
+    const farmerStatusFilter = document.getElementById('farmerStatusFilter');
+    const vendorStatusFilter = document.getElementById('vendorStatusFilter');
+    const bookingsTable = document.getElementById('bookingsTable');
+    const bookingModal = document.getElementById('bookingModal');
+    const bookingSearch = document.getElementById('bookingSearch');
+    const bookingStatusFilter = document.getElementById('bookingStatusFilter');
+    const bookingDateFilter = document.getElementById('bookingDateFilter');
+    const equipmentTable = document.getElementById('equipmentTable');
+    const equipmentModal = document.getElementById('equipmentModal');
+    const equipmentSearch = document.getElementById('equipmentSearch');
+    const equipmentStatusFilter = document.getElementById('equipmentStatusFilter');
+    const equipmentCategoryFilter = document.getElementById('equipmentCategoryFilter');
+    const broadcastHistoryTable = document.getElementById('broadcastHistory');
+    const broadcastForm = document.getElementById('broadcastForm');
+    const sendBroadcastBtn = document.getElementById('sendBroadcastBtn');
+    const previewMessageBtn = document.getElementById('previewMessageBtn');
+    const messagePreview = document.getElementById('messagePreview');
+    const previewContent = document.getElementById('previewContent');
+   async function loadRealReports() {
+    showReportsLoading(true);
+    
     try {
-        showLoading(true);
+        console.log("📊 Loading REAL reports data...");
         
-        const period = reportPeriod.value;
-        console.log(`📊 Loading reports for period: ${period}`);
-        
-        const response = await fetch(`/api/admin/reports?period=${period}`);
+        const response = await fetch('/api/admin/reports/real-data', {
+            credentials: 'same-origin',
+            headers: {
+                'Cache-Control': 'no-cache'
+            }
+        });
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
-        console.log('📊 Reports data received:', data);
         
         if (data.error) {
             if (data.error === 'Unauthorized') {
                 showNotification('Session expired. Please log in again.', 'error');
                 setTimeout(() => {
-                    window.location.href = "{{ url_for('admin_login') }}";
+                    window.location.href = "/admin_login";
                 }, 2000);
-            } else {
-                showNotification('Error: ' + data.error, 'error');
+                return;
             }
-            return;
+            throw new Error(data.error);
         }
         
-        reportsData = data;
-        renderReports();
+        // Update summary stats
+        updateSummaryStats(data.summary);
+        
+        // Render charts
+        renderRealCharts(data);
+        
+        // Update recent activities
+        updateRecentActivities(data.recentActivities);
+        
+        // Update timestamp
+        document.getElementById('dataLastUpdated').textContent = 
+            `Last updated: ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+        
+        console.log("✅ REAL reports data loaded successfully");
+        showNotification('Reports data loaded successfully', 'success');
         
     } catch (error) {
-        console.error('❌ Error loading reports:', error);
-        showNotification('Failed to load reports data. Check console for details.', 'error');
-        
-        // Try debug endpoint
-        try {
-            const debugResponse = await fetch('/api/admin/debug-data');
-            const debugData = await debugResponse.json();
-            console.log('🔍 Debug data:', debugData);
-        } catch (debugError) {
-            console.error('Debug error:', debugError);
-        }
+        console.error('❌ Error loading REAL reports:', error);
+        showNotification('Failed to load reports data: ' + error.message, 'error');
     } finally {
-        showLoading(false);
-        updateLastUpdated();
+        showReportsLoading(false);
     }
 }
 
-// Render reports data
-function renderReports() {
-    if (!reportsData) {
-        console.error('No reports data available');
-        showNotification('No reports data available', 'error');
-        return;
-    }
+// Update summary statistics
+function updateSummaryStats(summary) {
+    if (!summary) return;
     
-    console.log('📊 Rendering reports with data:', reportsData);
-    
-    const summary = reportsData.summary || {};
-    const detailed = reportsData.detailedStats || {};
-    
-    // Update summary cards
-    document.getElementById('totalRevenue').textContent = formatCurrency(summary.totalRevenue || 0);
-    document.getElementById('totalOrders').textContent = (summary.totalOrders || 0).toLocaleString();
-    document.getElementById('activeUsers').textContent = (summary.activeUsers || 0).toLocaleString();
-    document.getElementById('conversionRate').textContent = (summary.conversionRate || 0) + '%';
-    
-    // Update summary details
-    document.getElementById('growthValue').textContent = (detailed.revenueGrowth || 0) + '%';
-    document.getElementById('completedOrders').textContent = detailed.completedOrders || 0;
-    document.getElementById('cancelledOrders').textContent = detailed.cancelledOrders || 0;
-    document.getElementById('totalFarmers').textContent = summary.totalFarmers || 0;
-    document.getElementById('totalVendors').textContent = summary.totalVendors || 0;
-    document.getElementById('cancelRate').textContent = (summary.cancellationRate || 0) + '%';
-    
-    // Update detailed statistics
-    document.getElementById('statsFarmers').textContent = detailed.farmers || 0;
-    document.getElementById('statsVendors').textContent = detailed.vendors || 0;
-    document.getElementById('activeThisMonth').textContent = detailed.activeThisMonth || 0;
-    document.getElementById('avgOrdersUser').textContent = (detailed.avgOrdersUser || 0).toFixed(1);
-    document.getElementById('statsOrders').textContent = detailed.totalOrders || 0;
-    document.getElementById('statsCompleted').textContent = detailed.completedOrders || 0;
-    document.getElementById('statsCancelled').textContent = detailed.cancelledOrders || 0;
-    document.getElementById('statsAvgDuration').textContent = (detailed.avgDuration || 0) + ' days';
-    document.getElementById('statsRevenue').textContent = formatCurrency(detailed.totalRevenue || 0);
-    document.getElementById('statsAvgOrderValue').textContent = formatCurrency(detailed.avgOrderValue || 0);
-    document.getElementById('statsCommission').textContent = formatCurrency(detailed.platformCommission || 0);
-    document.getElementById('statsRevenueGrowth').textContent = (detailed.revenueGrowth || 0) + '%';
-    document.getElementById('statsTotalEquipment').textContent = summary.totalEquipment || 0;
-    document.getElementById('statsAvailableEquipment').textContent = detailed.availableEquipment || 0;
-    document.getElementById('statsUtilization').textContent = (detailed.utilizationRate || 0) + '%';
-    document.getElementById('statsCategories').textContent = (reportsData.categoryDistribution || []).length;
-    
-    // Update top vendors table
-    updateTopVendors();
-    
-    // Render charts
-    renderCharts();
+    document.getElementById('realTotalFarmers').textContent = summary.totalFarmers || 0;
+    document.getElementById('realTotalVendors').textContent = summary.totalVendors || 0;
+    document.getElementById('realTotalEquipment').textContent = summary.totalEquipment || 0;
+    document.getElementById('realAvailableEquipment').textContent = summary.availableEquipment || 0;
+    document.getElementById('realTotalOrders').textContent = (summary.totalBookings || 0) + (summary.totalRentRequests || 0);
+    document.getElementById('realTotalBookings').textContent = summary.totalBookings || 0;
+    document.getElementById('realTotalRents').textContent = summary.totalRentRequests || 0;
 }
 
-// Update top vendors table
-function updateTopVendors() {
-    const table = document.getElementById('topVendorsTable');
-    const emptyDiv = document.getElementById('topVendorsEmpty');
-    const vendors = reportsData.topVendors || [];
+// Render all charts with real data
+function renderRealCharts(data) {
+    // Registration Timeline Chart
+    renderRegistrationTimeline(data.registrationTimeline);
     
-    console.log('👥 Top vendors data:', vendors);
+    // Equipment Categories Chart
+    renderEquipmentCategories(data.equipmentCategories);
     
-    if (!vendors || vendors.length === 0) {
-        table.style.display = 'none';
-        emptyDiv.style.display = 'block';
-        return;
-    }
+    // Booking Status Chart
+    renderBookingStatus(data.bookingStatus);
     
-    table.style.display = '';
-    emptyDiv.style.display = 'none';
-    
-    table.innerHTML = vendors.map((vendor, index) => `
-        <tr>
-            <td>
-                <strong>${index + 1}.</strong> ${vendor.name || 'Unknown Vendor'}
-                ${vendor.rating > 0 ? `<br><small>${'★'.repeat(Math.floor(vendor.rating))}${vendor.rating.toFixed(1)}</small>` : ''}
-            </td>
-            <td><span class="badge" style="background: #e3f2fd; color: #1976d2; padding: 3px 8px; border-radius: 12px;">${vendor.orders || 0}</span></td>
-            <td><strong>${formatCurrency(vendor.revenue || 0)}</strong></td>
-            <td>
-                ${vendor.rating > 0 ? `
-                <div style="display: flex; align-items: center; gap: 5px;">
-                    <span style="color: #ffb300;">${'★'.repeat(Math.floor(vendor.rating))}</span>
-                    <span>${vendor.rating.toFixed(1)}</span>
-                </div>
-                ` : 'No ratings'}
-            </td>
-        </tr>
-    `).join('');
+    // Rent Status Chart
+    renderRentStatus(data.rentStatus);
 }
 
-// Render all charts
-function renderCharts() {
-    renderRevenueChart();
-    renderRegistrationChart();
-    renderCategoryChart();
-    renderStatusChart();
-}
-
-// Render revenue chart
-function renderRevenueChart() {
-    const ctx = document.getElementById('revenueChart');
-    const emptyDiv = document.getElementById('revenueChartEmpty');
-    const revenueData = reportsData.revenueTrend || [];
+// Registration Timeline Chart
+function renderRegistrationTimeline(timelineData) {
+    const ctx = document.getElementById('realRegistrationChart');
+    const emptyDiv = document.getElementById('registrationEmpty');
     
-    console.log('💰 Revenue data:', revenueData);
-    
-    // Check if we have valid data
-    const hasData = revenueData.length > 0 && revenueData.some(r => r.amount > 0);
-    
-    if (!hasData) {
-        if (revenueChart) revenueChart.destroy();
+    if (!timelineData || timelineData.length === 0) {
+        if (realRegistrationChart) realRegistrationChart.destroy();
         ctx.style.display = 'none';
         emptyDiv.style.display = 'flex';
         return;
     }
     
+    // Prepare data
+    const labels = timelineData.map(item => item.date);
+    const farmersData = timelineData.map(item => item.farmers || 0);
+    const vendorsData = timelineData.map(item => item.vendors || 0);
+    
+    // Destroy existing chart
+    if (realRegistrationChart) realRegistrationChart.destroy();
+    
+    // Create new chart
     ctx.style.display = 'block';
     emptyDiv.style.display = 'none';
     
-    if (revenueChart) revenueChart.destroy();
-    
-    // Create chart
-    revenueChart = new Chart(ctx, {
-        type: 'line',
+    realRegistrationChart = new Chart(ctx, {
+        type: 'bar',
         data: {
-            labels: revenueData.map(r => r.date),
-            datasets: [{
-                label: 'Daily Revenue (₹)',
-                data: revenueData.map(r => r.amount),
-                borderColor: '#4299e1',
-                backgroundColor: 'rgba(66, 153, 225, 0.1)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.3
-            }]
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Farmers',
+                    data: farmersData,
+                    backgroundColor: 'rgba(56, 161, 105, 0.7)',
+                    borderColor: 'rgba(56, 161, 105, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Vendors',
+                    data: vendorsData,
+                    backgroundColor: 'rgba(49, 130, 206, 0.7)',
+                    borderColor: 'rgba(49, 130, 206, 1)',
+                    borderWidth: 1
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top'
-                }
-            },
             scales: {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        callback: function(value) {
-                            return '₹' + value.toLocaleString('en-IN');
+                        precision: 0
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.parsed.y} registrations`;
                         }
                     }
                 }
@@ -1794,56 +1556,55 @@ function renderRevenueChart() {
     });
 }
 
-// Render registration chart
-function renderRegistrationChart() {
-    const ctx = document.getElementById('registrationChart');
-    const emptyDiv = document.getElementById('registrationChartEmpty');
-    const regData = reportsData.registrationTrend || [];
+// Equipment Categories Chart
+function renderEquipmentCategories(categoriesData) {
+    const ctx = document.getElementById('realEquipmentChart');
+    const emptyDiv = document.getElementById('equipmentEmpty');
     
-    console.log('📈 Registration data:', regData);
-    
-    if (!regData || regData.length === 0) {
-        if (registrationChart) registrationChart.destroy();
+    if (!categoriesData || categoriesData.length === 0) {
+        if (realEquipmentChart) realEquipmentChart.destroy();
         ctx.style.display = 'none';
         emptyDiv.style.display = 'flex';
         return;
     }
     
+    // Prepare data
+    const labels = categoriesData.map(item => item.category);
+    const data = categoriesData.map(item => item.count);
+    
+    // Destroy existing chart
+    if (realEquipmentChart) realEquipmentChart.destroy();
+    
+    // Create new chart
     ctx.style.display = 'block';
     emptyDiv.style.display = 'none';
     
-    if (registrationChart) registrationChart.destroy();
-    
-    registrationChart = new Chart(ctx, {
-        type: 'bar',
+    realEquipmentChart = new Chart(ctx, {
+        type: 'doughnut',
         data: {
-            labels: regData.map(r => r.date),
-            datasets: [
-                {
-                    label: 'Farmers',
-                    data: regData.map(r => r.farmers || 0),
-                    backgroundColor: 'rgba(56, 161, 105, 0.7)'
-                },
-                {
-                    label: 'Vendors',
-                    data: regData.map(r => r.vendors || 0),
-                    backgroundColor: 'rgba(49, 130, 206, 0.7)'
-                }
-            ]
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: [
+                    '#4299e1', '#38a169', '#d69e2e', '#ed8936', '#9f7aea',
+                    '#f687b3', '#4fd1c7', '#fc8181', '#68d391', '#a0aec0'
+                ]
+            }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'top'
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        precision: 0
+                    position: 'right'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                            return `${context.label}: ${context.parsed} (${percentage}%)`;
+                        }
                     }
                 }
             }
@@ -1851,82 +1612,41 @@ function renderRegistrationChart() {
     });
 }
 
-// Render category chart
-function renderCategoryChart() {
-    const ctx = document.getElementById('categoryChart');
-    const emptyDiv = document.getElementById('categoryChartEmpty');
-    const categories = reportsData.categoryDistribution || [];
+// Booking Status Chart
+function renderBookingStatus(statusData) {
+    const ctx = document.getElementById('realBookingChart');
+    const emptyDiv = document.getElementById('bookingEmpty');
     
-    console.log('🏷️ Category data:', categories);
-    
-    if (!categories || categories.length === 0) {
-        if (categoryChart) categoryChart.destroy();
+    if (!statusData || statusData.length === 0) {
+        if (realBookingChart) realBookingChart.destroy();
         ctx.style.display = 'none';
         emptyDiv.style.display = 'flex';
+        document.getElementById('bookingCount').textContent = '0';
         return;
     }
     
+    // Prepare data
+    const labels = statusData.map(item => item.status);
+    const data = statusData.map(item => item.count);
+    const totalBookings = data.reduce((a, b) => a + b, 0);
+    
+    // Update count
+    document.getElementById('bookingCount').textContent = totalBookings;
+    
+    // Destroy existing chart
+    if (realBookingChart) realBookingChart.destroy();
+    
+    // Create new chart
     ctx.style.display = 'block';
     emptyDiv.style.display = 'none';
     
-    if (categoryChart) categoryChart.destroy();
-    
-    // Prepare colors
-    const colors = [
-        '#4299e1', '#38a169', '#d69e2e', '#ed8936', '#9f7aea',
-        '#f687b3', '#4fd1c7', '#fc8181', '#68d391', '#d6bcfa'
-    ];
-    
-    categoryChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: categories.map(c => c.category || 'Unknown'),
-            datasets: [{
-                data: categories.map(c => c.count || 0),
-                backgroundColor: colors.slice(0, categories.length),
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right'
-                }
-            }
-        }
-    });
-}
-
-// Render status chart
-function renderStatusChart() {
-    const ctx = document.getElementById('statusChart');
-    const emptyDiv = document.getElementById('statusChartEmpty');
-    const statuses = reportsData.statusDistribution || [];
-    
-    console.log('📊 Status data:', statuses);
-    
-    if (!statuses || statuses.length === 0) {
-        if (statusChart) statusChart.destroy();
-        ctx.style.display = 'none';
-        emptyDiv.style.display = 'flex';
-        return;
-    }
-    
-    ctx.style.display = 'block';
-    emptyDiv.style.display = 'none';
-    
-    if (statusChart) statusChart.destroy();
-    
-    statusChart = new Chart(ctx, {
+    realBookingChart = new Chart(ctx, {
         type: 'pie',
         data: {
-            labels: statuses.map(s => s.status),
+            labels: labels,
             datasets: [{
-                data: statuses.map(s => s.count || 0),
-                backgroundColor: statuses.map(s => s.color || '#718096'),
-                borderWidth: 1
+                data: data,
+                backgroundColor: ['#ecc94b', '#4299e1', '#38a169', '#fc8181', '#9f7aea']
             }]
         },
         options: {
@@ -1935,86 +1655,278 @@ function renderStatusChart() {
             plugins: {
                 legend: {
                     position: 'right'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const percentage = ((context.parsed / totalBookings) * 100).toFixed(1);
+                            return `${context.label}: ${context.parsed} (${percentage}%)`;
+                        }
+                    }
                 }
             }
         }
     });
 }
 
-// Initialize reports when section is shown
-function showSection(sectionId) {
-    // ... existing code ...
+// Rent Status Chart
+function renderRentStatus(statusData) {
+    const ctx = document.getElementById('realRentChart');
+    const emptyDiv = document.getElementById('rentEmpty');
     
-    if (sectionId === 'reports') {
-        console.log('📊 Showing reports section');
-        loadReports();
+    if (!statusData || statusData.length === 0) {
+        if (realRentChart) realRentChart.destroy();
+        ctx.style.display = 'none';
+        emptyDiv.style.display = 'flex';
+        document.getElementById('rentCount').textContent = '0';
+        return;
+    }
+    
+    // Prepare data
+    const labels = statusData.map(item => item.status);
+    const data = statusData.map(item => item.count);
+    const totalRents = data.reduce((a, b) => a + b, 0);
+    
+    // Update count
+    document.getElementById('rentCount').textContent = totalRents;
+    
+    // Destroy existing chart
+    if (realRentChart) realRentChart.destroy();
+    
+    // Create new chart
+    ctx.style.display = 'block';
+    emptyDiv.style.display = 'none';
+    
+    realRentChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: ['#ecc94b', '#4299e1', '#38a169', '#fc8181', '#9f7aea', '#4fd1c7']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const percentage = ((context.parsed / totalRents) * 100).toFixed(1);
+                            return `${context.label}: ${context.parsed} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Update recent activities tables
+function updateRecentActivities(activities) {
+    if (!activities) return;
+    
+    // Recent Bookings
+    const bookingsTable = document.getElementById('recentBookingsTable');
+    if (activities.bookings && activities.bookings.length > 0) {
+        bookingsTable.innerHTML = activities.bookings.map(booking => `
+            <tr>
+                <td>#${booking.id}</td>
+                <td>${booking.equipment_name || 'N/A'}</td>
+                <td>${booking.user_name || 'N/A'}</td>
+                <td>₹${booking.total_amount || 0}</td>
+                <td><span class="status-badge ${getStatusClass(booking.status)}">${booking.status || 'N/A'}</span></td>
+            </tr>
+        `).join('');
+    } else {
+        bookingsTable.innerHTML = `
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">
+                    No recent bookings
+                </td>
+            </tr>
+        `;
+    }
+    
+    // Recent Rent Requests
+    const rentsTable = document.getElementById('recentRentsTable');
+    if (activities.rentRequests && activities.rentRequests.length > 0) {
+        rentsTable.innerHTML = activities.rentRequests.map(rent => `
+            <tr>
+                <td>#${rent.id}</td>
+                <td>${rent.equipment_name || 'N/A'}</td>
+                <td>${rent.user_name || 'N/A'}</td>
+                <td>₹${rent.total_amount || 0}</td>
+                <td><span class="status-badge ${getStatusClass(rent.status)}">${rent.status || 'N/A'}</span></td>
+            </tr>
+        `).join('');
+    } else {
+        rentsTable.innerHTML = `
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 20px; color: var(--gray);">
+                    No recent rent requests
+                </td>
+            </tr>
+        `;
+    }
+    
+    // Recent Registrations
+    const regTable = document.getElementById('recentRegTable');
+    if (activities.registrations && activities.registrations.length > 0) {
+        regTable.innerHTML = activities.registrations.map(reg => `
+            <tr>
+                <td><span class="status-badge ${reg.type === 'farmer' ? 'status-approved' : 'status-pending'}">${reg.type}</span></td>
+                <td>${reg.name || 'N/A'}</td>
+                <td>${formatDate(reg.date)}</td>
+            </tr>
+        `).join('');
+    } else {
+        regTable.innerHTML = `
+            <tr>
+                <td colspan="3" style="text-align: center; padding: 20px; color: var(--gray);">
+                    No recent registrations
+                </td>
+            </tr>
+        `;
     }
 }
 
-// Add event listeners when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    if (generateReportBtn) {
-        generateReportBtn.addEventListener('click', loadReports);
-        console.log('✅ Added click listener to generate button');
-    }
+// Helper function for status badges
+function getStatusClass(status) {
+    if (!status) return 'status-pending';
     
-    if (reportPeriod) {
-        reportPeriod.addEventListener('change', loadReports);
-        console.log('✅ Added change listener to period selector');
-    }
-    
-    // Auto-refresh every 2 minutes
-    setInterval(() => {
-        if (document.getElementById('reports-section') && 
-            document.getElementById('reports-section').classList.contains('active')) {
-            console.log('🔄 Auto-refreshing reports...');
-            loadReports();
-        }
-    }, 120000); // 2 minutes
-});
-// Add to your existing showSection function
-function showSection(sectionId) {
-    // ... existing code ...
-    
-    if (sectionId === 'broadcast') {
-        loadBroadcastStats();
-        loadBroadcastHistory();
+    const statusLower = status.toLowerCase();
+    if (statusLower.includes('approved') || statusLower.includes('confirmed') || statusLower.includes('completed')) {
+        return 'status-approved';
+    } else if (statusLower.includes('rejected') || statusLower.includes('cancelled')) {
+        return 'status-rejected';
+    } else {
+        return 'status-pending';
     }
 }
-async function loadBroadcastStats() {
-    try {
-        // Load the same stats that dashboard uses
-        const statsData = await fetchData('/api/admin/stats');
-        console.log("📊 Broadcast stats received:", statsData);
-        
-        if (statsData) {
-            // Show TOTAL FARMERS (all statuses) - same as dashboard
-            const totalFarmers = statsData.total_farmers || 0;
-            document.getElementById('totalUsers').textContent = totalFarmers;
+
+// Show/hide loading indicator
+function showReportsLoading(show) {
+    const loadingDiv = document.getElementById('reportsLoading');
+    const loadBtn = document.getElementById('loadRealReportsBtn');
+    
+    if (loadingDiv) loadingDiv.style.display = show ? 'block' : 'none';
+    if (loadBtn) {
+        loadBtn.disabled = show;
+        loadBtn.innerHTML = show ? 
+            '<i class="fas fa-spinner fa-spin"></i> Loading...' : 
+            '<i class="fas fa-sync-alt"></i> Load Data';
+    }
+}
+
+// Initialize real reports
+function initializeRealReports() {
+    const loadBtn = document.getElementById('loadRealReportsBtn');
+    if (loadBtn) {
+        loadBtn.addEventListener('click', loadRealReports);
+    }
+    
+    // Auto-load when reports section is shown
+    const reportNav = document.querySelector('.nav-link[data-section="reports"]');
+    if (reportNav) {
+        reportNav.addEventListener('click', function() {
+            setTimeout(loadRealReports, 100);
+        });
+    }
+}
+
+// Add to your existing initDashboard function
+document.addEventListener('DOMContentLoaded', function() {
+    // Your existing initialization...
+    initDashboard();
+    
+    // Add real reports initialization
+    initializeRealReports();
+});
+
+    // API functions
+    async function fetchData(url) {
+        try {
+            const response = await fetch(url, {
+                credentials: 'same-origin'
+            });
             
-            // Also update the text to be clear
-            const statInfoElement = document.querySelector('#broadcast-section .stat-info p');
-            if (statInfoElement) {
-                statInfoElement.textContent = `Total Registered Farmers (All Statuses)`;
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            console.log(`📱 Broadcast: Showing ${totalFarmers} total farmers (all statuses)`);
-        } else {
-            document.getElementById('totalUsers').textContent = '0';
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            showNotification('Error fetching data. Please try again.', 'error');
+            return null;
         }
-    } catch (error) {
-        console.error('Error loading broadcast stats:', error);
-        document.getElementById('totalUsers').textContent = 'Error';
     }
-}
+    
+    async function postData(url, data = {}) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(data)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.error('Error posting data:', error);
+            showNotification('Error processing request. Please try again.', 'error');
+            return null;
+        }
+    }
 
-
-async function loadBroadcastHistory() {
-    try {
-        broadcastHistory = await fetchData('/api/admin/broadcast-history');
+    // Data loading functions
+    async function loadStats() {
+        statsData = await fetchData('/api/admin/stats');
         
-        if (broadcastHistory && broadcastHistory.error) {
-            if (broadcastHistory.error === 'Unauthorized') {
+        if (statsData) {
+            document.getElementById('totalFarmers').textContent = statsData.total_farmers || 0;
+            document.getElementById('totalVendors').textContent = statsData.total_vendors || 0;
+            document.getElementById('totalEquipment').textContent = statsData.total_equipment || 0;
+            document.getElementById('totalBookings').textContent = statsData.total_bookings || 0;
+            document.getElementById('pendingFarmers').textContent = statsData.pending_farmers || 0;
+            document.getElementById('pendingVendors').textContent = statsData.pending_vendors || 0;
+        }
+    }
+    
+    async function loadFarmers() {
+        const statusFilter = farmerStatusFilter.value;
+        const searchTerm = farmerSearch.value;
+        
+        let url = '/api/admin/farmers';
+        const params = new URLSearchParams();
+        
+        if (statusFilter !== 'all') {
+            params.append('status', statusFilter);
+        }
+        
+        if (searchTerm) {
+            params.append('search', searchTerm);
+        }
+        
+        if (params.toString()) {
+            url += '?' + params.toString();
+        }
+        
+        farmersData = await fetchData(url);
+        
+        if (farmersData && farmersData.error) {
+            if (farmersData.error === 'Unauthorized') {
                 showNotification('Session expired. Please log in again.', 'error');
                 setTimeout(() => {
                     window.location.href = "{{ url_for('admin_login') }}";
@@ -2023,485 +1935,372 @@ async function loadBroadcastHistory() {
             return;
         }
         
-        renderBroadcastHistory();
-    } catch (error) {
-        console.error('Error loading broadcast history:', error);
+        renderFarmersTable();
+        updateRecentRegistrations();
     }
-}
-
-function renderBroadcastHistory() {
-    broadcastHistoryTable.innerHTML = '';
     
-    if (!broadcastHistory || broadcastHistory.length === 0) {
-        broadcastHistoryTable.innerHTML = `
-            <tr>
-                <td colspan="7" style="text-align: center; padding: 20px; color: var(--gray);">
-                    No broadcast history found.
+    async function loadVendors() {
+        const statusFilter = vendorStatusFilter.value;
+        const searchTerm = vendorSearch.value;
+        
+        let url = '/api/admin/vendors';
+        const params = new URLSearchParams();
+        
+        if (statusFilter !== 'all') {
+            params.append('status', statusFilter);
+        }
+        
+        if (searchTerm) {
+            params.append('search', searchTerm);
+        }
+        
+        if (params.toString()) {
+            url += '?' + params.toString();
+        }
+        
+        vendorsData = await fetchData(url);
+        
+        if (vendorsData && vendorsData.error) {
+            if (vendorsData.error === 'Unauthorized') {
+                showNotification('Session expired. Please log in again.', 'error');
+                setTimeout(() => {
+                    window.location.href = "{{ url_for('admin_login') }}";
+                }, 2000);
+            }
+            return;
+        }
+        
+        renderVendorsTable();
+        updateRecentRegistrations();
+    }
+
+    // Equipment functions
+    async function loadEquipment() {
+        equipmentData = await fetchData('/api/admin/equipment');
+        
+        if (equipmentData && equipmentData.error) {
+            if (equipmentData.error === 'Unauthorized') {
+                showNotification('Session expired. Please log in again.', 'error');
+                setTimeout(() => {
+                    window.location.href = "{{ url_for('admin_login') }}";
+                }, 2000);
+            }
+            return;
+        }
+        
+        // Apply filters locally
+        filterAndRenderEquipment();
+    }
+
+    function filterAndRenderEquipment() {
+        if (!equipmentData) return;
+        
+        const statusFilter = equipmentStatusFilter.value;
+        const categoryFilter = equipmentCategoryFilter.value;
+        const searchTerm = equipmentSearch.value.toLowerCase();
+        
+        let filteredData = [...equipmentData];
+        
+        // Apply status filter
+        if (statusFilter !== 'all') {
+            filteredData = filteredData.filter(equipment => 
+                equipment.status === statusFilter
+            );
+        }
+        
+        // Apply category filter
+        if (categoryFilter !== 'all') {
+            filteredData = filteredData.filter(equipment => 
+                equipment.category === categoryFilter
+            );
+        }
+        
+        // Apply search filter
+        if (searchTerm) {
+            filteredData = filteredData.filter(equipment => 
+                equipment.name.toLowerCase().includes(searchTerm) ||
+                equipment.vendor_name.toLowerCase().includes(searchTerm) ||
+                equipment.location.toLowerCase().includes(searchTerm)
+            );
+        }
+        
+        renderEquipmentTable(filteredData);
+    }
+
+    function renderEquipmentTable(equipmentList) {
+        equipmentTable.innerHTML = '';
+        
+        if (!equipmentList || equipmentList.length === 0) {
+            equipmentTable.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 20px; color: var(--gray);">No equipment found.</td></tr>';
+            return;
+        }
+        
+        equipmentList.forEach(equipment => {
+            const row = document.createElement('tr');
+            
+            const statusClass = 
+                equipment.status === 'available' ? 'status-approved' : 
+                equipment.status === 'unavailable' ? 'status-rejected' : 
+                'status-pending';
+            
+            const stockStatus = equipment.stock_quantity <= 0 ? 'Out of Stock' : 
+                               equipment.stock_quantity <= (equipment.min_stock_threshold || 2) ? 'Low Stock' : 'In Stock';
+            
+            const stockClass = equipment.stock_quantity <= 0 ? 'status-rejected' : 
+                              equipment.stock_quantity <= (equipment.min_stock_threshold || 2) ? 'status-pending' : 'status-approved';
+            
+            row.innerHTML = `
+                <td>#${equipment.id}</td>
+                <td>${equipment.name}</td>
+                <td>${equipment.category}</td>
+                <td>${equipment.vendor_name}</td>
+                <td>₹${equipment.price}/${equipment.price_unit}</td>
+                <td>${equipment.location}</td>
+                <td><span class="status-badge ${stockClass}">${stockStatus} (${equipment.stock_quantity})</span></td>
+                <td><span class="status-badge ${statusClass}">${equipment.status}</span></td>
+                <td>${formatDate(equipment.created_date)}</td>
+                <td>
+                    <button class="btn btn-primary btn-sm view-equipment-btn" data-id="${equipment.id}">View</button>
                 </td>
-            </tr>
-        `;
-        return;
-    }
-    
-    broadcastHistory.forEach(broadcast => {
-        const row = document.createElement('tr');
-        
-        const statusClass = 
-            broadcast.status === 'sent' ? 'status-sent' : 
-            broadcast.status === 'failed' ? 'status-failed' : 
-            'status-pending';
-        
-        row.innerHTML = `
-            <td>#${broadcast.id}</td>
-            <td>${broadcast.title}</td>
-            <td>${broadcast.type}</td>
-            <td>${broadcast.recipients_count || 0} farmers</td>
-            <td><span class="message-status ${statusClass}">${broadcast.status}</span></td>
-            <td>${formatDate(broadcast.sent_date)}</td>
-            <td>
-                <button class="btn btn-primary btn-sm view-broadcast-btn" data-id="${broadcast.id}">View</button>
-            </td>
-        `;
-        
-        broadcastHistoryTable.appendChild(row);
-    });
-    
-    // Add event listeners to view buttons
-    document.querySelectorAll('.view-broadcast-btn').forEach(btn => {
-        btn.addEventListener('click', () => viewBroadcastDetails(btn.dataset.id));
-    });
-}
-
-// Preview message functionality
-previewMessageBtn.addEventListener('click', () => {
-    const title = document.getElementById('messageTitle').value;
-    const content = document.getElementById('messageContent').value;
-    const type = document.getElementById('messageType').value;
-    
-    if (!title || !content) {
-        showNotification('Please enter title and content to preview', 'error');
-        return;
-    }
-    
-    previewContent.innerHTML = `
-        <h5>${title}</h5>
-        <p style="color: #666; margin-bottom: 10px; font-style: italic;">Type: ${type}</p>
-        <div style="background: white; padding: 15px; border-radius: 5px; border: 1px solid #eee;">
-            ${content.replace(/\n/g, '<br>')}
-        </div>
-        <p style="margin-top: 10px; color: #888; font-size: 0.9em;">
-            This message will be sent to all registered farmers.
-        </p>
-    `;
-    
-    messagePreview.style.display = 'block';
-});
-
-// Send broadcast message
-broadcastForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const title = document.getElementById('messageTitle').value;
-    const content = document.getElementById('messageContent').value;
-    const type = document.getElementById('messageType').value;
-    
-    if (!title || !content) {
-        showNotification('Please enter both title and content', 'error');
-        return;
-    }
-    
-    // Confirm before sending
-    const confirmed = confirm(`Are you sure you want to send this broadcast to all farmers?
-    
-Title: ${title}
-Type: ${type}
-
-This will send an SMS to all registered farmers.`);
-    
-    if (!confirmed) {
-        return;
-    }
-    
-    // Disable send button while processing
-    const originalBtnText = sendBroadcastBtn.innerHTML;
-    sendBroadcastBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-    sendBroadcastBtn.disabled = true;
-    
-    try {
-        const result = await postData('/api/admin/broadcast', {
-            title: title,
-            content: content,
-            type: type
+            `;
+            
+            equipmentTable.appendChild(row);
         });
         
-        if (result && result.success) {
-            showNotification(result.message || 'Broadcast sent successfully!', 'success');
-            
-            // Clear form
-            broadcastForm.reset();
-            messagePreview.style.display = 'none';
-            
-            // Refresh history
-            loadBroadcastHistory();
-        } else {
-            showNotification(result.error || 'Failed to send broadcast', 'error');
-        }
-    } catch (error) {
-        console.error('Error sending broadcast:', error);
-        showNotification('Error sending broadcast', 'error');
-    } finally {
-        // Re-enable send button
-        sendBroadcastBtn.innerHTML = originalBtnText;
-        sendBroadcastBtn.disabled = false;
+        // Add event listeners to buttons
+        document.querySelectorAll('.view-equipment-btn').forEach(btn => {
+            btn.addEventListener('click', () => viewEquipment(btn.dataset.id));
+        });
     }
-});
 
-// Add to your existing initDashboard function
-function initDashboard() {
-    // ... existing code ...
-    
-    // Add broadcast event listeners if elements exist
-    if (previewMessageBtn) {
-        previewMessageBtn.addEventListener('click', handlePreviewMessage);
-    }
-    
-    if (broadcastForm) {
-        broadcastForm.addEventListener('submit', handleBroadcastSubmit);
-    }
-}
-// Equipment management functions
-async function loadEquipment() {
-    const statusFilter = equipmentStatusFilter.value;
-    const categoryFilter = equipmentCategoryFilter.value;
-    const searchTerm = equipmentSearch.value;
-    
-    let url = '/api/admin/equipment';
-    const params = new URLSearchParams();
-    
-    if (statusFilter !== 'all') {
-        params.append('status', statusFilter);
-    }
-    
-    if (categoryFilter !== 'all') {
-        params.append('category', categoryFilter);
-    }
-    
-    if (searchTerm) {
-        params.append('search', searchTerm);
-    }
-    
-    if (params.toString()) {
-        url += '?' + params.toString();
-    }
-    
-    equipmentData = await fetchData(url);
-    
-    if (equipmentData && equipmentData.error) {
-        if (equipmentData.error === 'Unauthorized') {
-            showNotification('Session expired. Please log in again.', 'error');
-            setTimeout(() => {
-                window.location.href = "{{ url_for('admin_login') }}";
-            }, 2000);
-        }
-        return;
-    }
-    
-    renderEquipmentTable();
-}
-
-function renderEquipmentTable() {
-    equipmentTable.innerHTML = '';
-    
-    if (!equipmentData || equipmentData.length === 0) {
-        equipmentTable.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 20px; color: var(--gray);">No equipment found.</td></tr>';
-        return;
-    }
-    
-    equipmentData.forEach(equipment => {
-        const row = document.createElement('tr');
+    function viewEquipment(equipmentId) {
+        const equipment = equipmentData.find(e => e.id === parseInt(equipmentId));
+        if (!equipment) return;
         
-        const statusClass = 
-            equipment.status === 'available' ? 'status-approved' : 
-            equipment.status === 'unavailable' ? 'status-rejected' : 
-            'status-pending';
+        document.getElementById('equipmentModalTitle').textContent = `Equipment Details - ${equipment.name}`;
         
-        const stockStatus = equipment.stock_quantity <= 0 ? 'Out of Stock' : 
-                           equipment.stock_quantity <= equipment.min_stock_threshold ? 'Low Stock' : 'In Stock';
-        
-        const stockClass = equipment.stock_quantity <= 0 ? 'status-rejected' : 
-                          equipment.stock_quantity <= equipment.min_stock_threshold ? 'status-pending' : 'status-approved';
-        
-        row.innerHTML = `
-            <td>#${equipment.id}</td>
-            <td>${equipment.name}</td>
-            <td>${equipment.category}</td>
-            <td>${equipment.vendor_name}</td>
-            <td>₹${equipment.price}/${equipment.price_unit}</td>
-            <td>${equipment.location}</td>
-            <td><span class="status-badge ${stockClass}">${stockStatus} (${equipment.stock_quantity})</span></td>
-            <td><span class="status-badge ${statusClass}">${equipment.status}</span></td>
-            <td>${formatDate(equipment.created_date)}</td>
-            <td>
-                <button class="btn btn-primary btn-sm view-equipment-btn" data-id="${equipment.id}">View</button>
-            </td>
+        const modalBody = document.getElementById('equipmentModalBody');
+        modalBody.innerHTML = `
+            <div class="detail-row">
+                <div class="detail-label">Equipment ID:</div>
+                <div class="detail-value">#${equipment.id}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Name:</div>
+                <div class="detail-value">${equipment.name}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Category:</div>
+                <div class="detail-value">${equipment.category}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Description:</div>
+                <div class="detail-value">${equipment.description || 'No description available'}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Pricing:</div>
+                <div class="detail-value">₹${equipment.price} per ${equipment.price_unit}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Location:</div>
+                <div class="detail-value">${equipment.location}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Vendor Details:</div>
+                <div class="detail-value">${equipment.vendor_name}<br>${equipment.vendor_contact}<br>${equipment.vendor_phone}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Stock Information:</div>
+                <div class="detail-value">
+                    Current Stock: ${equipment.stock_quantity}<br>
+                    Low Stock Alert: ${equipment.min_stock_threshold || 2}<br>
+                    Status: <span class="status-badge ${equipment.stock_quantity <= 0 ? 'status-rejected' : equipment.stock_quantity <= (equipment.min_stock_threshold || 2) ? 'status-pending' : 'status-approved'}">
+                        ${equipment.stock_quantity <= 0 ? 'Out of Stock' : equipment.stock_quantity <= (equipment.min_stock_threshold || 2) ? 'Low Stock' : 'In Stock'}
+                    </span>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Availability:</div>
+                <div class="detail-value">
+                    <span class="status-badge ${equipment.status === 'available' ? 'status-approved' : equipment.status === 'unavailable' ? 'status-rejected' : 'status-pending'}">
+                        ${equipment.status}
+                    </span>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Added Date:</div>
+                <div class="detail-value">${formatDate(equipment.created_date)}</div>
+            </div>
+            ${equipment.image_url ? `
+            <div class="detail-row">
+                <div class="detail-label">Image:</div>
+                <div class="detail-value">
+                    <img src="${equipment.image_url}" alt="${equipment.name}" style="max-width: 200px; max-height: 150px; border-radius: 8px;">
+                </div>
+            </div>
+            ` : ''}
         `;
         
-        equipmentTable.appendChild(row);
-    });
-    
-    // Add event listeners to buttons
-    document.querySelectorAll('.view-equipment-btn').forEach(btn => {
-        btn.addEventListener('click', () => viewEquipment(btn.dataset.id));
-    });
-}
+        const modalFooter = document.getElementById('equipmentModalFooter');
+        modalFooter.innerHTML = `
+            <button class="btn btn-primary" id="closeEquipmentModal">Close</button>
+        `;
+        
+        document.getElementById('closeEquipmentModal').addEventListener('click', () => {
+            equipmentModal.style.display = 'none';
+        });
+        
+        equipmentModal.style.display = 'flex';
+    }
 
-function viewEquipment(equipmentId) {
-    const equipment = equipmentData.find(e => e.id === parseInt(equipmentId));
-    if (!equipment) return;
-    
-    document.getElementById('equipmentModalTitle').textContent = `Equipment Details - ${equipment.name}`;
-    
-    const modalBody = document.getElementById('equipmentModalBody');
-    modalBody.innerHTML = `
-        <div class="detail-row">
-            <div class="detail-label">Equipment ID:</div>
-            <div class="detail-value">#${equipment.id}</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Name:</div>
-            <div class="detail-value">${equipment.name}</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Category:</div>
-            <div class="detail-value">${equipment.category}</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Description:</div>
-            <div class="detail-value">${equipment.description || 'No description available'}</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Pricing:</div>
-            <div class="detail-value">₹${equipment.price} per ${equipment.price_unit}</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Location:</div>
-            <div class="detail-value">${equipment.location}</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Vendor Details:</div>
-            <div class="detail-value">${equipment.vendor_name}<br>${equipment.vendor_contact}<br>${equipment.vendor_phone}</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Stock Information:</div>
-            <div class="detail-value">
-                Current Stock: ${equipment.stock_quantity}<br>
-                Low Stock Alert: ${equipment.min_stock_threshold}<br>
-                Status: <span class="status-badge ${equipment.stock_quantity <= 0 ? 'status-rejected' : equipment.stock_quantity <= equipment.min_stock_threshold ? 'status-pending' : 'status-approved'}">
-                    ${equipment.stock_quantity <= 0 ? 'Out of Stock' : equipment.stock_quantity <= equipment.min_stock_threshold ? 'Low Stock' : 'In Stock'}
-                </span>
-            </div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Availability:</div>
-            <div class="detail-value">
-                <span class="status-badge ${equipment.status === 'available' ? 'status-approved' : equipment.status === 'unavailable' ? 'status-rejected' : 'status-pending'}">
-                    ${equipment.status}
-                </span>
-            </div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Added Date:</div>
-            <div class="detail-value">${formatDate(equipment.created_date)}</div>
-        </div>
-        ${equipment.image_url ? `
-        <div class="detail-row">
-            <div class="detail-label">Image:</div>
-            <div class="detail-value">
-                <img src="${equipment.image_url}" alt="${equipment.name}" style="max-width: 200px; max-height: 150px; border-radius: 8px;">
-            </div>
-        </div>
-        ` : ''}
-    `;
-    
-    const modalFooter = document.getElementById('equipmentModalFooter');
-    modalFooter.innerHTML = `
-        <button class="btn btn-primary" id="closeEquipmentModal">Close</button>
-    `;
-    
-    document.getElementById('closeEquipmentModal').addEventListener('click', () => {
-        equipmentModal.style.display = 'none';
-    });
-    
-    equipmentModal.style.display = 'flex';
-}
+    // Booking functions
+    async function loadBookings() {
+        bookingsData = await fetchData('/api/admin/bookings');
+        
+        if (bookingsData && bookingsData.error) {
+            if (bookingsData.error === 'Unauthorized') {
+                showNotification('Session expired. Please log in again.', 'error');
+                setTimeout(() => {
+                    window.location.href = "{{ url_for('admin_login') }}";
+                }, 2000);
+            }
+            return;
+        }
+        
+        filterAndRenderBookings();
+    }
 
-// Update the showSection function to include equipment
-function showSection(sectionId) {
-    // ... existing code ...
+// Updated filterAndRenderBookings function
+function filterAndRenderBookings() {
+    if (!bookingsData) return;
     
-    // Load data for the section if needed
-    if (sectionId === 'farmers') {
-        loadFarmers();
-    } else if (sectionId === 'vendors') {
-        loadVendors();
-    } else if (sectionId === 'equipment') {
-        loadEquipment(); // Add this line
-    } else if (sectionId === 'bookings') {
-        loadBookings();
-    } else if (sectionId === 'dashboard') {
-        loadStats();
-    }
-}
-
-// Add event listeners for equipment search/filter
-equipmentSearch.addEventListener('input', () => loadEquipment());
-equipmentStatusFilter.addEventListener('change', () => loadEquipment());
-equipmentCategoryFilter.addEventListener('change', () => loadEquipment());
-
-// Update modal close events
-document.querySelectorAll('.close-modal').forEach(btn => {
-    btn.addEventListener('click', () => {
-        farmerModal.style.display = 'none';
-        vendorModal.style.display = 'none';
-        bookingModal.style.display = 'none';
-        equipmentModal.style.display = 'none'; // Add this line
-    });
-});
-
-// Close equipment modal when clicking outside
-window.addEventListener('click', (e) => {
-    if (e.target === farmerModal) {
-        farmerModal.style.display = 'none';
-    }
-    if (e.target === vendorModal) {
-        vendorModal.style.display = 'none';
-    }
-    if (e.target === bookingModal) {
-        bookingModal.style.display = 'none';
-    }
-    if (e.target === equipmentModal) {
-        equipmentModal.style.display = 'none';
-    }
-});
-
-// Update auto-refresh to include equipment
-setInterval(() => {
-    if (document.getElementById('dashboard-section').classList.contains('active')) {
-        loadStats();
-    }
-    if (document.getElementById('farmers-section').classList.contains('active')) {
-        loadFarmers();
-    }
-    if (document.getElementById('vendors-section').classList.contains('active')) {
-        loadVendors();
-    }
-    if (document.getElementById('equipment-section').classList.contains('active')) {
-        loadEquipment(); // Add this line
-    }
-    if (document.getElementById('bookings-section').classList.contains('active')) {
-        loadBookings();
-    }
-}, 60000);
-
-// Booking management functions
-async function loadBookings() {
     const statusFilter = bookingStatusFilter.value;
     const dateFilter = bookingDateFilter.value;
-    const searchTerm = bookingSearch.value;
+    const searchTerm = bookingSearch.value.toLowerCase();
     
-    let url = '/api/admin/bookings';
-    const params = new URLSearchParams();
+    let filteredData = [...bookingsData];
     
+    // Apply status filter
     if (statusFilter !== 'all') {
-        params.append('status', statusFilter);
+        filteredData = filteredData.filter(booking => 
+            booking.status === statusFilter
+        );
     }
     
-    if (searchTerm) {
-        params.append('search', searchTerm);
-    }
-    
-    if (params.toString()) {
-        url += '?' + params.toString();
-    }
-    
-    bookingsData = await fetchData(url);
-    
-    if (bookingsData && bookingsData.error) {
-        if (bookingsData.error === 'Unauthorized') {
-            showNotification('Session expired. Please log in again.', 'error');
-            setTimeout(() => {
-                window.location.href = "{{ url_for('admin_login') }}";
-            }, 2000);
-        }
-        return;
-    }
-    
-    // Apply date filter locally
+    // Apply date filter
     if (dateFilter !== 'all') {
-        bookingsData = filterBookingsByDate(bookingsData, dateFilter);
+        filteredData = filterBookingsByDate(filteredData, dateFilter);
     }
     
-    renderBookingsTable();
+    // Apply search filter
+    if (searchTerm) {
+        filteredData = filteredData.filter(booking => 
+            (booking.farmer_name && booking.farmer_name.toLowerCase().includes(searchTerm)) ||
+            (booking.vendor_name && booking.vendor_name.toLowerCase().includes(searchTerm)) ||
+            (booking.equipment_name && booking.equipment_name.toLowerCase().includes(searchTerm))
+        );
+    }
+    
+    renderBookingsTable(filteredData);
+}
+
+// Updated event listeners for booking filters
+if (bookingSearch) {
+    bookingSearch.addEventListener('input', () => filterAndRenderBookings());
+}
+
+if (bookingStatusFilter) {
+    bookingStatusFilter.addEventListener('change', () => filterAndRenderBookings());
+}
+
+if (bookingDateFilter) {
+    bookingDateFilter.addEventListener('change', () => filterAndRenderBookings());
 }
 
 function filterBookingsByDate(bookings, dateFilter) {
+    if (!bookings || bookings.length === 0) return [];
+    
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
     return bookings.filter(booking => {
+        if (!booking.start_date) return false;
+        
         const startDate = new Date(booking.start_date);
+        startDate.setHours(0, 0, 0, 0);
+        
+        const endDate = booking.end_date ? new Date(booking.end_date) : null;
+        if (endDate) endDate.setHours(0, 0, 0, 0);
         
         switch (dateFilter) {
             case 'today':
-                return startDate.toDateString() === today.toDateString();
+                // Check if booking starts today
+                return startDate.getTime() === today.getTime();
+                
             case 'week':
+                // Get start of week (Sunday)
                 const weekStart = new Date(today);
                 weekStart.setDate(today.getDate() - today.getDay());
+                
+                // Get end of week (Saturday)
                 const weekEnd = new Date(weekStart);
                 weekEnd.setDate(weekStart.getDate() + 6);
+                
+                // Check if booking starts this week
                 return startDate >= weekStart && startDate <= weekEnd;
+                
             case 'month':
+                // Check if booking starts this month
                 return startDate.getMonth() === today.getMonth() && 
                        startDate.getFullYear() === today.getFullYear();
+                
             case 'upcoming':
+                // Check if booking starts today or in the future
                 return startDate >= today;
+                
             case 'past':
+                // Check if booking started before today
                 return startDate < today;
+                
             default:
                 return true;
         }
     });
 }
 
-function renderBookingsTable() {
+function renderBookingsTable(bookingsList) {
     bookingsTable.innerHTML = '';
     
-    if (!bookingsData || bookingsData.length === 0) {
+    if (!bookingsList || bookingsList.length === 0) {
         bookingsTable.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 20px; color: var(--gray);">No bookings found.</td></tr>';
         return;
     }
     
-    bookingsData.forEach(booking => {
+    bookingsList.forEach(booking => {
         const row = document.createElement('tr');
         const duration = calculateDuration(booking.start_date, booking.end_date);
         
         const statusClass = 
             booking.status === 'pending' ? 'status-pending' : 
             booking.status === 'confirmed' ? 'status-approved' : 
-            booking.status === 'active' ? 'status-badge-maintenance' :
-            booking.status === 'completed' ? 'status-approved' : 
-            'status-rejected';
+            booking.status === 'cancelled' ? 'status-rejected' : 
+            'status-pending';
+        
+        // Format dates safely
+        const startDate = booking.start_date ? formatDate(booking.start_date) : 'N/A';
+        const endDate = booking.end_date ? formatDate(booking.end_date) : 'N/A';
+        const bookingDate = booking.booking_date ? formatDate(booking.booking_date) : 'N/A';
         
         row.innerHTML = `
             <td>#${booking.id}</td>
-            <td>${booking.farmer_name}</td>
-            <td>${booking.vendor_name}</td>
-            <td>${booking.equipment_name}</td>
-            <td>${formatDate(booking.start_date)} to ${formatDate(booking.end_date)}</td>
+            <td>${booking.farmer_name || 'N/A'}</td>
+            <td>${booking.vendor_name || 'N/A'}</td>
+            <td>${booking.equipment_name || 'N/A'}</td>
+            <td>${startDate} to ${endDate}</td>
             <td>${duration} days</td>
             <td>₹${booking.total_amount?.toLocaleString() || '0'}</td>
             <td><span class="status-badge ${statusClass}">${booking.status}</span></td>
-            <td>${formatDate(booking.booking_date)}</td>
+            <td>${bookingDate}</td>
             <td>
                 <button class="btn btn-primary btn-sm view-booking-btn" data-id="${booking.id}">View</button>
                 <button class="btn btn-danger btn-sm delete-booking-btn" data-id="${booking.id}">Delete</button>
@@ -2520,926 +2319,879 @@ function renderBookingsTable() {
         btn.addEventListener('click', () => deleteBooking(btn.dataset.id));
     });
 }
-
+// Update calculateDuration to handle missing dates
 function calculateDuration(startDate, endDate) {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const diffTime = Math.abs(end - start);
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    if (!startDate || !endDate) return 0;
+    
+    try {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const diffTime = Math.abs(end - start);
+        return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    } catch (error) {
+        console.error('Error calculating duration:', error);
+        return 0;
+    }
 }
+    
 
-async function viewBooking(bookingId) {
-    const booking = await fetchData(`/api/admin/booking/${bookingId}`);
-    
-    if (!booking) return;
-    
-    document.getElementById('bookingModalTitle').textContent = `Booking Details - #${booking.id}`;
-    
-    const modalBody = document.getElementById('bookingModalBody');
-    modalBody.innerHTML = `
-        <div class="detail-row">
-            <div class="detail-label">Booking ID:</div>
-            <div class="detail-value">#${booking.id}</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Farmer Details:</div>
-            <div class="detail-value">${booking.farmer_name} (${booking.farmer_phone})<br>${booking.farmer_location}</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Vendor Details:</div>
-            <div class="detail-value">${booking.vendor_name} (${booking.vendor_phone})</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Equipment:</div>
-            <div class="detail-value">${booking.equipment_name}<br>₹${booking.equipment_price}/day</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Booking Period:</div>
-            <div class="detail-value">${formatDate(booking.start_date)} to ${formatDate(booking.end_date)} (${booking.total_days} days)</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Pricing:</div>
-            <div class="detail-value">
-                Base Amount: ₹${booking.total_amount?.toLocaleString()}<br>
-                Service Fee: ₹${booking.service_fee?.toLocaleString()}<br>
-                <strong>Total: ₹${booking.final_amount?.toLocaleString()}</strong>
+    async function viewBooking(bookingId) {
+        const booking = await fetchData(`/api/admin/booking/${bookingId}`);
+        
+        if (!booking) return;
+        
+        document.getElementById('bookingModalTitle').textContent = `Booking Details - #${booking.id}`;
+        
+        const modalBody = document.getElementById('bookingModalBody');
+        modalBody.innerHTML = `
+            <div class="detail-row">
+                <div class="detail-label">Booking ID:</div>
+                <div class="detail-value">#${booking.id}</div>
             </div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Special Requests:</div>
-            <div class="detail-value">${booking.special_requests || 'None'}</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Status:</div>
-            <div class="detail-value">
-                <span class="status-badge ${booking.status === 'pending' ? 'status-pending' : booking.status === 'confirmed' ? 'status-approved' : booking.status === 'active' ? 'status-badge-maintenance' : booking.status === 'completed' ? 'status-approved' : 'status-rejected'}">
-                    ${booking.status}
-                </span>
+            <div class="detail-row">
+                <div class="detail-label">Farmer Details:</div>
+                <div class="detail-value">${booking.farmer_name} (${booking.farmer_phone})<br>${booking.farmer_location}</div>
             </div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Payment Status:</div>
-            <div class="detail-value">
-                <span class="status-badge ${booking.payment_status === 'paid' ? 'status-approved' : 'status-pending'}">
-                    ${booking.payment_status}
-                </span>
+            <div class="detail-row">
+                <div class="detail-label">Vendor Details:</div>
+                <div class="detail-value">${booking.vendor_name} (${booking.vendor_phone})</div>
             </div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Booking Date:</div>
-            <div class="detail-value">${formatDate(booking.booking_date)}</div>
-        </div>
-    `;
-    
-    const modalFooter = document.getElementById('bookingModalFooter');
-    modalFooter.innerHTML = `
-        <button class="btn btn-danger" id="modalDeleteBooking" data-id="${booking.id}">Delete Booking</button>
-        <button class="btn btn-primary" id="closeBookingModal">Close</button>
-    `;
-    
-    document.getElementById('modalDeleteBooking').addEventListener('click', () => {
-        deleteBooking(booking.id);
-        bookingModal.style.display = 'none';
-    });
-    
-    document.getElementById('closeBookingModal').addEventListener('click', () => {
-        bookingModal.style.display = 'none';
-    });
-    
-    bookingModal.style.display = 'flex';
-}
-
-async function deleteBooking(bookingId) {
-    if (confirm('Are you sure you want to delete this booking? This action cannot be undone.')) {
-        const result = await postData(`/api/admin/booking/delete/${bookingId}`);
-        
-        if (result && result.success) {
-            showNotification('Booking deleted successfully!', 'success');
-            // Reload bookings
-            loadBookings();
-        } else {
-            showNotification('Failed to delete booking. Please try again.', 'error');
-        }
-    }
-}
-
-// Update the showSection function to include bookings
-function showSection(sectionId) {
-    // ... existing code ...
-    
-    // Load data for the section if needed
-    if (sectionId === 'farmers') {
-        loadFarmers();
-    } else if (sectionId === 'vendors') {
-        loadVendors();
-    } else if (sectionId === 'bookings') {
-        loadBookings(); // Add this line
-    } else if (sectionId === 'dashboard') {
-        loadStats();
-    }
-}
-
-// Add event listeners for booking search/filter
-bookingSearch.addEventListener('input', () => loadBookings());
-bookingStatusFilter.addEventListener('change', () => loadBookings());
-bookingDateFilter.addEventListener('change', () => loadBookings());
-
-// Update modal close events
-document.querySelectorAll('.close-modal').forEach(btn => {
-    btn.addEventListener('click', () => {
-        farmerModal.style.display = 'none';
-        vendorModal.style.display = 'none';
-        bookingModal.style.display = 'none'; // Add this line
-    });
-});
-
-// Close booking modal when clicking outside
-window.addEventListener('click', (e) => {
-    if (e.target === farmerModal) {
-        farmerModal.style.display = 'none';
-    }
-    if (e.target === vendorModal) {
-        vendorModal.style.display = 'none';
-    }
-    if (e.target === bookingModal) {
-        bookingModal.style.display = 'none';
-    }
-});
-
-// Update auto-refresh to include bookings
-setInterval(() => {
-    if (document.getElementById('dashboard-section').classList.contains('active')) {
-        loadStats();
-    }
-    if (document.getElementById('farmers-section').classList.contains('active')) {
-        loadFarmers();
-    }
-    if (document.getElementById('vendors-section').classList.contains('active')) {
-        loadVendors();
-    }
-    if (document.getElementById('bookings-section').classList.contains('active')) {
-        loadBookings(); // Add this line
-    }
-}, 60000);
-        // API functions
-        async function fetchData(url) {
-            try {
-                const response = await fetch(url, {
-                    credentials: 'same-origin' // Include cookies for session authentication
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                return await response.json();
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                showNotification('Error fetching data. Please try again.', 'error');
-                return null;
-            }
-        }
-        
-        async function postData(url, data = {}) {
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'same-origin',
-                    body: JSON.stringify(data)
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                return await response.json();
-            } catch (error) {
-                console.error('Error posting data:', error);
-                showNotification('Error processing request. Please try again.', 'error');
-                return null;
-            }
-        }
-        
-        // Data loading functions
-        async function loadStats() {
-            statsData = await fetchData('/api/admin/stats');
-            
-            if (statsData) {
-                document.getElementById('totalFarmers').textContent = statsData.total_farmers || 0;
-                document.getElementById('totalVendors').textContent = statsData.total_vendors || 0;
-                document.getElementById('totalEquipment').textContent = statsData.total_equipment || 0;
-                document.getElementById('totalBookings').textContent = statsData.total_bookings || 0;
-                document.getElementById('pendingFarmers').textContent = statsData.pending_farmers || 0;
-                document.getElementById('pendingVendors').textContent = statsData.pending_vendors || 0;
-            }
-        }
-        
-        async function loadFarmers() {
-            const statusFilter = farmerStatusFilter.value;
-            const searchTerm = farmerSearch.value;
-            
-            let url = '/api/admin/farmers';
-            const params = new URLSearchParams();
-            
-            if (statusFilter !== 'all') {
-                params.append('status', statusFilter);
-            }
-            
-            if (searchTerm) {
-                params.append('search', searchTerm);
-            }
-            
-            if (params.toString()) {
-                url += '?' + params.toString();
-            }
-            
-            farmersData = await fetchData(url);
-            
-            if (farmersData && farmersData.error) {
-                if (farmersData.error === 'Unauthorized') {
-                    showNotification('Session expired. Please log in again.', 'error');
-                    setTimeout(() => {
-                        window.location.href = "{{ url_for('admin_login') }}";
-                    }, 2000);
-                }
-                return;
-            }
-            
-            renderFarmersTable();
-            updateRecentRegistrations();
-        }
-        
-        async function loadVendors() {
-            const statusFilter = vendorStatusFilter.value;
-            const searchTerm = vendorSearch.value;
-            
-            let url = '/api/admin/vendors';
-            const params = new URLSearchParams();
-            
-            if (statusFilter !== 'all') {
-                params.append('status', statusFilter);
-            }
-            
-            if (searchTerm) {
-                params.append('search', searchTerm);
-            }
-            
-            if (params.toString()) {
-                url += '?' + params.toString();
-            }
-            
-            vendorsData = await fetchData(url);
-            
-            if (vendorsData && vendorsData.error) {
-                if (vendorsData.error === 'Unauthorized') {
-                    showNotification('Session expired. Please log in again.', 'error');
-                    setTimeout(() => {
-                        window.location.href = "{{ url_for('admin_login') }}";
-                    }, 2000);
-                }
-                return;
-            }
-            
-            renderVendorsTable();
-            updateRecentRegistrations();
-        }
-        
-        // Render functions
-        function renderFarmersTable() {
-            farmersTable.innerHTML = '';
-            
-            if (!farmersData || farmersData.length === 0) {
-                farmersTable.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 20px; color: var(--gray);">No farmers found.</td></tr>';
-                return;
-            }
-            
-            farmersData.forEach(farmer => {
-                const row = document.createElement('tr');
-                
-                const statusClass = 
-                    farmer.status === 'pending' ? 'status-pending' : 
-                    farmer.status === 'approved' ? 'status-approved' : 
-                    'status-rejected';
-                
-                row.innerHTML = `
-                    <td>#${farmer.id}</td>
-                    <td>${farmer.full_name} ${farmer.last_name}</td>
-                    <td>${farmer.email || 'N/A'}</td>
-                    <td>${farmer.phone}</td>
-                    <td>${farmer.farm_location}</td>
-                    <td>${farmer.farm_size || 'N/A'} acres</td>
-                    <td>${formatDate(farmer.registration_date)}</td>
-                    <td><span class="status-badge ${statusClass}">${farmer.status}</span></td>
-                    <td>
-                        <button class="btn btn-primary btn-sm view-farmer-btn" data-id="${farmer.id}">View</button>
-                        ${farmer.status === 'pending' ? 
-                            `<button class="btn btn-success btn-sm approve-farmer-btn" data-id="${farmer.id}">Approve</button>
-                             <button class="btn btn-danger btn-sm reject-farmer-btn" data-id="${farmer.id}">Reject</button>` : ''}
-                    </td>
-                `;
-                
-                farmersTable.appendChild(row);
-            });
-            
-            // Add event listeners to buttons
-            document.querySelectorAll('.view-farmer-btn').forEach(btn => {
-                btn.addEventListener('click', () => viewFarmer(btn.dataset.id));
-            });
-            
-            document.querySelectorAll('.approve-farmer-btn').forEach(btn => {
-                btn.addEventListener('click', () => approveFarmer(btn.dataset.id));
-            });
-            
-            document.querySelectorAll('.reject-farmer-btn').forEach(btn => {
-                btn.addEventListener('click', () => rejectFarmer(btn.dataset.id));
-            });
-        }
-        
-        function renderVendorsTable() {
-    vendorsTable.innerHTML = '';
-    
-    if (!vendorsData || vendorsData.length === 0) {
-        vendorsTable.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 20px; color: var(--gray);">No vendors found.</td></tr>';
-        return;
-    }
-    
-    vendorsData.forEach(vendor => {
-        const row = document.createElement('tr');
-        
-        const statusClass = 
-            vendor.status === 'pending' ? 'status-pending' : 
-            vendor.status === 'approved' ? 'status-approved' : 
-            'status-rejected';
-        
-        // Document status styling
-        const docStatusClass = 
-            vendor.document_verified === 'verified' ? 'status-approved' : 
-            vendor.document_verified === 'rejected' ? 'status-rejected' : 
-            'status-pending';
-        
-        // Document name or indicator
-        const documentIndicator = vendor.business_document ? 
-            `<a href="${vendor.document_url || '#'}" target="_blank" title="View Document">
-                <i class="fas fa-file-pdf"></i> View
-            </a>` : 
-            'No Document';
-        
-        row.innerHTML = `
-            <td>#${vendor.id}</td>
-            <td>${vendor.business_name}</td>
-            <td>${vendor.contact_name}</td>
-            <td>${vendor.email}</td>
-            <td>${vendor.phone}</td>
-            <td>${vendor.service_type}</td>
-            <td>${documentIndicator}</td>
-            <td>
-                <span class="status-badge ${docStatusClass}">
-                    ${vendor.document_verified || 'pending'}
-                </span>
-            </td>
-            <td>${formatDate(vendor.registration_date)}</td>
-            <td><span class="status-badge ${statusClass}">${vendor.status}</span></td>
-            <td>
-                <button class="btn btn-primary btn-sm view-vendor-btn" data-id="${vendor.id}">View</button>
-                ${vendor.status === 'pending' ? 
-                    `<button class="btn btn-success btn-sm approve-vendor-btn" data-id="${vendor.id}">Approve</button>
-                     <button class="btn btn-danger btn-sm reject-vendor-btn" data-id="${vendor.id}">Reject</button>` : ''}
-                ${vendor.business_document ? 
-                    `<div style="margin-top: 5px;">
-                        <button class="btn btn-info btn-sm verify-doc-btn" data-id="${vendor.id}" data-status="verified" style="font-size: 0.7rem; padding: 2px 6px;">Verify Doc</button>
-                        <button class="btn btn-warning btn-sm reject-doc-btn" data-id="${vendor.id}" data-status="rejected" style="font-size: 0.7rem; padding: 2px 6px;">Reject Doc</button>
-                    </div>` : ''}
-            </td>
+            <div class="detail-row">
+                <div class="detail-label">Equipment:</div>
+                <div class="detail-value">${booking.equipment_name}<br>₹${booking.equipment_price}/day</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Booking Period:</div>
+                <div class="detail-value">${formatDate(booking.start_date)} to ${formatDate(booking.end_date)} (${booking.total_days} days)</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Pricing:</div>
+                <div class="detail-value">
+                    Base Amount: ₹${booking.total_amount?.toLocaleString()}<br>
+                    <strong>Total: ₹${booking.final_amount?.toLocaleString()}</strong>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Special Requests:</div>
+                <div class="detail-value">${booking.special_requests || 'None'}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Status:</div>
+                <div class="detail-value">
+                    <span class="status-badge ${booking.status === 'pending' ? 'status-pending' : booking.status === 'confirmed' ? 'status-approved' : 'status-rejected'}">
+                        ${booking.status}
+                    </span>
+                </div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Booking Date:</div>
+                <div class="detail-value">${formatDate(booking.booking_date)}</div>
+            </div>
         `;
         
-        vendorsTable.appendChild(row);
-    });
-    
-    // Add event listeners to buttons
-    document.querySelectorAll('.view-vendor-btn').forEach(btn => {
-        btn.addEventListener('click', () => viewVendor(btn.dataset.id));
-    });
-    
-    document.querySelectorAll('.approve-vendor-btn').forEach(btn => {
-        btn.addEventListener('click', () => approveVendor(btn.dataset.id));
-    });
-    
-    document.querySelectorAll('.reject-vendor-btn').forEach(btn => {
-        btn.addEventListener('click', () => rejectVendor(btn.dataset.id));
-    });
-    
-    // Add event listeners for document verification buttons
-    document.querySelectorAll('.verify-doc-btn').forEach(btn => {
-        btn.addEventListener('click', () => verifyVendorDocument(btn.dataset.id, btn.dataset.status));
-    });
-    
-    document.querySelectorAll('.reject-doc-btn').forEach(btn => {
-        btn.addEventListener('click', () => verifyVendorDocument(btn.dataset.id, btn.dataset.status));
-    });
-}
-async function verifyVendorDocument(vendorId, status) {
-    if (confirm(`Are you sure you want to mark this document as ${status}?`)) {
-        const result = await postData('/api/admin/vendor/document/verify', {
-            vendor_id: vendorId,
-            status: status
+        const modalFooter = document.getElementById('bookingModalFooter');
+        modalFooter.innerHTML = `
+            <button class="btn btn-danger" id="modalDeleteBooking" data-id="${booking.id}">Delete Booking</button>
+            <button class="btn btn-primary" id="closeBookingModal">Close</button>
+        `;
+        
+        document.getElementById('modalDeleteBooking').addEventListener('click', () => {
+            deleteBooking(booking.id);
+            bookingModal.style.display = 'none';
         });
         
-        if (result && result.success) {
-            showNotification(`Document marked as ${status} successfully!`, 'success');
-            // Reload vendors data
-            loadVendors();
-        } else {
-            showNotification('Failed to update document status: ' + (result.error || 'Unknown error'), 'error');
+        document.getElementById('closeBookingModal').addEventListener('click', () => {
+            bookingModal.style.display = 'none';
+        });
+        
+        bookingModal.style.display = 'flex';
+    }
+
+    async function deleteBooking(bookingId) {
+        if (confirm('Are you sure you want to delete this booking? This action cannot be undone.')) {
+            const result = await postData(`/api/admin/booking/delete/${bookingId}`);
+            
+            if (result && result.success) {
+                showNotification('Booking deleted successfully!', 'success');
+                loadBookings();
+            } else {
+                showNotification('Failed to delete booking. Please try again.', 'error');
+            }
         }
     }
-}
-        // View detail functions
-        function viewFarmer(farmerId) {
-            const farmer = farmersData.find(f => f.id === parseInt(farmerId));
-            if (!farmer) return;
+
+    // Broadcast functions
+    async function loadBroadcastStats() {
+        try {
+            const statsData = await fetchData('/api/admin/stats');
             
-            document.getElementById('farmerModalTitle').textContent = `Farmer Details - ${farmer.full_name} ${farmer.last_name}`;
-            
-            const modalBody = document.getElementById('farmerModalBody');
-            modalBody.innerHTML = `
-                <div class="detail-row">
-                    <div class="detail-label">Full Name:</div>
-                    <div class="detail-value">${farmer.full_name} ${farmer.last_name}</div>
-                </div>
-                <div class="detail-row">
-                    <div class="detail-label">Email:</div>
-                    <div class="detail-value">${farmer.email || 'N/A'}</div>
-                </div>
-                <div class="detail-row">
-                    <div class="detail-label">Phone:</div>
-                    <div class="detail-value">${farmer.phone}</div>
-                </div>
-                <div class="detail-row">
-                    <div class="detail-label">Farm Location:</div>
-                    <div class="detail-value">${farmer.farm_location}</div>
-                </div>
-                <div class="detail-row">
-                    <div class="detail-label">Farm Size:</div>
-                    <div class="detail-value">${farmer.farm_size || 'N/A'} acres</div>
-                </div>
-                <div class="detail-row">
-                    <div class="detail-label">Crop Types:</div>
-                    <div class="detail-value">${farmer.crop_types || 'N/A'}</div>
-                </div>
-                <div class="detail-row">
-                    <div class="detail-label">Additional Info:</div>
-                    <div class="detail-value">${farmer.additional_info || 'N/A'}</div>
-                </div>
-                <div class="detail-row">
-                    <div class="detail-label">Registration Date:</div>
-                    <div class="detail-value">${formatDate(farmer.registration_date)}</div>
-                </div>
-                <div class="detail-row">
-                    <div class="detail-label">Status:</div>
-                    <div class="detail-value"><span class="status-badge ${farmer.status === 'pending' ? 'status-pending' : farmer.status === 'approved' ? 'status-approved' : 'status-rejected'}">${farmer.status}</span></div>
-                </div>
-            `;
-            
-            const modalFooter = document.getElementById('farmerModalFooter');
-            if (farmer.status === 'pending') {
-                modalFooter.innerHTML = `
-                    <button class="btn btn-success" id="modalApproveFarmer" data-id="${farmer.id}">Approve</button>
-                    <button class="btn btn-danger" id="modalRejectFarmer" data-id="${farmer.id}">Reject</button>
-                    <button class="btn btn-primary" id="closeFarmerModal">Close</button>
-                `;
-                
-                document.getElementById('modalApproveFarmer').addEventListener('click', () => {
-                    approveFarmer(farmer.id);
-                    farmerModal.style.display = 'none';
-                });
-                
-                document.getElementById('modalRejectFarmer').addEventListener('click', () => {
-                    rejectFarmer(farmer.id);
-                    farmerModal.style.display = 'none';
-                });
+            if (statsData) {
+                const totalFarmers = statsData.total_farmers || 0;
+                document.getElementById('totalUsers').textContent = totalFarmers;
             } else {
-                modalFooter.innerHTML = `
-                    <button class="btn btn-primary" id="closeFarmerModal">Close</button>
-                `;
+                document.getElementById('totalUsers').textContent = '0';
+            }
+        } catch (error) {
+            console.error('Error loading broadcast stats:', error);
+            document.getElementById('totalUsers').textContent = 'Error';
+        }
+    }
+
+    async function loadBroadcastHistory() {
+        try {
+            broadcastHistory = await fetchData('/api/admin/broadcast-history');
+            
+            if (broadcastHistory && broadcastHistory.error) {
+                if (broadcastHistory.error === 'Unauthorized') {
+                    showNotification('Session expired. Please log in again.', 'error');
+                    setTimeout(() => {
+                        window.location.href = "{{ url_for('admin_login') }}";
+                    }, 2000);
+                }
+                return;
             }
             
-            document.getElementById('closeFarmerModal').addEventListener('click', () => {
+            renderBroadcastHistory();
+        } catch (error) {
+            console.error('Error loading broadcast history:', error);
+        }
+    }
+
+    function renderBroadcastHistory() {
+        broadcastHistoryTable.innerHTML = '';
+        
+        if (!broadcastHistory || broadcastHistory.length === 0) {
+            broadcastHistoryTable.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 20px; color: var(--gray);">
+                        No broadcast history found.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        broadcastHistory.forEach(broadcast => {
+            const row = document.createElement('tr');
+            
+            const statusClass = 
+                broadcast.status === 'sent' ? 'status-sent' : 
+                broadcast.status === 'failed' ? 'status-failed' : 
+                'status-pending';
+            
+            row.innerHTML = `
+                <td>#${broadcast.id}</td>
+                <td>${broadcast.title}</td>
+                <td>${broadcast.type}</td>
+                <td>${broadcast.recipients_count || 0} farmers</td>
+                <td><span class="message-status ${statusClass}">${broadcast.status}</span></td>
+                <td>${formatDate(broadcast.sent_date)}</td>
+                <td>
+                    <button class="btn btn-primary btn-sm view-broadcast-btn" data-id="${broadcast.id}">View</button>
+                </td>
+            `;
+            
+            broadcastHistoryTable.appendChild(row);
+        });
+    }
+
+    // Preview message functionality
+    if (previewMessageBtn) {
+        previewMessageBtn.addEventListener('click', () => {
+            const title = document.getElementById('messageTitle').value;
+            const content = document.getElementById('messageContent').value;
+            const type = document.getElementById('messageType').value;
+            
+            if (!title || !content) {
+                showNotification('Please enter title and content to preview', 'error');
+                return;
+            }
+            
+            previewContent.innerHTML = `
+                <h5>${title}</h5>
+                <p style="color: #666; margin-bottom: 10px; font-style: italic;">Type: ${type}</p>
+                <div style="background: white; padding: 15px; border-radius: 5px; border: 1px solid #eee;">
+                    ${content.replace(/\n/g, '<br>')}
+                </div>
+                <p style="margin-top: 10px; color: #888; font-size: 0.9em;">
+                    This message will be sent to all registered farmers.
+                </p>
+            `;
+            
+            messagePreview.style.display = 'block';
+        });
+    }
+
+    // Send broadcast message
+    if (broadcastForm) {
+        broadcastForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('messageTitle').value;
+            const content = document.getElementById('messageContent').value;
+            const type = document.getElementById('messageType').value;
+            
+            if (!title || !content) {
+                showNotification('Please enter both title and content', 'error');
+                return;
+            }
+            
+            const confirmed = confirm(`Are you sure you want to send this broadcast to all farmers?
+            
+Title: ${title}
+Type: ${type}
+
+This will send an SMS to all registered farmers.`);
+            
+            if (!confirmed) {
+                return;
+            }
+            
+            const originalBtnText = sendBroadcastBtn.innerHTML;
+            sendBroadcastBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            sendBroadcastBtn.disabled = true;
+            
+            try {
+                const result = await postData('/api/admin/broadcast', {
+                    title: title,
+                    content: content,
+                    type: type
+                });
+                
+                if (result && result.success) {
+                    showNotification(result.message || 'Broadcast sent successfully!', 'success');
+                    
+                    broadcastForm.reset();
+                    messagePreview.style.display = 'none';
+                    
+                    loadBroadcastHistory();
+                } else {
+                    showNotification(result.error || 'Failed to send broadcast', 'error');
+                }
+            } catch (error) {
+                console.error('Error sending broadcast:', error);
+                showNotification('Error sending broadcast', 'error');
+            } finally {
+                sendBroadcastBtn.innerHTML = originalBtnText;
+                sendBroadcastBtn.disabled = false;
+            }
+        });
+    }
+
+ 
+
+    // Render functions
+    function renderFarmersTable() {
+        farmersTable.innerHTML = '';
+        
+        if (!farmersData || farmersData.length === 0) {
+            farmersTable.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 20px; color: var(--gray);">No farmers found.</td></tr>';
+            return;
+        }
+        
+        farmersData.forEach(farmer => {
+            const row = document.createElement('tr');
+            
+            const statusClass = 
+                farmer.status === 'pending' ? 'status-pending' : 
+                farmer.status === 'approved' ? 'status-approved' : 
+                'status-rejected';
+            
+            row.innerHTML = `
+                <td>#${farmer.id}</td>
+                <td>${farmer.full_name} ${farmer.last_name}</td>
+                <td>${farmer.email || 'N/A'}</td>
+                <td>${farmer.phone}</td>
+                <td>${farmer.farm_location}</td>
+                <td>${farmer.farm_size || 'N/A'} acres</td>
+                <td>${formatDate(farmer.registration_date)}</td>
+                <td><span class="status-badge ${statusClass}">${farmer.status}</span></td>
+                <td>
+                    <button class="btn btn-primary btn-sm view-farmer-btn" data-id="${farmer.id}">View</button>
+                    ${farmer.status === 'pending' ? 
+                        `<button class="btn btn-success btn-sm approve-farmer-btn" data-id="${farmer.id}">Approve</button>
+                         <button class="btn btn-danger btn-sm reject-farmer-btn" data-id="${farmer.id}">Reject</button>` : ''}
+                </td>
+            `;
+            
+            farmersTable.appendChild(row);
+        });
+        
+        document.querySelectorAll('.view-farmer-btn').forEach(btn => {
+            btn.addEventListener('click', () => viewFarmer(btn.dataset.id));
+        });
+        
+        document.querySelectorAll('.approve-farmer-btn').forEach(btn => {
+            btn.addEventListener('click', () => approveFarmer(btn.dataset.id));
+        });
+        
+        document.querySelectorAll('.reject-farmer-btn').forEach(btn => {
+            btn.addEventListener('click', () => rejectFarmer(btn.dataset.id));
+        });
+    }
+    
+    function renderVendorsTable() {
+        vendorsTable.innerHTML = '';
+        
+        if (!vendorsData || vendorsData.length === 0) {
+            vendorsTable.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 20px; color: var(--gray);">No vendors found.</td></tr>';
+            return;
+        }
+        
+        vendorsData.forEach(vendor => {
+            const row = document.createElement('tr');
+            
+            const statusClass = 
+                vendor.status === 'pending' ? 'status-pending' : 
+                vendor.status === 'approved' ? 'status-approved' : 
+                'status-rejected';
+            
+            const docStatusClass = 
+                vendor.document_verified === 'verified' ? 'status-approved' : 
+                vendor.document_verified === 'rejected' ? 'status-rejected' : 
+                'status-pending';
+            
+            const documentIndicator = vendor.business_document ? 
+                `<a href="${vendor.document_url || '#'}" target="_blank" title="View Document">
+                    <i class="fas fa-file-pdf"></i> View
+                </a>` : 
+                'No Document';
+            
+            row.innerHTML = `
+                <td>#${vendor.id}</td>
+                <td>${vendor.business_name}</td>
+                <td>${vendor.contact_name}</td>
+                <td>${vendor.email}</td>
+                <td>${vendor.phone}</td>
+                <td>${vendor.service_type}</td>
+                <td>${documentIndicator}</td>
+                <td>
+                    <span class="status-badge ${docStatusClass}">
+                        ${vendor.document_verified || 'pending'}
+                    </span>
+                </td>
+                <td>${formatDate(vendor.registration_date)}</td>
+                <td><span class="status-badge ${statusClass}">${vendor.status}</span></td>
+                <td>
+                    <button class="btn btn-primary btn-sm view-vendor-btn" data-id="${vendor.id}">View</button>
+                    ${vendor.status === 'pending' ? 
+                        `<button class="btn btn-success btn-sm approve-vendor-btn" data-id="${vendor.id}">Approve</button>
+                         <button class="btn btn-danger btn-sm reject-vendor-btn" data-id="${vendor.id}">Reject</button>` : ''}
+                    ${vendor.business_document ? 
+                        `<div style="margin-top: 5px;">
+                            <button class="btn btn-info btn-sm verify-doc-btn" data-id="${vendor.id}" data-status="verified" style="font-size: 0.7rem; padding: 2px 6px;">Verify Doc</button>
+                            <button class="btn btn-warning btn-sm reject-doc-btn" data-id="${vendor.id}" data-status="rejected" style="font-size: 0.7rem; padding: 2px 6px;">Reject Doc</button>
+                        </div>` : ''}
+                </td>
+            `;
+            
+            vendorsTable.appendChild(row);
+        });
+        
+        document.querySelectorAll('.view-vendor-btn').forEach(btn => {
+            btn.addEventListener('click', () => viewVendor(btn.dataset.id));
+        });
+        
+        document.querySelectorAll('.approve-vendor-btn').forEach(btn => {
+            btn.addEventListener('click', () => approveVendor(btn.dataset.id));
+        });
+        
+        document.querySelectorAll('.reject-vendor-btn').forEach(btn => {
+            btn.addEventListener('click', () => rejectVendor(btn.dataset.id));
+        });
+        
+        document.querySelectorAll('.verify-doc-btn').forEach(btn => {
+            btn.addEventListener('click', () => verifyVendorDocument(btn.dataset.id, btn.dataset.status));
+        });
+        
+        document.querySelectorAll('.reject-doc-btn').forEach(btn => {
+            btn.addEventListener('click', () => verifyVendorDocument(btn.dataset.id, btn.dataset.status));
+        });
+    }
+
+    async function verifyVendorDocument(vendorId, status) {
+        if (confirm(`Are you sure you want to mark this document as ${status}?`)) {
+            const result = await postData('/api/admin/vendor/document/verify', {
+                vendor_id: vendorId,
+                status: status
+            });
+            
+            if (result && result.success) {
+                showNotification(`Document marked as ${status} successfully!`, 'success');
+                loadVendors();
+            } else {
+                showNotification('Failed to update document status: ' + (result.error || 'Unknown error'), 'error');
+            }
+        }
+    }
+
+    // View detail functions
+    function viewFarmer(farmerId) {
+        const farmer = farmersData.find(f => f.id === parseInt(farmerId));
+        if (!farmer) return;
+        
+        document.getElementById('farmerModalTitle').textContent = `Farmer Details - ${farmer.full_name} ${farmer.last_name}`;
+        
+        const modalBody = document.getElementById('farmerModalBody');
+        modalBody.innerHTML = `
+            <div class="detail-row">
+                <div class="detail-label">Full Name:</div>
+                <div class="detail-value">${farmer.full_name} ${farmer.last_name}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Email:</div>
+                <div class="detail-value">${farmer.email || 'N/A'}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Phone:</div>
+                <div class="detail-value">${farmer.phone}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Farm Location:</div>
+                <div class="detail-value">${farmer.farm_location}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Farm Size:</div>
+                <div class="detail-value">${farmer.farm_size || 'N/A'} acres</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Crop Types:</div>
+                <div class="detail-value">${farmer.crop_types || 'N/A'}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Registration Date:</div>
+                <div class="detail-value">${formatDate(farmer.registration_date)}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Status:</div>
+                <div class="detail-value"><span class="status-badge ${farmer.status === 'pending' ? 'status-pending' : farmer.status === 'approved' ? 'status-approved' : 'status-rejected'}">${farmer.status}</span></div>
+            </div>
+        `;
+        
+        const modalFooter = document.getElementById('farmerModalFooter');
+        if (farmer.status === 'pending') {
+            modalFooter.innerHTML = `
+                <button class="btn btn-success" id="modalApproveFarmer" data-id="${farmer.id}">Approve</button>
+                <button class="btn btn-danger" id="modalRejectFarmer" data-id="${farmer.id}">Reject</button>
+                <button class="btn btn-primary" id="closeFarmerModal">Close</button>
+            `;
+            
+            document.getElementById('modalApproveFarmer').addEventListener('click', () => {
+                approveFarmer(farmer.id);
                 farmerModal.style.display = 'none';
             });
             
-            farmerModal.style.display = 'flex';
+            document.getElementById('modalRejectFarmer').addEventListener('click', () => {
+                rejectFarmer(farmer.id);
+                farmerModal.style.display = 'none';
+            });
+        } else {
+            modalFooter.innerHTML = `
+                <button class="btn btn-primary" id="closeFarmerModal">Close</button>
+            `;
         }
         
-       function viewVendor(vendorId) {
-    const vendor = vendorsData.find(v => v.id === parseInt(vendorId));
-    if (!vendor) return;
+        document.getElementById('closeFarmerModal').addEventListener('click', () => {
+            farmerModal.style.display = 'none';
+        });
+        
+        farmerModal.style.display = 'flex';
+    }
     
-    document.getElementById('vendorModalTitle').textContent = `Vendor Details - ${vendor.business_name}`;
-    
-    // Document verification status with options
-    const docStatusSection = vendor.business_document ? `
-        <div class="detail-row">
-            <div class="detail-label">Document:</div>
-            <div class="detail-value">
-                <a href="${vendor.document_url || '#'}" target="_blank" class="btn btn-sm btn-info">
-                    <i class="fas fa-eye"></i> View Document
-                </a>
-            </div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Document Status:</div>
-            <div class="detail-value">
-                <span class="status-badge ${vendor.document_verified === 'verified' ? 'status-approved' : vendor.document_verified === 'rejected' ? 'status-rejected' : 'status-pending'}">
-                    ${vendor.document_verified || 'pending'}
-                </span>
-                ${vendor.business_document ? `
-                <div style="margin-top: 10px;">
-                    <button class="btn btn-success btn-sm" id="verifyDocBtn" data-id="${vendor.id}" data-status="verified">
-                        <i class="fas fa-check"></i> Verify Document
-                    </button>
-                    <button class="btn btn-danger btn-sm" id="rejectDocBtn" data-id="${vendor.id}" data-status="rejected">
-                        <i class="fas fa-times"></i> Reject Document
-                    </button>
+    function viewVendor(vendorId) {
+        const vendor = vendorsData.find(v => v.id === parseInt(vendorId));
+        if (!vendor) return;
+        
+        document.getElementById('vendorModalTitle').textContent = `Vendor Details - ${vendor.business_name}`;
+        
+        const docStatusSection = vendor.business_document ? `
+            <div class="detail-row">
+                <div class="detail-label">Document:</div>
+                <div class="detail-value">
+                    <a href="${vendor.document_url || '#'}" target="_blank" class="btn btn-sm btn-info">
+                        <i class="fas fa-eye"></i> View Document
+                    </a>
                 </div>
-                ` : ''}
             </div>
-        </div>
-    ` : '<div class="detail-row"><div class="detail-label">Document:</div><div class="detail-value">No document uploaded</div></div>';
-    
-    const modalBody = document.getElementById('vendorModalBody');
-    modalBody.innerHTML = `
-        <div class="detail-row">
-            <div class="detail-label">Business Name:</div>
-            <div class="detail-value">${vendor.business_name}</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Contact Person:</div>
-            <div class="detail-value">${vendor.contact_name}</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Email:</div>
-            <div class="detail-value">${vendor.email}</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Phone:</div>
-            <div class="detail-value">${vendor.phone}</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Service Type:</div>
-            <div class="detail-value">${vendor.service_type}</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Description:</div>
-            <div class="detail-value">${vendor.description || 'N/A'}</div>
-        </div>
-        ${docStatusSection}
-        <div class="detail-row">
-            <div class="detail-label">Registration Date:</div>
-            <div class="detail-value">${formatDate(vendor.registration_date)}</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Account Status:</div>
-            <div class="detail-value"><span class="status-badge ${vendor.status === 'pending' ? 'status-pending' : vendor.status === 'approved' ? 'status-approved' : 'status-rejected'}">${vendor.status}</span></div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Equipment Count:</div>
-            <div class="detail-value">${vendor.equipment_count || 0}</div>
-        </div>
-        <div class="detail-row">
-            <div class="detail-label">Booking Count:</div>
-            <div class="detail-value">${vendor.booking_count || 0}</div>
-        </div>
-    `;
-    
-    const modalFooter = document.getElementById('vendorModalFooter');
-    if (vendor.status === 'pending') {
-        modalFooter.innerHTML = `
-            <button class="btn btn-success" id="modalApproveVendor" data-id="${vendor.id}">Approve Account</button>
-            <button class="btn btn-danger" id="modalRejectVendor" data-id="${vendor.id}">Reject Account</button>
-            <button class="btn btn-primary" id="closeVendorModal">Close</button>
+            <div class="detail-row">
+                <div class="detail-label">Document Status:</div>
+                <div class="detail-value">
+                    <span class="status-badge ${vendor.document_verified === 'verified' ? 'status-approved' : vendor.document_verified === 'rejected' ? 'status-rejected' : 'status-pending'}">
+                        ${vendor.document_verified || 'pending'}
+                    </span>
+                    ${vendor.business_document ? `
+                    <div style="margin-top: 10px;">
+                        <button class="btn btn-success btn-sm" id="verifyDocBtn" data-id="${vendor.id}" data-status="verified">
+                            <i class="fas fa-check"></i> Verify Document
+                        </button>
+                        <button class="btn btn-danger btn-sm" id="rejectDocBtn" data-id="${vendor.id}" data-status="rejected">
+                            <i class="fas fa-times"></i> Reject Document
+                        </button>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+        ` : '<div class="detail-row"><div class="detail-label">Document:</div><div class="detail-value">No document uploaded</div></div>';
+        
+        const modalBody = document.getElementById('vendorModalBody');
+        modalBody.innerHTML = `
+            <div class="detail-row">
+                <div class="detail-label">Business Name:</div>
+                <div class="detail-value">${vendor.business_name}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Contact Person:</div>
+                <div class="detail-value">${vendor.contact_name}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Email:</div>
+                <div class="detail-value">${vendor.email}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Phone:</div>
+                <div class="detail-value">${vendor.phone}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Service Type:</div>
+                <div class="detail-value">${vendor.service_type}</div>
+            </div>
+            ${docStatusSection}
+            <div class="detail-row">
+                <div class="detail-label">Registration Date:</div>
+                <div class="detail-value">${formatDate(vendor.registration_date)}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Account Status:</div>
+                <div class="detail-value"><span class="status-badge ${vendor.status === 'pending' ? 'status-pending' : vendor.status === 'approved' ? 'status-approved' : 'status-rejected'}">${vendor.status}</span></div>
+            </div>
         `;
         
-        document.getElementById('modalApproveVendor').addEventListener('click', () => {
-            approveVendor(vendor.id);
-            vendorModal.style.display = 'none';
-        });
-        
-        document.getElementById('modalRejectVendor').addEventListener('click', () => {
-            rejectVendor(vendor.id);
-            vendorModal.style.display = 'none';
-        });
-    } else {
-        modalFooter.innerHTML = `
-            <button class="btn btn-primary" id="closeVendorModal">Close</button>
-        `;
-    }
-    
-    // Add event listeners for document verification buttons in modal
-    if (vendor.business_document) {
-        document.getElementById('verifyDocBtn')?.addEventListener('click', () => {
-            verifyVendorDocument(vendor.id, 'verified');
-            vendorModal.style.display = 'none';
-        });
-        
-        document.getElementById('rejectDocBtn')?.addEventListener('click', () => {
-            verifyVendorDocument(vendor.id, 'rejected');
-            vendorModal.style.display = 'none';
-        });
-    }
-    
-    document.getElementById('closeVendorModal').addEventListener('click', () => {
-        vendorModal.style.display = 'none';
-    });
-    
-    vendorModal.style.display = 'flex';
-}
-        
-        // Approval functions
-        async function approveFarmer(farmerId) {
-            if (confirm('Are you sure you want to approve this farmer?')) {
-                const result = await postData(`/api/admin/farmer/approve/${farmerId}`);
-                
-                if (result && result.success) {
-                    showNotification('Farmer approved successfully!', 'success');
-                    // Reload data
-                    loadFarmers();
-                    loadStats();
-                } else {
-                    showNotification('Failed to approve farmer. Please try again.', 'error');
-                }
-            }
-        }
-        
-        async function rejectFarmer(farmerId) {
-            if (confirm('Are you sure you want to reject this farmer?')) {
-                const result = await postData(`/api/admin/farmer/reject/${farmerId}`);
-                
-                if (result && result.success) {
-                    showNotification('Farmer rejected successfully!', 'success');
-                    // Reload data
-                    loadFarmers();
-                    loadStats();
-                } else {
-                    showNotification('Failed to reject farmer. Please try again.', 'error');
-                }
-            }
-        }
-        
-        async function approveVendor(vendorId) {
-            if (confirm('Are you sure you want to approve this vendor?')) {
-                const result = await postData(`/api/admin/vendor/approve/${vendorId}`);
-                
-                if (result && result.success) {
-                    showNotification('Vendor approved successfully!', 'success');
-                    // Reload data
-                    loadVendors();
-                    loadStats();
-                } else {
-                    showNotification('Failed to approve vendor. Please try again.', 'error');
-                }
-            }
-        }
-        
-        async function rejectVendor(vendorId) {
-            if (confirm('Are you sure you want to reject this vendor?')) {
-                const result = await postData(`/api/admin/vendor/reject/${vendorId}`);
-                
-                if (result && result.success) {
-                    showNotification('Vendor rejected successfully!', 'success');
-                    // Reload data
-                    loadVendors();
-                    loadStats();
-                } else {
-                    showNotification('Failed to reject vendor. Please try again.', 'error');
-                }
-            }
-        }
-        
-        // Utility functions
-        function formatDate(dateString) {
-            if (!dateString) return 'N/A';
-            
-            const options = { year: 'numeric', month: 'short', day: 'numeric' };
-            return new Date(dateString).toLocaleDateString(undefined, options);
-        }
-        
-        function updateRecentRegistrations() {
-            const recentRegistrations = document.getElementById('recentRegistrations');
-            recentRegistrations.innerHTML = '';
-            
-            if ((!farmersData || farmersData.length === 0) && (!vendorsData || vendorsData.length === 0)) {
-                recentRegistrations.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: var(--gray);">No recent registrations.</td></tr>';
-                return;
-            }
-            
-            // Combine farmers and vendors and sort by registration date
-            const allRegistrations = [
-                ...(farmersData || []).map(f => ({ ...f, type: 'Farmer' })),
-                ...(vendorsData || []).map(v => ({ ...v, type: 'Vendor' }))
-            ].sort((a, b) => new Date(b.registration_date) - new Date(a.registration_date))
-            .slice(0, 5); // Get only the 5 most recent
-            
-            allRegistrations.forEach(reg => {
-                const row = document.createElement('tr');
-                
-                const statusClass = 
-                    reg.status === 'pending' ? 'status-pending' : 
-                    reg.status === 'approved' ? 'status-approved' : 
-                    'status-rejected';
-                
-                const name = reg.type === 'Farmer' ? `${reg.full_name} ${reg.last_name}` : reg.business_name;
-                const contact = reg.phone;
-                const location = reg.type === 'Farmer' ? reg.farm_location : reg.service_type;
-                
-                row.innerHTML = `
-                    <td>${name}</td>
-                    <td>${reg.type}</td>
-                    <td>${contact}</td>
-                    <td>${location}</td>
-                    <td>${formatDate(reg.registration_date)}</td>
-                    <td><span class="status-badge ${statusClass}">${reg.status}</span></td>
-                    <td>
-                        <button class="btn btn-primary btn-sm view-recent-btn" data-type="${reg.type.toLowerCase()}" data-id="${reg.id}">View</button>
-                    </td>
-                `;
-                
-                recentRegistrations.appendChild(row);
-            });
-            
-            // Add event listeners to view buttons
-            document.querySelectorAll('.view-recent-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (btn.dataset.type === 'farmer') {
-                        viewFarmer(btn.dataset.id);
-                    } else {
-                        viewVendor(btn.dataset.id);
-                    }
-                });
-            });
-        }
-        
-        function showNotification(message, type = 'info') {
-            // Remove any existing notifications
-            const existingNotifications = document.querySelectorAll('.notification');
-            existingNotifications.forEach(notif => notif.remove());
-            
-            // Create notification element
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 15px 20px;
-                border-radius: 5px;
-                color: white;
-                z-index: 10000;
-                font-weight: 500;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                max-width: 350px;
+        const modalFooter = document.getElementById('vendorModalFooter');
+        if (vendor.status === 'pending') {
+            modalFooter.innerHTML = `
+                <button class="btn btn-success" id="modalApproveVendor" data-id="${vendor.id}">Approve Account</button>
+                <button class="btn btn-danger" id="modalRejectVendor" data-id="${vendor.id}">Reject Account</button>
+                <button class="btn btn-primary" id="closeVendorModal">Close</button>
             `;
             
-            if (type === 'success') {
-                notification.style.backgroundColor = '#38a169';
-            } else if (type === 'error') {
-                notification.style.backgroundColor = '#e53e3e';
+            document.getElementById('modalApproveVendor').addEventListener('click', () => {
+                approveVendor(vendor.id);
+                vendorModal.style.display = 'none';
+            });
+            
+            document.getElementById('modalRejectVendor').addEventListener('click', () => {
+                rejectVendor(vendor.id);
+                vendorModal.style.display = 'none';
+            });
+        } else {
+            modalFooter.innerHTML = `
+                <button class="btn btn-primary" id="closeVendorModal">Close</button>
+            `;
+        }
+        
+        if (vendor.business_document) {
+            document.getElementById('verifyDocBtn')?.addEventListener('click', () => {
+                verifyVendorDocument(vendor.id, 'verified');
+                vendorModal.style.display = 'none';
+            });
+            
+            document.getElementById('rejectDocBtn')?.addEventListener('click', () => {
+                verifyVendorDocument(vendor.id, 'rejected');
+                vendorModal.style.display = 'none';
+            });
+        }
+        
+        document.getElementById('closeVendorModal').addEventListener('click', () => {
+            vendorModal.style.display = 'none';
+        });
+        
+        vendorModal.style.display = 'flex';
+    }
+
+    // Approval functions
+    async function approveFarmer(farmerId) {
+        if (confirm('Are you sure you want to approve this farmer?')) {
+            const result = await postData(`/api/admin/farmer/approve/${farmerId}`);
+            
+            if (result && result.success) {
+                showNotification('Farmer approved successfully!', 'success');
+                loadFarmers();
+                loadStats();
             } else {
-                notification.style.backgroundColor = '#3182ce';
-            }
-            
-            notification.textContent = message;
-            
-            // Add to page
-            document.body.appendChild(notification);
-            
-            // Remove after 5 seconds
-            setTimeout(() => {
-                notification.remove();
-            }, 5000);
-        }
-        
-        // Navigation functions
-        function showSection(sectionId) {
-            // Hide all sections
-            contentSections.forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            // Show the requested section
-            const section = document.getElementById(`${sectionId}-section`);
-            if (section) {
-                section.classList.add('active');
-                
-                // Load data for the section if needed
-                if (sectionId === 'farmers') {
-                    loadFarmers();
-                } else if (sectionId === 'vendors') {
-                    loadVendors();
-                } else if (sectionId === 'dashboard') {
-                    loadStats();
-                }
+                showNotification('Failed to approve farmer. Please try again.', 'error');
             }
         }
-        
-        function setActiveNavLink(sectionId) {
-            // Remove active class from all links
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-            });
-            
-            // Add active class to the clicked link
-            const activeLink = document.querySelector(`.nav-link[data-section="${sectionId}"]`);
-            if (activeLink) {
-                activeLink.classList.add('active');
-            }
-        }
-        function googleTranslateElementInit() {
-    new google.translate.TranslateElement({
-        pageLanguage: 'en',
-        includedLanguages: 'en,kn',
-        autoDisplay: false
-    }, 'google_translate_element');
+    }
     
-    // Apply saved language
-    const savedLang = localStorage.getItem('selectedLanguage');
-    if(savedLang === 'kn') {
-        setTimeout(() => {
-            var iframe = document.querySelector('.goog-te-menu-frame');
-            if(iframe) {
-                var select = iframe.contentWindow.document.querySelector('.goog-te-menu2-select');
-                if(select) {
-                    select.value = 'kn';
-                    select.dispatchEvent(new Event('change'));
-                }
+    async function rejectFarmer(farmerId) {
+        if (confirm('Are you sure you want to reject this farmer?')) {
+            const result = await postData(`/api/admin/farmer/reject/${farmerId}`);
+            
+            if (result && result.success) {
+                showNotification('Farmer rejected successfully!', 'success');
+                loadFarmers();
+                loadStats();
+            } else {
+                showNotification('Failed to reject farmer. Please try again.', 'error');
             }
-        }, 1000);
+        }
+    }
+    
+    async function approveVendor(vendorId) {
+        if (confirm('Are you sure you want to approve this vendor?')) {
+            const result = await postData(`/api/admin/vendor/approve/${vendorId}`);
+            
+            if (result && result.success) {
+                showNotification('Vendor approved successfully!', 'success');
+                loadVendors();
+                loadStats();
+            } else {
+                showNotification('Failed to approve vendor. Please try again.', 'error');
+            }
+        }
+    }
+    
+    async function rejectVendor(vendorId) {
+        if (confirm('Are you sure you want to reject this vendor?')) {
+            const result = await postData(`/api/admin/vendor/reject/${vendorId}`);
+            
+            if (result && result.success) {
+                showNotification('Vendor rejected successfully!', 'success');
+                loadVendors();
+                loadStats();
+            } else {
+                showNotification('Failed to reject vendor. Please try again.', 'error');
+            }
+        }
+    }
+
+    // Update formatDate to handle invalid dates
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return 'Invalid Date';
+        
+        const options = { year: 'numeric', month: 'short', day: 'numeric' };
+        return date.toLocaleDateString(undefined, options);
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return 'N/A';
     }
 }
-var script = document.createElement('script');
-script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-document.head.appendChild(script);
-        // Initialize the dashboard
-        function initDashboard() {
-            // Load initial data
-            loadStats();
-            loadFarmers();
-            loadVendors();
-            
-            // Set up event listeners
-            navLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const sectionId = link.getAttribute('data-section');
-                    setActiveNavLink(sectionId);
-                    showSection(sectionId);
-                });
-            });
-            
-            // Modal close buttons
-            document.querySelectorAll('.close-modal').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    farmerModal.style.display = 'none';
-                    vendorModal.style.display = 'none';
-                });
-            });
-            
-            // Close modal when clicking outside
-            window.addEventListener('click', (e) => {
-                if (e.target === farmerModal) {
-                    farmerModal.style.display = 'none';
-                }
-                if (e.target === vendorModal) {
-                    vendorModal.style.display = 'none';
-                }
-            });
-            
-            // Search and filter events
-            farmerSearch.addEventListener('input', () => loadFarmers());
-            vendorSearch.addEventListener('input', () => loadVendors());
-            farmerStatusFilter.addEventListener('change', () => loadFarmers());
-            vendorStatusFilter.addEventListener('change', () => loadVendors());
-            
-            // Auto-refresh data every 60 seconds
-            setInterval(() => {
-                if (document.getElementById('dashboard-section').classList.contains('active')) {
-                    loadStats();
-                }
-                if (document.getElementById('farmers-section').classList.contains('active')) {
-                    loadFarmers();
-                }
-                if (document.getElementById('vendors-section').classList.contains('active')) {
-                    loadVendors();
-                }
-            }, 60000);
+    
+    function updateRecentRegistrations() {
+        const recentRegistrations = document.getElementById('recentRegistrations');
+        recentRegistrations.innerHTML = '';
+        
+        if ((!farmersData || farmersData.length === 0) && (!vendorsData || vendorsData.length === 0)) {
+            recentRegistrations.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: var(--gray);">No recent registrations.</td></tr>';
+            return;
         }
         
-        // Initialize the dashboard when the page loads
-        document.addEventListener('DOMContentLoaded', initDashboard);
+        const allRegistrations = [
+            ...(farmersData || []).map(f => ({ ...f, type: 'Farmer' })),
+            ...(vendorsData || []).map(v => ({ ...v, type: 'Vendor' }))
+        ].sort((a, b) => new Date(b.registration_date) - new Date(a.registration_date))
+        .slice(0, 5);
         
-    </script>
+        allRegistrations.forEach(reg => {
+            const row = document.createElement('tr');
+            
+            const statusClass = 
+                reg.status === 'pending' ? 'status-pending' : 
+                reg.status === 'approved' ? 'status-approved' : 
+                'status-rejected';
+            
+            const name = reg.type === 'Farmer' ? `${reg.full_name} ${reg.last_name}` : reg.business_name;
+            const contact = reg.phone;
+            const location = reg.type === 'Farmer' ? reg.farm_location : reg.service_type;
+            
+            row.innerHTML = `
+                <td>${name}</td>
+                <td>${reg.type}</td>
+                <td>${contact}</td>
+                <td>${location}</td>
+                <td>${formatDate(reg.registration_date)}</td>
+                <td><span class="status-badge ${statusClass}">${reg.status}</span></td>
+                <td>
+                    <button class="btn btn-primary btn-sm view-recent-btn" data-type="${reg.type.toLowerCase()}" data-id="${reg.id}">View</button>
+                </td>
+            `;
+            
+            recentRegistrations.appendChild(row);
+        });
+        
+        document.querySelectorAll('.view-recent-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.dataset.type === 'farmer') {
+                    viewFarmer(btn.dataset.id);
+                } else {
+                    viewVendor(btn.dataset.id);
+                }
+            });
+        });
+    }
+    
+    function showNotification(message, type = 'info') {
+        const existingNotifications = document.querySelectorAll('.notification');
+        existingNotifications.forEach(notif => notif.remove());
+        
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            z-index: 10000;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-width: 350px;
+        `;
+        
+        if (type === 'success') {
+            notification.style.backgroundColor = '#38a169';
+        } else if (type === 'error') {
+            notification.style.backgroundColor = '#e53e3e';
+        } else {
+            notification.style.backgroundColor = '#3182ce';
+        }
+        
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+
+    // Navigation functions
+    function setActiveNavLink(sectionId) {
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+        });
+        
+        const activeLink = document.querySelector(`.nav-link[data-section="${sectionId}"]`);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+    }
+
+    function showSection(sectionId) {
+        contentSections.forEach(section => {
+            section.classList.remove('active');
+        });
+        
+        const section = document.getElementById(`${sectionId}-section`);
+        if (section) {
+            section.classList.add('active');
+            
+            if (sectionId === 'farmers') {
+                loadFarmers();
+            } else if (sectionId === 'vendors') {
+                loadVendors();
+            } else if (sectionId === 'dashboard') {
+                loadStats();
+            } else if (sectionId === 'equipment') {
+                loadEquipment();
+            } else if (sectionId === 'bookings') {
+                loadBookings();
+            } else if (sectionId === 'broadcast') {
+                loadBroadcastStats();
+                loadBroadcastHistory();
+            } else if (sectionId === 'reports') {
+                loadReports();
+            }
+        }
+    }
+
+    // Initialize the dashboard
+    function initDashboard() {
+        loadStats();
+        
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const sectionId = link.getAttribute('data-section');
+                setActiveNavLink(sectionId);
+                showSection(sectionId);
+            });
+        });
+        
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', () => {
+                farmerModal.style.display = 'none';
+                vendorModal.style.display = 'none';
+                bookingModal.style.display = 'none';
+                equipmentModal.style.display = 'none';
+            });
+        });
+        
+        window.addEventListener('click', (e) => {
+            if (e.target === farmerModal) {
+                farmerModal.style.display = 'none';
+            }
+            if (e.target === vendorModal) {
+                vendorModal.style.display = 'none';
+            }
+            if (e.target === bookingModal) {
+                bookingModal.style.display = 'none';
+            }
+            if (e.target === equipmentModal) {
+                equipmentModal.style.display = 'none';
+            }
+        });
+        
+        // Search and filter events
+        farmerSearch.addEventListener('input', () => loadFarmers());
+        vendorSearch.addEventListener('input', () => loadVendors());
+        farmerStatusFilter.addEventListener('change', () => loadFarmers());
+        vendorStatusFilter.addEventListener('change', () => loadVendors());
+        
+        // Equipment filter events - FIXED
+        equipmentSearch.addEventListener('input', () => filterAndRenderEquipment());
+        equipmentStatusFilter.addEventListener('change', () => filterAndRenderEquipment());
+        equipmentCategoryFilter.addEventListener('change', () => filterAndRenderEquipment());
+        
+        // Booking filter events
+        bookingSearch.addEventListener('input', () => filterAndRenderBookings());
+        bookingStatusFilter.addEventListener('change', () => filterAndRenderBookings());
+        bookingDateFilter.addEventListener('change', () => filterAndRenderBookings());
+      
+        
+        // Auto-refresh data every 60 seconds
+        setInterval(() => {
+            const activeSection = document.querySelector('.content-section.active');
+            if (!activeSection) return;
+            
+            const activeId = activeSection.id.replace('-section', '');
+            
+            if (activeId === 'dashboard') {
+                loadStats();
+            } else if (activeId === 'farmers') {
+                loadFarmers();
+            } else if (activeId === 'vendors') {
+                loadVendors();
+            } else if (activeId === 'equipment') {
+                loadEquipment();
+            } else if (activeId === 'bookings') {
+                loadBookings();
+            } else if (activeId === 'broadcast') {
+                loadBroadcastStats();
+                loadBroadcastHistory();
+            } 
+        }, 60000);
+    }
+    
+    // Initialize the dashboard when the page loads
+    document.addEventListener('DOMContentLoaded', initDashboard);
+    
+</script>
     <style>.goog-te-banner-frame{display:none!important;}.goog-te-gadget{font-size:0!important;}</style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
