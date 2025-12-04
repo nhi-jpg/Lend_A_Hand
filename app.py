@@ -3559,14 +3559,15 @@ def api_approve_farmer(farmer_id):
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-@app.route('/api/admin/reports')
-def api_admin_reports():
-    """Get real reports data from database - SIMPLIFIED VERSION"""
+# ==================== REAL REPORTS API ====================
+@app.route('/api/admin/reports/real-data')
+def api_admin_real_reports():
+    """Get ONLY real data from database - NO DUMMY VALUES"""
     if 'admin_id' not in session or session.get('user_type') != 'admin':
         return jsonify({'error': 'Unauthorized'}), 401
     
     try:
-        print("📊 Loading reports data...")
+        print("📊 Loading REAL reports data from database...")
         
         # Connect to databases
         conn_vendors = sqlite3.connect('vendors.db')
@@ -3575,31 +3576,78 @@ def api_admin_reports():
         cursor_vendors = conn_vendors.cursor()
         cursor_agri = conn_agri.cursor()
         
-        # ==================== BASIC COUNTS ====================
+        # ==================== BASIC COUNTS FROM DATABASE ====================
         
-        # Total approved farmers
+        # Total approved farmers (REAL)
         cursor_agri.execute("SELECT COUNT(*) FROM farmers WHERE status = 'approved'")
         total_farmers = cursor_agri.fetchone()[0] or 0
         
-        # Total approved vendors
+        # Total approved vendors (REAL)
         cursor_vendors.execute("SELECT COUNT(*) FROM vendors WHERE status = 'approved'")
         total_vendors = cursor_vendors.fetchone()[0] or 0
         
-        # Total equipment
+        # Total equipment (REAL)
         cursor_vendors.execute("SELECT COUNT(*) FROM equipment")
         total_equipment = cursor_vendors.fetchone()[0] or 0
         
-        # Available equipment
+        # Available equipment (REAL)
         cursor_vendors.execute("SELECT COUNT(*) FROM equipment WHERE status = 'available'")
         available_equipment = cursor_vendors.fetchone()[0] or 0
         
-        # ==================== BOOKINGS DATA ====================
-        
-        # Total bookings
+        # Total bookings (REAL)
         cursor_vendors.execute("SELECT COUNT(*) FROM bookings")
         total_bookings = cursor_vendors.fetchone()[0] or 0
         
-        # Booking status distribution
+        # Total rent requests (REAL)
+        cursor_vendors.execute("SELECT COUNT(*) FROM rent_requests")
+        total_rents = cursor_vendors.fetchone()[0] or 0
+        
+        # ==================== REGISTRATION TIMELINE (REAL) ====================
+        registration_data = []
+        for i in range(5, -1, -1):  # Last 6 months
+            date = datetime.now().date() - timedelta(days=30 * i)
+            start_date = date.replace(day=1)
+            end_date = (date.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
+            
+            # Farmers this month
+            cursor_agri.execute("""
+                SELECT COUNT(*) FROM farmers 
+                WHERE DATE(registration_date) BETWEEN ? AND ?
+            """, (start_date, end_date))
+            farmers_count = cursor_agri.fetchone()[0] or 0
+            
+            # Vendors this month
+            cursor_vendors.execute("""
+                SELECT COUNT(*) FROM vendors 
+                WHERE DATE(registration_date) BETWEEN ? AND ?
+            """, (start_date, end_date))
+            vendors_count = cursor_vendors.fetchone()[0] or 0
+            
+            registration_data.append({
+                'date': start_date.strftime('%b %Y'),
+                'farmers': farmers_count,
+                'vendors': vendors_count,
+                'total': farmers_count + vendors_count
+            })
+        
+        # ==================== EQUIPMENT CATEGORIES (REAL) ====================
+        cursor_vendors.execute("""
+            SELECT category, COUNT(*) as count 
+            FROM equipment 
+            GROUP BY category 
+            ORDER BY count DESC
+        """)
+        categories_result = cursor_vendors.fetchall()
+        
+        category_distribution = []
+        for category, count in categories_result:
+            if category:  # Only include if category is not null/empty
+                category_distribution.append({
+                    'category': category,
+                    'count': count
+                })
+        
+        # ==================== BOOKING STATUS (REAL) ====================
         cursor_vendors.execute("""
             SELECT status, COUNT(*) as count 
             FROM bookings 
@@ -3607,17 +3655,15 @@ def api_admin_reports():
         """)
         booking_statuses = cursor_vendors.fetchall()
         
-        # Completed bookings revenue
-        cursor_vendors.execute("SELECT SUM(total_amount) FROM bookings WHERE status = 'completed'")
-        booking_revenue = cursor_vendors.fetchone()[0] or 0
+        booking_status_distribution = []
+        for status, count in booking_statuses:
+            if status:  # Only include if status is not null
+                booking_status_distribution.append({
+                    'status': status.replace('_', ' ').title(),
+                    'count': count
+                })
         
-        # ==================== RENT REQUESTS DATA ====================
-        
-        # Total rent requests
-        cursor_vendors.execute("SELECT COUNT(*) FROM rent_requests")
-        total_rents = cursor_vendors.fetchone()[0] or 0
-        
-        # Rent request status distribution
+        # ==================== RENT REQUEST STATUS (REAL) ====================
         cursor_vendors.execute("""
             SELECT status, COUNT(*) as count 
             FROM rent_requests 
@@ -3625,196 +3671,122 @@ def api_admin_reports():
         """)
         rent_statuses = cursor_vendors.fetchall()
         
-        # Completed rent requests revenue
-        cursor_vendors.execute("SELECT SUM(total_amount) FROM rent_requests WHERE status = 'completed'")
-        rent_revenue = cursor_vendors.fetchone()[0] or 0
-        
-        # ==================== TOTAL REVENUE ====================
-        total_revenue = float(booking_revenue) + float(rent_revenue)
-        
-        # ==================== TOTAL ORDERS ====================
-        total_orders = total_bookings + total_rents
-        
-        # ==================== COMBINE STATUSES ====================
-        status_counts = {}
-        for status, count in booking_statuses + rent_statuses:
-            status = status.replace('_', ' ').title()
-            status_counts[status] = status_counts.get(status, 0) + count
-        
-        status_distribution = []
-        status_colors = {
-            'Completed': '#38a169',
-            'Pending': '#d69e2e',
-            'Approved': '#3182ce',
-            'Confirmed': '#3182ce',
-            'Cancelled': '#e53e3e',
-            'Cancellation Requested': '#ed8936'
-        }
-        
-        for status, count in status_counts.items():
-            if count > 0:
-                status_distribution.append({
-                    'status': status,
-                    'count': count,
-                    'color': status_colors.get(status, '#718096')
+        rent_status_distribution = []
+        for status, count in rent_statuses:
+            if status:  # Only include if status is not null
+                rent_status_distribution.append({
+                    'status': status.replace('_', ' ').title(),
+                    'count': count
                 })
         
-        # ==================== CATEGORY DISTRIBUTION ====================
+        # ==================== RECENT ACTIVITIES (REAL) ====================
+        
+        # Recent bookings (last 10)
         cursor_vendors.execute("""
-            SELECT category, COUNT(*) as count 
-            FROM equipment 
-            GROUP BY category 
-            ORDER BY count DESC
+            SELECT id, equipment_name, user_name, total_amount, status, created_date
+            FROM bookings 
+            ORDER BY created_date DESC 
+            LIMIT 10
         """)
-        categories = cursor_vendors.fetchall()
+        recent_bookings = []
+        for row in cursor_vendors.fetchall():
+            recent_bookings.append({
+                'id': row[0],
+                'equipment_name': row[1],
+                'user_name': row[2],
+                'total_amount': float(row[3]) if row[3] else 0,
+                'status': row[4],
+                'date': row[5]
+            })
         
-        category_distribution = []
-        for category, count in categories:
-            if category:
-                category_distribution.append({
-                    'category': category,
-                    'count': count,
-                    'revenue': count * 1000  # Simplified revenue calculation
-                })
-        
-        # ==================== TOP VENDORS ====================
+        # Recent rent requests (last 10)
         cursor_vendors.execute("""
-            SELECT 
-                v.business_name,
-                COUNT(e.id) as equipment_count,
-                COUNT(b.id) as booking_count
-            FROM vendors v
-            LEFT JOIN equipment e ON v.email = e.vendor_email
-            LEFT JOIN bookings b ON e.id = b.equipment_id
-            WHERE v.status = 'approved'
-            GROUP BY v.id
-            ORDER BY equipment_count DESC
+            SELECT id, equipment_name, user_name, total_amount, status, submitted_date
+            FROM rent_requests 
+            ORDER BY submitted_date DESC 
+            LIMIT 10
+        """)
+        recent_rents = []
+        for row in cursor_vendors.fetchall():
+            recent_rents.append({
+                'id': row[0],
+                'equipment_name': row[1],
+                'user_name': row[2],
+                'total_amount': float(row[3]) if row[3] else 0,
+                'status': row[4],
+                'date': row[5]
+            })
+        
+        # Recent registrations (last 10)
+        cursor_agri.execute("""
+            SELECT id, full_name, last_name, 'farmer' as type, registration_date
+            FROM farmers 
+            ORDER BY registration_date DESC 
             LIMIT 5
         """)
+        recent_farmers = cursor_agri.fetchall()
         
-        vendors_data = cursor_vendors.fetchall()
-        top_vendors = []
-        
-        for vendor in vendors_data:
-            name, equipment_count, booking_count = vendor
-            top_vendors.append({
-                'name': name or 'Unknown Vendor',
-                'orders': booking_count or 0,
-                'revenue': (booking_count or 0) * 1000,  # Simplified
-                'rating': 4.5  # Default rating
-            })
-        
-        # ==================== DAILY REVENUE (Last 7 days) ====================
-        revenue_data = []
-        for i in range(6, -1, -1):
-            date = datetime.now().date() - timedelta(days=i)
-            date_str = date.strftime('%Y-%m-%d')
-            
-            cursor_vendors.execute("""
-                SELECT SUM(total_amount) FROM bookings 
-                WHERE DATE(created_date) = ? AND status = 'completed'
-            """, (date_str,))
-            day_revenue = cursor_vendors.fetchone()[0] or 0
-            
-            revenue_data.append({
-                'date': date.strftime('%b %d'),
-                'amount': float(day_revenue)
-            })
-        
-        # ==================== REGISTRATION TREND (Last 7 days) ====================
-        registration_data = []
-        for i in range(6, -1, -1):
-            date = datetime.now().date() - timedelta(days=i)
-            date_str = date.strftime('%Y-%m-%d')
-            
-            # Farmers
-            cursor_agri.execute("""
-                SELECT COUNT(*) FROM farmers 
-                WHERE DATE(registration_date) = ?
-            """, (date_str,))
-            farmers = cursor_agri.fetchone()[0] or 0
-            
-            # Vendors
-            cursor_vendors.execute("""
-                SELECT COUNT(*) FROM vendors 
-                WHERE DATE(registration_date) = ?
-            """, (date_str,))
-            vendors = cursor_vendors.fetchone()[0] or 0
-            
-            registration_data.append({
-                'date': date.strftime('%b %d'),
-                'farmers': farmers,
-                'vendors': vendors
-            })
-        
-        # ==================== CALCULATE CONVERSION RATE ====================
-        # Simple calculation: users who made at least one booking or rent request
         cursor_vendors.execute("""
-            SELECT COUNT(DISTINCT user_id) FROM (
-                SELECT user_id FROM bookings
-                UNION
-                SELECT user_id FROM rent_requests
-            )
+            SELECT id, business_name, contact_name, 'vendor' as type, registration_date
+            FROM vendors 
+            ORDER BY registration_date DESC 
+            LIMIT 5
         """)
-        users_with_orders = cursor_vendors.fetchone()[0] or 0
+        recent_vendors = cursor_vendors.fetchall()
         
-        total_users = total_farmers + total_vendors
-        conversion_rate = round((users_with_orders / total_users * 100), 1) if total_users > 0 else 0
+        recent_registrations = []
+        for farmer in recent_farmers:
+            recent_registrations.append({
+                'id': farmer[0],
+                'name': f"{farmer[1]} {farmer[2]}",
+                'type': farmer[3],
+                'date': farmer[4]
+            })
         
-        # ==================== CALCULATE CANCELLATION RATE ====================
-        cancelled_orders = 0
-        for status, count in [('cancelled', count) for status, count in booking_statuses + rent_statuses if status == 'cancelled']:
-            cancelled_orders += count
+        for vendor in recent_vendors:
+            recent_registrations.append({
+                'id': vendor[0],
+                'name': f"{vendor[1]} ({vendor[2]})",
+                'type': vendor[3],
+                'date': vendor[4]
+            })
         
-        cancellation_rate = round((cancelled_orders / total_orders * 100), 1) if total_orders > 0 else 0
-        
-        # ==================== PREPARE RESPONSE ====================
-        reports_data = {
-            'summary': {
-                'totalRevenue': float(total_revenue),
-                'totalOrders': total_orders,
-                'activeUsers': total_farmers + total_vendors,  # Simplified
-                'conversionRate': conversion_rate,
-                'totalFarmers': total_farmers,
-                'totalVendors': total_vendors,
-                'totalEquipment': total_equipment,
-                'cancellationRate': cancellation_rate
-            },
-            'revenueTrend': revenue_data,
-            'registrationTrend': registration_data,
-            'categoryDistribution': category_distribution,
-            'statusDistribution': status_distribution,
-            'topVendors': top_vendors,
-            'detailedStats': {
-                'farmers': total_farmers,
-                'vendors': total_vendors,
-                'activeThisMonth': total_farmers + total_vendors,  # Simplified
-                'avgOrdersUser': round(total_orders / (total_farmers + total_vendors), 1) if (total_farmers + total_vendors) > 0 else 0,
-                'totalOrders': total_orders,
-                'completedOrders': sum([count for status, count in booking_statuses + rent_statuses if status == 'completed']),
-                'cancelledOrders': cancelled_orders,
-                'avgDuration': 3,  # Default value
-                'totalRevenue': float(total_revenue),
-                'avgOrderValue': round(total_revenue / total_orders, 2) if total_orders > 0 else 0,
-                'platformCommission': round(total_revenue * 0.1, 2),
-                'revenueGrowth': 0,  # Default
-                'availableEquipment': available_equipment,
-                'utilizationRate': round((total_orders / (available_equipment * 30)) * 100, 1) if available_equipment > 0 else 0
-            }
-        }
+        # Sort by date
+        recent_registrations.sort(key=lambda x: x['date'], reverse=True)
         
         conn_vendors.close()
         conn_agri.close()
         
-        print(f"✅ Reports data loaded: {total_farmers} farmers, {total_vendors} vendors, ₹{total_revenue} revenue")
+        # ==================== PREPARE RESPONSE ====================
+        reports_data = {
+            'summary': {
+                'totalFarmers': total_farmers,
+                'totalVendors': total_vendors,
+                'totalEquipment': total_equipment,
+                'availableEquipment': available_equipment,
+                'totalBookings': total_bookings,
+                'totalRentRequests': total_rents
+            },
+            'registrationTimeline': registration_data,
+            'equipmentCategories': category_distribution,
+            'bookingStatus': booking_status_distribution,
+            'rentStatus': rent_status_distribution,
+            'recentActivities': {
+                'bookings': recent_bookings,
+                'rentRequests': recent_rents,
+                'registrations': recent_registrations[:10]  # Top 10
+            }
+        }
+        
+        print(f"✅ REAL Reports data loaded: {total_farmers} farmers, {total_vendors} vendors, {total_equipment} equipment")
         
         return jsonify(reports_data)
         
     except Exception as e:
-        print(f"❌ Error in reports API: {str(e)}")
+        print(f"❌ Error in REAL reports API: {str(e)}")
         import traceback
         traceback.print_exc()
-        return jsonify({'error': str(e), 'message': 'Failed to load reports data'}), 500
+        return jsonify({'error': str(e), 'message': 'Failed to load real reports data'}), 500
 # API endpoint to reject a farmer
 @app.route('/api/admin/farmer/reject/<int:farmer_id>', methods=['POST'])
 def api_reject_farmer(farmer_id):
