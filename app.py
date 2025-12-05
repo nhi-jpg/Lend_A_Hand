@@ -708,40 +708,10 @@ def get_user_orders():
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
-@app.route('/api/admin/broadcast-history')
-def api_admin_broadcast_history():
-    """Get broadcast message history"""
-    if 'admin_id' not in session or session.get('user_type') != 'admin':
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    try:
-        # For now, return mock data. You can add a proper database table later
-        # Create a broadcasts table in your database to store history
-        return jsonify([
-            {
-                'id': 1,
-                'title': 'New Equipment Available',
-                'type': 'new_equipment',
-                'recipients_count': 150,
-                'status': 'sent',
-                'sent_date': datetime.now().isoformat()
-            },
-            {
-                'id': 2,
-                'title': 'System Maintenance Notice',
-                'type': 'maintenance',
-                'recipients_count': 150,
-                'status': 'sent',
-                'sent_date': (datetime.now() - timedelta(days=3)).isoformat()
-            }
-        ])
-    except Exception as e:
-        print(f"Error fetching broadcast history: {str(e)}")
-        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/admin/broadcast', methods=['POST'])
 def api_admin_send_broadcast():
-    """Send broadcast message to all farmers - SIMPLIFIED VERSION"""
+    """Send broadcast message to all farmers"""
     if 'admin_id' not in session or session.get('user_type') != 'admin':
         return jsonify({'error': 'Unauthorized'}), 401
     
@@ -767,8 +737,8 @@ def api_admin_send_broadcast():
         success_count = 0
         failed_count = 0
         
-        # Format the message
-        full_message = f"📢 *{title}*\n\n{content}\n\n- Lend A Hand"
+        # Format the message - KEEP IT SIMPLE, NO EMOJIS
+        full_message = f"{title}\n\n{content}\n\n- Lend A Hand"
         
         print(f"📢 Starting broadcast to {len(farmers)} farmers")
         
@@ -777,10 +747,15 @@ def api_admin_send_broadcast():
             farmer_name, farmer_phone = farmer
             
             try:
-                # Use the phone number as-is from database
+                # Get phone number as string and clean it
                 phone = str(farmer_phone).strip()
+                
+                # Remove all non-digit characters (spaces, dashes, etc.)
+                phone = ''.join(filter(str.isdigit, phone))
+                
                 print(f"📱 Sending to {farmer_name}: {phone}")
                 
+                # Send SMS using the cleaned number
                 sms_result = send_sms(phone, full_message)
                 
                 if sms_result.get('success'):
@@ -794,9 +769,9 @@ def api_admin_send_broadcast():
                 failed_count += 1
                 print(f"❌ Error for {farmer_name}: {str(e)}")
         
-        # Create response
+        # Create response - ALWAYS return success for the API call itself
         response_data = {
-            'success': True,
+            'success': True,  # Always true, the API call itself succeeded
             'message': f'Broadcast completed. Sent to {success_count} of {len(farmers)} farmers',
             'stats': {
                 'total': len(farmers),
@@ -810,7 +785,6 @@ def api_admin_send_broadcast():
     except Exception as e:
         print(f"Error sending broadcast: {str(e)}")
         return jsonify({'error': str(e)}), 500
-        
 @app.route('/api/admin/farmers-count')
 def api_admin_farmers_count():
     """Get count of approved farmers for broadcast"""
@@ -4895,4 +4869,5 @@ if __name__ == '__main__':
     add_reminder_columns()  # ✅ ADD THIS LINE
     start_reminder_scheduler()
     app.run(debug=True)
+
 
