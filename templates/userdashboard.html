@@ -816,16 +816,118 @@
             }
         }
         
-        .menu-toggle {
-            display: none;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 10px 15px;
-            cursor: pointer;
-            margin-right: 15px;
-        }
+      /* Mobile menu toggle button */
+.menu-toggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1100;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    align-items: center;
+    justify-content: center;
+}
+
+/* Overlay for mobile when sidebar is open */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 999;
+}
+
+.overlay.active {
+    display: block;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 1000;
+        transition: transform 0.3s ease;
+    }
+    
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 20px 15px;
+        transition: none;
+    }
+    
+    .menu-toggle {
+        display: flex;
+    }
+    
+    .header {
+        margin-left: 0;
+        padding-top: 60px; /* Make space for mobile toggle button */
+    }
+    
+    /* Adjust header actions for mobile */
+    .header-actions {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    /* Adjust dashboard cards for mobile */
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .menu-toggle {
+        top: 10px;
+        left: 10px;
+        width: 40px;
+        height: 40px;
+    }
+    
+    .sidebar {
+        width: 85%;
+        max-width: 280px;
+    }
+    
+    .header {
+        padding-top: 50px;
+    }
+    
+    .items-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 10px;
+    }
+    
+    .booking-container {
+        grid-template-columns: 1fr;
+    }
+}
         
         @media (max-width: 768px) {
             .dashboard-cards {
@@ -1921,13 +2023,18 @@
     </style>
 </head>
 <body>
+    <!-- Mobile menu toggle -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay"></div>
    
 <!-- Google Translate for this page -->
 <div id="google_translate_element"></div>
    <!-- Mobile Menu Button -->
-    <button class="mobile-menu-btn" id="mobileMenuBtn" style="display: none;">
-        <i class="fas fa-bars"></i>
-    </button>
+   
 
     <!-- Toast Notification -->
     <div class="toast" id="toast">
@@ -1936,22 +2043,21 @@
     </div>
 
     <!-- Sidebar Navigation -->
-    <div class="sidebar" id="sidebar">
-        <div class="logo">
-            <h1><i class="fas fa-hands-helping"></i> <span>Lend A Hand</span></h1>
-        </div>
-        
-        <ul class="nav-links">
-            <li><a href="#" class="nav-link active" data-section="dashboard"><i class="fas fa-th-large"></i> <span>Dashboard</span></a></li>
-            <li><a href="#" class="nav-link" data-section="browse"><i class="fas fa-search"></i> <span>Browse Equipment</span></a></li>
-            <li><a href="#" class="nav-link" data-section="cart"><i class="fas fa-shopping-cart"></i> <span>My Cart</span></a></li>
-            <li><a href="#" class="nav-link" data-section="wishlist"><i class="fas fa-heart"></i> <span>Wishlist</span></a></li>
-            
-            <li><a href="#" class="nav-link" data-section="reviews"><i class="fas fa-star"></i> <span>My Reviews</span></a></li>
-            <li><a href="#" class="nav-link" data-section="orders"><i class="fas fa-clipboard-list"></i> <span>My Orders</span></a></li>
-            <li><a href="{{ url_for('logout') }}" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
-        </ul>
+<div class="sidebar" id="sidebar">
+    <div class="logo">
+        <h1><i class="fas fa-hands-helping"></i> <span>Lend A Hand</span></h1>
     </div>
+    
+    <ul class="nav-links">
+        <li><a href="#" class="nav-link active" data-section="dashboard"><i class="fas fa-th-large"></i> <span>Dashboard</span></a></li>
+        <li><a href="#" class="nav-link" data-section="browse"><i class="fas fa-search"></i> <span>Browse Equipment</span></a></li>
+        <li><a href="#" class="nav-link" data-section="cart"><i class="fas fa-shopping-cart"></i> <span>My Cart</span></a></li>
+        <li><a href="#" class="nav-link" data-section="wishlist"><i class="fas fa-heart"></i> <span>Wishlist</span></a></li>
+        <li><a href="#" class="nav-link" data-section="reviews"><i class="fas fa-star"></i> <span>My Reviews</span></a></li>
+        <li><a href="#" class="nav-link" data-section="orders"><i class="fas fa-clipboard-list"></i> <span>My Orders</span></a></li>
+        <li><a href="{{ url_for('logout') }}" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+    </ul>
+</div>
     
     <!-- Main Content -->
     <div class="main-content" id="mainContent">
@@ -1970,15 +2076,13 @@
             </div>
             
             <div class="header-actions">
-                <div class="notification-btn">
-                    <i class="fas fa-bell"></i>
-                </div>
+                
                 <div class="notification-btn cart-icon" id="cartIcon">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="cart-counter" id="cartCounter" style="display: none;">0</span>
                 </div>
                 <div class="user-profile">
-                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="User" class="user-img">
+             
                     <span id="userName">{{ user_name }}</span>
                 </div>
             </div>
@@ -2688,7 +2792,7 @@ let currentOrders = [];
 let currentOrderToCancel = null;
 
 // DOM Elements
-const sidebar = document.getElementById('sidebar');
+//const sidebar = document.getElementById('sidebar');
 const mainContent = document.getElementById('mainContent');
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
 const navLinks = document.querySelectorAll('.nav-link');
@@ -2718,7 +2822,88 @@ const cartCounter = document.getElementById('cartCounter');
 
 // Initialize the dashboard when the page loads
 document.addEventListener('DOMContentLoaded', initDashboard);
+// Mobile sidebar toggle functionality - SIMPLE VERSION
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
 
+// Initialize mobile menu state
+function initMobileMenu() {
+    if (window.innerWidth <= 992) {
+        // On mobile - hide sidebar initially
+        sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+        menuToggle.style.display = 'flex';
+        menuToggle.querySelector('i').classList.remove('fa-times');
+        menuToggle.querySelector('i').classList.add('fa-bars');
+    } else {
+        // On desktop - show sidebar
+        sidebar.classList.add('active');
+        overlay.classList.remove('active');
+        menuToggle.style.display = 'none';
+    }
+}
+
+// Toggle sidebar
+menuToggle.addEventListener('click', function() {
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+    
+    // Change icon based on sidebar state
+    const icon = menuToggle.querySelector('i');
+    if (sidebar.classList.contains('active')) {
+        icon.classList.remove('fa-bars');
+        icon.classList.add('fa-times');
+    } else {
+        icon.classList.remove('fa-times');
+        icon.classList.add('fa-bars');
+    }
+});
+
+// Close sidebar when clicking on overlay
+overlay.addEventListener('click', function() {
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+    const icon = menuToggle.querySelector('i');
+    icon.classList.remove('fa-times');
+    icon.classList.add('fa-bars');
+});
+
+// Close sidebar when clicking on a nav link (mobile)
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+        // Only prevent default for non-logout links
+        if (!this.getAttribute('href') || this.getAttribute('href') === '#') {
+            e.preventDefault();
+        }
+        
+        if (window.innerWidth <= 992) {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            const icon = menuToggle.querySelector('i');
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+        }
+    });
+});
+
+// Handle window resize
+window.addEventListener('resize', function() {
+    initMobileMenu();
+});
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initMobileMenu();
+});
+
+// Also initialize in your initDashboard function
+async function initDashboard() {
+    // ... your existing initDashboard code ...
+    
+    // Add this at the end:
+    initMobileMenu();
+}
 async function initDashboard() {
     console.log('🚀 Initializing user dashboard...');
     
@@ -4530,12 +4715,19 @@ function formatDate(dateString) {
 }
 
 function checkScreenSize() {
-    if (window.innerWidth <= 576) {
-        mobileMenuBtn.style.display = 'block';
+    if (window.innerWidth <= 992) {
+        menuToggle.style.display = 'flex';
         sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+        const icon = menuToggle.querySelector('i');
+        if (icon) {
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+        }
     } else {
-        mobileMenuBtn.style.display = 'none';
+        menuToggle.style.display = 'none';
         sidebar.classList.add('active');
+        overlay.classList.remove('active');
     }
 }
 
@@ -4571,7 +4763,11 @@ function showToast(message, type = 'success') {
 
 navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
-        e.preventDefault();
+        // Only prevent default for non-logout links
+        if (!link.getAttribute('href') || link.getAttribute('href') === '#') {
+            e.preventDefault();
+        }
+        
         const section = link.dataset.section;
         showSection(section);
         setActiveNavLink(section);
@@ -4580,8 +4776,14 @@ navLinks.forEach(link => {
         window.location.hash = section;
         
         // Close sidebar on mobile after selection
-        if (window.innerWidth <= 576) {
+        if (window.innerWidth <= 992) {
             sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            const icon = menuToggle.querySelector('i');
+            if (icon) {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
         }
     });
 });
