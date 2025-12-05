@@ -741,7 +741,7 @@ def api_admin_broadcast_history():
 
 @app.route('/api/admin/broadcast', methods=['POST'])
 def api_admin_send_broadcast():
-    """Send broadcast message to all farmers"""
+    """Send broadcast message to all farmers - SIMPLIFIED VERSION"""
     if 'admin_id' not in session or session.get('user_type') != 'admin':
         return jsonify({'error': 'Unauthorized'}), 401
     
@@ -766,64 +766,51 @@ def api_admin_send_broadcast():
         
         success_count = 0
         failed_count = 0
-        failed_numbers = []
         
         # Format the message
         full_message = f"📢 *{title}*\n\n{content}\n\n- Lend A Hand"
+        
+        print(f"📢 Starting broadcast to {len(farmers)} farmers")
         
         # Send SMS to each farmer
         for farmer in farmers:
             farmer_name, farmer_phone = farmer
             
             try:
-                # Clean phone number
-                phone_clean = ''.join(filter(str.isdigit, str(farmer_phone)))
+                # Use the phone number as-is from database
+                phone = str(farmer_phone).strip()
+                print(f"📱 Sending to {farmer_name}: {phone}")
                 
-                if phone_clean and len(phone_clean) >= 10:
-                    sms_result = send_sms(phone_clean, full_message)
-                    
-                    if sms_result.get('success'):
-                        success_count += 1
-                        print(f"✅ Broadcast sent to {farmer_name} ({phone_clean})")
-                    else:
-                        failed_count += 1
-                        failed_numbers.append(f"{farmer_name} - {phone_clean}")
+                sms_result = send_sms(phone, full_message)
+                
+                if sms_result.get('success'):
+                    success_count += 1
+                    print(f"✅ Sent to {farmer_name}")
                 else:
                     failed_count += 1
-                    failed_numbers.append(f"{farmer_name} - Invalid phone")
+                    print(f"❌ Failed for {farmer_name}: {sms_result.get('error')}")
                     
             except Exception as e:
                 failed_count += 1
-                failed_numbers.append(f"{farmer_name} - Error: {str(e)}")
+                print(f"❌ Error for {farmer_name}: {str(e)}")
         
-        # Create a response message
-        if success_count > 0:
-            message = f"Broadcast sent successfully to {success_count} farmers"
-            if failed_count > 0:
-                message += f". Failed for {failed_count} farmers"
-        else:
-            return jsonify({
-                'error': f'Failed to send broadcast to any farmers. Check farmer phone numbers.'
-            }), 400
-        
-        # TODO: Save to database history table
-        # You should create a broadcasts table with columns:
-        # id, title, content, type, recipients_count, success_count, failed_count, sent_by, sent_date
-        
-        return jsonify({
+        # Create response
+        response_data = {
             'success': True,
-            'message': message,
+            'message': f'Broadcast completed. Sent to {success_count} of {len(farmers)} farmers',
             'stats': {
                 'total': len(farmers),
                 'success': success_count,
                 'failed': failed_count
             }
-        })
+        }
+        
+        return jsonify(response_data)
         
     except Exception as e:
         print(f"Error sending broadcast: {str(e)}")
         return jsonify({'error': str(e)}), 500
-
+        
 @app.route('/api/admin/farmers-count')
 def api_admin_farmers_count():
     """Get count of approved farmers for broadcast"""
@@ -4908,3 +4895,4 @@ if __name__ == '__main__':
     add_reminder_columns()  # ✅ ADD THIS LINE
     start_reminder_scheduler()
     app.run(debug=True)
+
