@@ -64,6 +64,57 @@
     background: #feebcb;
     color: #b45309;
 }
+/* Fix modal close button positioning */
+.modal-header .close-modal {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: var(--gray);
+    line-height: 1;
+    padding: 0;
+    margin: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-header .close-modal:hover {
+    color: var(--dark);
+}
+
+/* Ensure modal is above everything */
+.modal {
+    z-index: 9999;
+}
+
+/* Make sure detail rows display properly */
+.detail-row {
+    display: flex;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.detail-label {
+    width: 180px;
+    font-weight: 600;
+    color: var(--dark);
+    flex-shrink: 0;
+}
+
+.detail-value {
+    flex: 1;
+    word-break: break-word;
+}
 
 /* Small buttons for document actions */
 .btn-doc-action {
@@ -777,7 +828,41 @@
                     </div>
                 </div>
             </div>
-            
+            <!-- Farmer Detail Modal -->
+<div class="modal" id="farmerModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="farmerModalTitle">Farmer Details</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        
+        <div class="modal-body" id="farmerModalBody">
+            <!-- Farmer details will be loaded here -->
+        </div>
+        
+        <div class="modal-footer" id="farmerModalFooter">
+            <!-- Action buttons will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<!-- Vendor Detail Modal -->
+<div class="modal" id="vendorModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="vendorModalTitle">Vendor Details</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        
+        <div class="modal-body" id="vendorModalBody">
+            <!-- Vendor details will be loaded here -->
+        </div>
+        
+        <div class="modal-footer" id="vendorModalFooter">
+            <!-- Action buttons will be loaded here -->
+        </div>
+    </div>
+</div>
             <!-- Farmers Section -->
             <div class="content-section" id="farmers-section">
                 <div class="section-header">
@@ -1222,7 +1307,7 @@
         </div>
         
     </div>
-    
+
     <!-- Recent Activities -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px;">
         
@@ -2580,134 +2665,101 @@ This will send an SMS to all registered farmers.`);
 
  
 
-    // Render functions
-    function renderFarmersTable() {
-        farmersTable.innerHTML = '';
-        
-        if (!farmersData || farmersData.length === 0) {
-            farmersTable.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 20px; color: var(--gray);">No farmers found.</td></tr>';
-            return;
-        }
-        
-        farmersData.forEach(farmer => {
-            const row = document.createElement('tr');
-            
-            const statusClass = 
-                farmer.status === 'pending' ? 'status-pending' : 
-                farmer.status === 'approved' ? 'status-approved' : 
-                'status-rejected';
-            
-            row.innerHTML = `
-                <td>#${farmer.id}</td>
-                <td>${farmer.full_name} ${farmer.last_name}</td>
-                <td>${farmer.email || 'N/A'}</td>
-                <td>${farmer.phone}</td>
-                <td>${farmer.farm_location}</td>
-                <td>${farmer.farm_size || 'N/A'} acres</td>
-                <td>${formatDate(farmer.registration_date)}</td>
-                <td><span class="status-badge ${statusClass}">${farmer.status}</span></td>
-                <td>
-                    <button class="btn btn-primary btn-sm view-farmer-btn" data-id="${farmer.id}">View</button>
-                    ${farmer.status === 'pending' ? 
-                        `<button class="btn btn-success btn-sm approve-farmer-btn" data-id="${farmer.id}">Approve</button>
-                         <button class="btn btn-danger btn-sm reject-farmer-btn" data-id="${farmer.id}">Reject</button>` : ''}
-                </td>
-            `;
-            
-            farmersTable.appendChild(row);
-        });
-        
-        document.querySelectorAll('.view-farmer-btn').forEach(btn => {
-            btn.addEventListener('click', () => viewFarmer(btn.dataset.id));
-        });
-        
-        document.querySelectorAll('.approve-farmer-btn').forEach(btn => {
-            btn.addEventListener('click', () => approveFarmer(btn.dataset.id));
-        });
-        
-        document.querySelectorAll('.reject-farmer-btn').forEach(btn => {
-            btn.addEventListener('click', () => rejectFarmer(btn.dataset.id));
-        });
+function renderFarmersTable() {
+    farmersTable.innerHTML = '';
+    
+    if (!farmersData || farmersData.length === 0) {
+        farmersTable.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 20px; color: var(--gray);">No farmers found.</td></tr>';
+        return;
     }
     
-    function renderVendorsTable() {
-        vendorsTable.innerHTML = '';
+    farmersData.forEach(farmer => {
+        const row = document.createElement('tr');
         
-        if (!vendorsData || vendorsData.length === 0) {
-            vendorsTable.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 20px; color: var(--gray);">No vendors found.</td></tr>';
-            return;
-        }
+        const statusClass = 
+            farmer.status === 'pending' ? 'status-pending' : 
+            farmer.status === 'approved' ? 'status-approved' : 
+            'status-rejected';
         
-        vendorsData.forEach(vendor => {
-            const row = document.createElement('tr');
-            
-            const statusClass = 
-                vendor.status === 'pending' ? 'status-pending' : 
-                vendor.status === 'approved' ? 'status-approved' : 
-                'status-rejected';
-            
-            const docStatusClass = 
-                vendor.document_verified === 'verified' ? 'status-approved' : 
-                vendor.document_verified === 'rejected' ? 'status-rejected' : 
-                'status-pending';
-            
-            const documentIndicator = vendor.business_document ? 
-                `<a href="${vendor.document_url || '#'}" target="_blank" title="View Document">
-                    <i class="fas fa-file-pdf"></i> View
-                </a>` : 
-                'No Document';
-            
-            row.innerHTML = `
-                <td>#${vendor.id}</td>
-                <td>${vendor.business_name}</td>
-                <td>${vendor.contact_name}</td>
-                <td>${vendor.email}</td>
-                <td>${vendor.phone}</td>
-                <td>${vendor.service_type}</td>
-                <td>${documentIndicator}</td>
-                <td>
-                    <span class="status-badge ${docStatusClass}">
-                        ${vendor.document_verified || 'pending'}
-                    </span>
-                </td>
-                <td>${formatDate(vendor.registration_date)}</td>
-                <td><span class="status-badge ${statusClass}">${vendor.status}</span></td>
-                <td>
-                    <button class="btn btn-primary btn-sm view-vendor-btn" data-id="${vendor.id}">View</button>
-                    ${vendor.status === 'pending' ? 
-                        `<button class="btn btn-success btn-sm approve-vendor-btn" data-id="${vendor.id}">Approve</button>
-                         <button class="btn btn-danger btn-sm reject-vendor-btn" data-id="${vendor.id}">Reject</button>` : ''}
-                    ${vendor.business_document ? 
-                        `<div style="margin-top: 5px;">
-                            <button class="btn btn-info btn-sm verify-doc-btn" data-id="${vendor.id}" data-status="verified" style="font-size: 0.7rem; padding: 2px 6px;">Verify Doc</button>
-                            <button class="btn btn-warning btn-sm reject-doc-btn" data-id="${vendor.id}" data-status="rejected" style="font-size: 0.7rem; padding: 2px 6px;">Reject Doc</button>
-                        </div>` : ''}
-                </td>
-            `;
-            
-            vendorsTable.appendChild(row);
-        });
+        row.innerHTML = `
+            <td>#${farmer.id}</td>
+            <td>${farmer.full_name} ${farmer.last_name}</td>
+            <td>${farmer.email || 'N/A'}</td>
+            <td>${farmer.phone}</td>
+            <td>${farmer.farm_location}</td>
+            <td>${farmer.farm_size || 'N/A'} acres</td>
+            <td>${formatDate(farmer.registration_date)}</td>
+            <td><span class="status-badge ${statusClass}">${farmer.status}</span></td>
+            <td>
+                <button class="btn btn-primary btn-sm view-farmer-btn" data-id="${farmer.id}">View</button>
+                ${farmer.status === 'pending' ? 
+                    `<button class="btn btn-success btn-sm approve-farmer-btn" data-id="${farmer.id}">Approve</button>
+                     <button class="btn btn-danger btn-sm reject-farmer-btn" data-id="${farmer.id}">Reject</button>` : ''}
+            </td>
+        `;
         
-        document.querySelectorAll('.view-vendor-btn').forEach(btn => {
-            btn.addEventListener('click', () => viewVendor(btn.dataset.id));
-        });
-        
-        document.querySelectorAll('.approve-vendor-btn').forEach(btn => {
-            btn.addEventListener('click', () => approveVendor(btn.dataset.id));
-        });
-        
-        document.querySelectorAll('.reject-vendor-btn').forEach(btn => {
-            btn.addEventListener('click', () => rejectVendor(btn.dataset.id));
-        });
-        
-        document.querySelectorAll('.verify-doc-btn').forEach(btn => {
-            btn.addEventListener('click', () => verifyVendorDocument(btn.dataset.id, btn.dataset.status));
-        });
-        
-        document.querySelectorAll('.reject-doc-btn').forEach(btn => {
-            btn.addEventListener('click', () => verifyVendorDocument(btn.dataset.id, btn.dataset.status));
-        });
+        farmersTable.appendChild(row);
+    });
+}
+    
+function renderVendorsTable() {
+    vendorsTable.innerHTML = '';
+    
+    if (!vendorsData || vendorsData.length === 0) {
+        vendorsTable.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 20px; color: var(--gray);">No vendors found.</td></tr>';
+        return;
     }
+    
+    vendorsData.forEach(vendor => {
+        const row = document.createElement('tr');
+        
+        const statusClass = 
+            vendor.status === 'pending' ? 'status-pending' : 
+            vendor.status === 'approved' ? 'status-approved' : 
+            'status-rejected';
+        
+        const docStatusClass = 
+            vendor.document_verified === 'verified' ? 'status-approved' : 
+            vendor.document_verified === 'rejected' ? 'status-rejected' : 
+            'status-pending';
+        
+        const documentIndicator = vendor.business_document ? 
+            `<a href="${vendor.document_url || '#'}" target="_blank" title="View Document">
+                <i class="fas fa-file-pdf"></i> View
+            </a>` : 
+            'No Document';
+        
+        row.innerHTML = `
+            <td>#${vendor.id}</td>
+            <td>${vendor.business_name}</td>
+            <td>${vendor.contact_name}</td>
+            <td>${vendor.email}</td>
+            <td>${vendor.phone}</td>
+            <td>${vendor.service_type}</td>
+            <td>${documentIndicator}</td>
+            <td>
+                <span class="status-badge ${docStatusClass}">
+                    ${vendor.document_verified || 'pending'}
+                </span>
+            </td>
+            <td>${formatDate(vendor.registration_date)}</td>
+            <td><span class="status-badge ${statusClass}">${vendor.status}</span></td>
+            <td>
+                <button class="btn btn-primary btn-sm view-vendor-btn" data-id="${vendor.id}">View</button>
+                ${vendor.status === 'pending' ? 
+                    `<button class="btn btn-success btn-sm approve-vendor-btn" data-id="${vendor.id}">Approve</button>
+                     <button class="btn btn-danger btn-sm reject-vendor-btn" data-id="${vendor.id}">Reject</button>` : ''}
+                ${vendor.business_document ? 
+                    `<div style="margin-top: 5px;">
+                        <button class="btn btn-info btn-sm verify-doc-btn" data-id="${vendor.id}" data-status="verified" style="font-size: 0.7rem; padding: 2px 6px;">Verify Doc</button>
+                        <button class="btn btn-warning btn-sm reject-doc-btn" data-id="${vendor.id}" data-status="rejected" style="font-size: 0.7rem; padding: 2px 6px;">Reject Doc</button>
+                    </div>` : ''}
+            </td>
+        `;
+        
+        vendorsTable.appendChild(row);
+    });
+}
 
     async function verifyVendorDocument(vendorId, status) {
         if (confirm(`Are you sure you want to mark this document as ${status}?`)) {
@@ -2724,189 +2776,190 @@ This will send an SMS to all registered farmers.`);
             }
         }
     }
-
-    // View detail functions
-    function viewFarmer(farmerId) {
-        const farmer = farmersData.find(f => f.id === parseInt(farmerId));
-        if (!farmer) return;
-        
-        document.getElementById('farmerModalTitle').textContent = `Farmer Details - ${farmer.full_name} ${farmer.last_name}`;
-        
-        const modalBody = document.getElementById('farmerModalBody');
-        modalBody.innerHTML = `
-            <div class="detail-row">
-                <div class="detail-label">Full Name:</div>
-                <div class="detail-value">${farmer.full_name} ${farmer.last_name}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Email:</div>
-                <div class="detail-value">${farmer.email || 'N/A'}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Phone:</div>
-                <div class="detail-value">${farmer.phone}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Farm Location:</div>
-                <div class="detail-value">${farmer.farm_location}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Farm Size:</div>
-                <div class="detail-value">${farmer.farm_size || 'N/A'} acres</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Crop Types:</div>
-                <div class="detail-value">${farmer.crop_types || 'N/A'}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Registration Date:</div>
-                <div class="detail-value">${formatDate(farmer.registration_date)}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Status:</div>
-                <div class="detail-value"><span class="status-badge ${farmer.status === 'pending' ? 'status-pending' : farmer.status === 'approved' ? 'status-approved' : 'status-rejected'}">${farmer.status}</span></div>
-            </div>
+  // Update the viewFarmer function to fetch fresh data
+async function viewFarmer(farmerId) {
+    console.log("Fetching farmer details for ID:", farmerId);
+    
+    // Fetch fresh data from the API
+    const farmer = await fetchData(`/api/admin/farmer/${farmerId}`);
+    
+    if (!farmer) {
+        showNotification('Failed to load farmer details', 'error');
+        return;
+    }
+    
+    document.getElementById('farmerModalTitle').textContent = `Farmer Details - ${farmer.full_name} ${farmer.last_name}`;
+    
+    const modalBody = document.getElementById('farmerModalBody');
+    modalBody.innerHTML = `
+        <div class="detail-row">
+            <div class="detail-label">Farmer ID:</div>
+            <div class="detail-value">#${farmer.id}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Full Name:</div>
+            <div class="detail-value">${farmer.full_name} ${farmer.last_name || ''}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Email:</div>
+            <div class="detail-value">${farmer.email || 'N/A'}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Phone:</div>
+            <div class="detail-value">${farmer.phone || 'N/A'}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Farm Location:</div>
+            <div class="detail-value">${farmer.farm_location || 'N/A'}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Farm Size:</div>
+            <div class="detail-value">${farmer.farm_size || 'N/A'} acres</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Crop Types:</div>
+            <div class="detail-value">${farmer.crop_types || 'N/A'}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Additional Info:</div>
+            <div class="detail-value">${farmer.additional_info || 'N/A'}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Registration Date:</div>
+            <div class="detail-value">${formatDate(farmer.registration_date)}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Status:</div>
+            <div class="detail-value"><span class="status-badge ${farmer.status === 'pending' ? 'status-pending' : farmer.status === 'approved' ? 'status-approved' : 'status-rejected'}">${farmer.status || 'N/A'}</span></div>
+        </div>
+    `;
+    
+    const modalFooter = document.getElementById('farmerModalFooter');
+    if (farmer.status === 'pending') {
+        modalFooter.innerHTML = `
+            <button class="btn btn-success" id="modalApproveFarmer" data-id="${farmer.id}">Approve</button>
+            <button class="btn btn-danger" id="modalRejectFarmer" data-id="${farmer.id}">Reject</button>
+            <button class="btn btn-primary" id="closeFarmerModal">Close</button>
         `;
         
-        const modalFooter = document.getElementById('farmerModalFooter');
-        if (farmer.status === 'pending') {
-            modalFooter.innerHTML = `
-                <button class="btn btn-success" id="modalApproveFarmer" data-id="${farmer.id}">Approve</button>
-                <button class="btn btn-danger" id="modalRejectFarmer" data-id="${farmer.id}">Reject</button>
-                <button class="btn btn-primary" id="closeFarmerModal">Close</button>
-            `;
-            
-            document.getElementById('modalApproveFarmer').addEventListener('click', () => {
-                approveFarmer(farmer.id);
-                farmerModal.style.display = 'none';
-            });
-            
-            document.getElementById('modalRejectFarmer').addEventListener('click', () => {
-                rejectFarmer(farmer.id);
-                farmerModal.style.display = 'none';
-            });
-        } else {
-            modalFooter.innerHTML = `
-                <button class="btn btn-primary" id="closeFarmerModal">Close</button>
-            `;
-        }
-        
-        document.getElementById('closeFarmerModal').addEventListener('click', () => {
+        document.getElementById('modalApproveFarmer').addEventListener('click', () => {
+            approveFarmer(farmer.id);
             farmerModal.style.display = 'none';
         });
         
-        farmerModal.style.display = 'flex';
+        document.getElementById('modalRejectFarmer').addEventListener('click', () => {
+            rejectFarmer(farmer.id);
+            farmerModal.style.display = 'none';
+        });
+    } else {
+        modalFooter.innerHTML = `
+            <button class="btn btn-primary" id="closeFarmerModal">Close</button>
+        `;
     }
     
-    function viewVendor(vendorId) {
-        const vendor = vendorsData.find(v => v.id === parseInt(vendorId));
-        if (!vendor) return;
-        
-        document.getElementById('vendorModalTitle').textContent = `Vendor Details - ${vendor.business_name}`;
-        
-        const docStatusSection = vendor.business_document ? `
-            <div class="detail-row">
-                <div class="detail-label">Document:</div>
-                <div class="detail-value">
-                    <a href="${vendor.document_url || '#'}" target="_blank" class="btn btn-sm btn-info">
-                        <i class="fas fa-eye"></i> View Document
-                    </a>
-                </div>
+    document.getElementById('closeFarmerModal').addEventListener('click', () => {
+        farmerModal.style.display = 'none';
+    });
+    
+    farmerModal.style.display = 'flex';
+}
+
+// Update the viewVendor function to fetch fresh data
+async function viewVendor(vendorId) {
+    console.log("Fetching vendor details for ID:", vendorId);
+    
+    // Fetch fresh data from the API
+    const vendor = await fetchData(`/api/admin/vendor/${vendorId}`);
+    
+    if (!vendor) {
+        showNotification('Failed to load vendor details', 'error');
+        return;
+    }
+    
+    document.getElementById('vendorModalTitle').textContent = `Vendor Details - ${vendor.business_name}`;
+    
+    const modalBody = document.getElementById('vendorModalBody');
+    modalBody.innerHTML = `
+        <div class="detail-row">
+            <div class="detail-label">Vendor ID:</div>
+            <div class="detail-value">#${vendor.id}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Business Name:</div>
+            <div class="detail-value">${vendor.business_name}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Contact Person:</div>
+            <div class="detail-value">${vendor.contact_name}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Email:</div>
+            <div class="detail-value">${vendor.email || 'N/A'}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Phone:</div>
+            <div class="detail-value">${vendor.phone || 'N/A'}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Service Type:</div>
+            <div class="detail-value">${vendor.service_type || 'N/A'}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Description:</div>
+            <div class="detail-value">${vendor.description || 'N/A'}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Registration Date:</div>
+            <div class="detail-value">${formatDate(vendor.registration_date)}</div>
+        </div>
+        <div class="detail-row">
+            <div class="detail-label">Status:</div>
+            <div class="detail-value"><span class="status-badge ${vendor.status === 'pending' ? 'status-pending' : vendor.status === 'approved' ? 'status-approved' : 'status-rejected'}">${vendor.status || 'N/A'}</span></div>
+        </div>
+        ${vendor.business_document ? `
+        <div class="detail-row">
+            <div class="detail-label">Business Document:</div>
+            <div class="detail-value">
+                <a href="${vendor.document_url || '#'}" target="_blank" class="btn btn-sm btn-info">
+                    <i class="fas fa-file-pdf"></i> View Document
+                </a>
+                <span class="status-badge ${vendor.document_verified === 'verified' ? 'status-approved' : vendor.document_verified === 'rejected' ? 'status-rejected' : 'status-pending'}">
+                    ${vendor.document_verified || 'pending'}
+                </span>
             </div>
-            <div class="detail-row">
-                <div class="detail-label">Document Status:</div>
-                <div class="detail-value">
-                    <span class="status-badge ${vendor.document_verified === 'verified' ? 'status-approved' : vendor.document_verified === 'rejected' ? 'status-rejected' : 'status-pending'}">
-                        ${vendor.document_verified || 'pending'}
-                    </span>
-                    ${vendor.business_document ? `
-                    <div style="margin-top: 10px;">
-                        <button class="btn btn-success btn-sm" id="verifyDocBtn" data-id="${vendor.id}" data-status="verified">
-                            <i class="fas fa-check"></i> Verify Document
-                        </button>
-                        <button class="btn btn-danger btn-sm" id="rejectDocBtn" data-id="${vendor.id}" data-status="rejected">
-                            <i class="fas fa-times"></i> Reject Document
-                        </button>
-                    </div>
-                    ` : ''}
-                </div>
-            </div>
-        ` : '<div class="detail-row"><div class="detail-label">Document:</div><div class="detail-value">No document uploaded</div></div>';
-        
-        const modalBody = document.getElementById('vendorModalBody');
-        modalBody.innerHTML = `
-            <div class="detail-row">
-                <div class="detail-label">Business Name:</div>
-                <div class="detail-value">${vendor.business_name}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Contact Person:</div>
-                <div class="detail-value">${vendor.contact_name}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Email:</div>
-                <div class="detail-value">${vendor.email}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Phone:</div>
-                <div class="detail-value">${vendor.phone}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Service Type:</div>
-                <div class="detail-value">${vendor.service_type}</div>
-            </div>
-            ${docStatusSection}
-            <div class="detail-row">
-                <div class="detail-label">Registration Date:</div>
-                <div class="detail-value">${formatDate(vendor.registration_date)}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Account Status:</div>
-                <div class="detail-value"><span class="status-badge ${vendor.status === 'pending' ? 'status-pending' : vendor.status === 'approved' ? 'status-approved' : 'status-rejected'}">${vendor.status}</span></div>
-            </div>
+        </div>
+        ` : ''}
+    `;
+    
+    const modalFooter = document.getElementById('vendorModalFooter');
+    if (vendor.status === 'pending') {
+        modalFooter.innerHTML = `
+            <button class="btn btn-success" id="modalApproveVendor" data-id="${vendor.id}">Approve</button>
+            <button class="btn btn-danger" id="modalRejectVendor" data-id="${vendor.id}">Reject</button>
+            <button class="btn btn-primary" id="closeVendorModal">Close</button>
         `;
         
-        const modalFooter = document.getElementById('vendorModalFooter');
-        if (vendor.status === 'pending') {
-            modalFooter.innerHTML = `
-                <button class="btn btn-success" id="modalApproveVendor" data-id="${vendor.id}">Approve Account</button>
-                <button class="btn btn-danger" id="modalRejectVendor" data-id="${vendor.id}">Reject Account</button>
-                <button class="btn btn-primary" id="closeVendorModal">Close</button>
-            `;
-            
-            document.getElementById('modalApproveVendor').addEventListener('click', () => {
-                approveVendor(vendor.id);
-                vendorModal.style.display = 'none';
-            });
-            
-            document.getElementById('modalRejectVendor').addEventListener('click', () => {
-                rejectVendor(vendor.id);
-                vendorModal.style.display = 'none';
-            });
-        } else {
-            modalFooter.innerHTML = `
-                <button class="btn btn-primary" id="closeVendorModal">Close</button>
-            `;
-        }
-        
-        if (vendor.business_document) {
-            document.getElementById('verifyDocBtn')?.addEventListener('click', () => {
-                verifyVendorDocument(vendor.id, 'verified');
-                vendorModal.style.display = 'none';
-            });
-            
-            document.getElementById('rejectDocBtn')?.addEventListener('click', () => {
-                verifyVendorDocument(vendor.id, 'rejected');
-                vendorModal.style.display = 'none';
-            });
-        }
-        
-        document.getElementById('closeVendorModal').addEventListener('click', () => {
+        document.getElementById('modalApproveVendor').addEventListener('click', () => {
+            approveVendor(vendor.id);
             vendorModal.style.display = 'none';
         });
         
-        vendorModal.style.display = 'flex';
+        document.getElementById('modalRejectVendor').addEventListener('click', () => {
+            rejectVendor(vendor.id);
+            vendorModal.style.display = 'none';
+        });
+    } else {
+        modalFooter.innerHTML = `
+            <button class="btn btn-primary" id="closeVendorModal">Close</button>
+        `;
     }
+    
+    document.getElementById('closeVendorModal').addEventListener('click', () => {
+        vendorModal.style.display = 'none';
+    });
+    
+    vendorModal.style.display = 'flex';
+}
 
     // Approval functions
     async function approveFarmer(farmerId) {
@@ -3110,86 +3163,187 @@ function formatDate(dateString) {
         }
     }
 
-    // Initialize the dashboard
-    function initDashboard() {
-        loadStats();
-        
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const sectionId = link.getAttribute('data-section');
-                setActiveNavLink(sectionId);
-                showSection(sectionId);
+// Initialize the dashboard - FIXED VERSION
+function initDashboard() {
+    loadStats();
+    
+    // Navigation
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const sectionId = link.getAttribute('data-section');
+            setActiveNavLink(sectionId);
+            showSection(sectionId);
+        });
+    });
+    
+    // Fix modal close buttons
+    document.addEventListener('click', function(e) {
+        // Close modals when clicking X button
+        if (e.target.classList.contains('close-modal')) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                modal.style.display = 'none';
             });
-        });
+        }
         
-        document.querySelectorAll('.close-modal').forEach(btn => {
-            btn.addEventListener('click', () => {
-                farmerModal.style.display = 'none';
-                vendorModal.style.display = 'none';
-                bookingModal.style.display = 'none';
-                equipmentModal.style.display = 'none';
-            });
-        });
-        
-        window.addEventListener('click', (e) => {
-            if (e.target === farmerModal) {
-                farmerModal.style.display = 'none';
-            }
-            if (e.target === vendorModal) {
-                vendorModal.style.display = 'none';
-            }
-            if (e.target === bookingModal) {
-                bookingModal.style.display = 'none';
-            }
-            if (e.target === equipmentModal) {
-                equipmentModal.style.display = 'none';
-            }
-        });
-        
-        // Search and filter events
-        farmerSearch.addEventListener('input', () => loadFarmers());
-        vendorSearch.addEventListener('input', () => loadVendors());
-        farmerStatusFilter.addEventListener('change', () => loadFarmers());
-        vendorStatusFilter.addEventListener('change', () => loadVendors());
-        
-        // Equipment filter events - FIXED
-        equipmentSearch.addEventListener('input', () => filterAndRenderEquipment());
-        equipmentStatusFilter.addEventListener('change', () => filterAndRenderEquipment());
-        equipmentCategoryFilter.addEventListener('change', () => filterAndRenderEquipment());
-        
-        // Booking filter events
-        bookingSearch.addEventListener('input', () => filterAndRenderBookings());
-        bookingStatusFilter.addEventListener('change', () => filterAndRenderBookings());
-        bookingDateFilter.addEventListener('change', () => filterAndRenderBookings());
-      
-        
-        // Auto-refresh data every 60 seconds
-        setInterval(() => {
-            const activeSection = document.querySelector('.content-section.active');
-            if (!activeSection) return;
-            
-            const activeId = activeSection.id.replace('-section', '');
-            
-            if (activeId === 'dashboard') {
-                loadStats();
-            } else if (activeId === 'farmers') {
-                loadFarmers();
-            } else if (activeId === 'vendors') {
-                loadVendors();
-            } else if (activeId === 'equipment') {
-                loadEquipment();
-            } else if (activeId === 'bookings') {
-                loadBookings();
-            } else if (activeId === 'broadcast') {
-                loadBroadcastStats();
-                loadBroadcastHistory();
-            } 
-        }, 60000);
+        // Close modals when clicking outside
+        if (e.target.classList.contains('modal')) {
+            e.target.style.display = 'none';
+        }
+    });
+    
+    // Search and filter events
+    farmerSearch.addEventListener('input', () => loadFarmers());
+    vendorSearch.addEventListener('input', () => loadVendors());
+    farmerStatusFilter.addEventListener('change', () => loadFarmers());
+    vendorStatusFilter.addEventListener('change', () => loadVendors());
+    
+    // Equipment filter events
+    equipmentSearch.addEventListener('input', () => filterAndRenderEquipment());
+    equipmentStatusFilter.addEventListener('change', () => filterAndRenderEquipment());
+    equipmentCategoryFilter.addEventListener('change', () => filterAndRenderEquipment());
+    
+    // Booking filter events
+    bookingSearch.addEventListener('input', () => filterAndRenderBookings());
+    bookingStatusFilter.addEventListener('change', () => filterAndRenderBookings());
+    bookingDateFilter.addEventListener('change', () => filterAndRenderBookings());
+// Event Delegation for ALL dynamically created buttons
+document.addEventListener('click', function(e) {
+    // FARMER ACTION BUTTONS
+    // Farmer view buttons
+    if (e.target.classList.contains('view-farmer-btn')) {
+        const button = e.target;
+        const farmerId = button.dataset.id;
+        console.log("👨‍🌾 Clicked view farmer button:", farmerId);
+        viewFarmer(farmerId);
+    }
+    // Farmer approve buttons
+    else if (e.target.classList.contains('approve-farmer-btn')) {
+        const button = e.target;
+        const farmerId = button.dataset.id;
+        console.log("✅ Clicked approve farmer button:", farmerId);
+        approveFarmer(farmerId);
+    }
+    // Farmer reject buttons
+    else if (e.target.classList.contains('reject-farmer-btn')) {
+        const button = e.target;
+        const farmerId = button.dataset.id;
+        console.log("❌ Clicked reject farmer button:", farmerId);
+        rejectFarmer(farmerId);
     }
     
-    // Initialize the dashboard when the page loads
-    document.addEventListener('DOMContentLoaded', initDashboard);
+    // VENDOR ACTION BUTTONS
+    // Vendor view buttons
+    else if (e.target.classList.contains('view-vendor-btn')) {
+        const button = e.target;
+        const vendorId = button.dataset.id;
+        console.log("👨‍💼 Clicked view vendor button:", vendorId);
+        viewVendor(vendorId);
+    }
+    // Vendor approve buttons
+    else if (e.target.classList.contains('approve-vendor-btn')) {
+        const button = e.target;
+        const vendorId = button.dataset.id;
+        console.log("✅ Clicked approve vendor button:", vendorId);
+        approveVendor(vendorId);
+    }
+    // Vendor reject buttons
+    else if (e.target.classList.contains('reject-vendor-btn')) {
+        const button = e.target;
+        const vendorId = button.dataset.id;
+        console.log("❌ Clicked reject vendor button:", vendorId);
+        rejectVendor(vendorId);
+    }
+    // Vendor document verify buttons
+    else if (e.target.classList.contains('verify-doc-btn')) {
+        const button = e.target;
+        const vendorId = button.dataset.id;
+        console.log("📄 Clicked verify doc button:", vendorId);
+        verifyVendorDocument(vendorId, 'verified');
+    }
+    // Vendor document reject buttons
+    else if (e.target.classList.contains('reject-doc-btn')) {
+        const button = e.target;
+        const vendorId = button.dataset.id;
+        console.log("📄 Clicked reject doc button:", vendorId);
+        verifyVendorDocument(vendorId, 'rejected');
+    }
+    
+    // RECENT REGISTRATION BUTTONS
+    else if (e.target.classList.contains('view-recent-btn')) {
+        const button = e.target;
+        const type = button.dataset.type;
+        const id = button.dataset.id;
+        
+        if (type === 'farmer') {
+            console.log("📅 Clicked view recent farmer:", id);
+            viewFarmer(id);
+        } else {
+            console.log("📅 Clicked view recent vendor:", id);
+            viewVendor(id);
+        }
+    }
+    
+    // EQUIPMENT BUTTONS
+    else if (e.target.classList.contains('view-equipment-btn')) {
+        const button = e.target;
+        const equipmentId = button.dataset.id;
+        console.log("🚜 Clicked view equipment button:", equipmentId);
+        viewEquipment(equipmentId);
+    }
+    
+    // BOOKING BUTTONS
+    else if (e.target.classList.contains('view-booking-btn')) {
+        const button = e.target;
+        const bookingId = button.dataset.id;
+        console.log("📅 Clicked view booking button:", bookingId);
+        viewBooking(bookingId);
+    }
+    else if (e.target.classList.contains('delete-booking-btn')) {
+        const button = e.target;
+        const bookingId = button.dataset.id;
+        console.log("🗑️ Clicked delete booking button:", bookingId);
+        deleteBooking(bookingId);
+    }
+    
+    // MODAL CLOSE BUTTONS
+    else if (e.target.classList.contains('close-modal')) {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.style.display = 'none';
+        });
+    }
+    
+    // MODAL CLICK OUTSIDE
+    else if (e.target.classList.contains('modal')) {
+        e.target.style.display = 'none';
+    }
+});
+    
+    // Auto-refresh data every 60 seconds
+    setInterval(() => {
+        const activeSection = document.querySelector('.content-section.active');
+        if (!activeSection) return;
+        
+        const activeId = activeSection.id.replace('-section', '');
+        
+        if (activeId === 'dashboard') {
+            loadStats();
+        } else if (activeId === 'farmers') {
+            loadFarmers();
+        } else if (activeId === 'vendors') {
+            loadVendors();
+        } else if (activeId === 'equipment') {
+            loadEquipment();
+        } else if (activeId === 'bookings') {
+            loadBookings();
+        } else if (activeId === 'broadcast') {
+            loadBroadcastStats();
+            loadBroadcastHistory();
+        }
+    }, 60000);
+}
     
 </script>
     <style>.goog-te-banner-frame{display:none!important;}.goog-te-gadget{font-size:0!important;}</style>
