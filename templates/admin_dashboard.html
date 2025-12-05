@@ -679,7 +679,7 @@
             overflow-y: auto;
             padding: 10px;
         }
-        /* ===== MOBILE RESPONSIVE STYLES ===== */
+/* ===== MOBILE RESPONSIVE STYLES ===== */
 @media (max-width: 768px) {
     /* General adjustments */
     body {
@@ -689,19 +689,27 @@
     /* Admin Header */
     .admin-header {
         padding: 10px 15px;
-        flex-direction: column;
+        flex-direction: row;
+        justify-content: space-between;
         gap: 10px;
-        text-align: center;
     }
     
     .admin-header h1 {
         font-size: 1.3rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 50%;
     }
     
     .admin-header .user-info {
-        width: 100%;
-        justify-content: center;
+        justify-content: flex-end;
         gap: 10px;
+        flex-shrink: 0;
+    }
+    
+    .admin-header .user-info span {
+        display: none;
     }
     
     /* Main layout */
@@ -709,7 +717,7 @@
         flex-direction: column;
     }
     
-    /* Sidebar */
+    /* Sidebar - FIXED: Show text in mobile */
     .admin-sidebar {
         width: 100%;
         position: sticky;
@@ -722,10 +730,17 @@
     .admin-logo {
         padding: 0 15px 10px;
         margin-bottom: 10px;
+        flex-direction: column;
+        text-align: center;
+        gap: 5px;
     }
     
     .admin-logo h2 {
         font-size: 1.2rem;
+    }
+    
+    .admin-logo i {
+        font-size: 1.5rem;
     }
     
     .admin-nav {
@@ -734,10 +749,17 @@
         white-space: nowrap;
         padding: 0 10px 5px;
         -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
     }
     
     .admin-nav::-webkit-scrollbar {
-        height: 3px;
+        height: 4px;
+    }
+    
+    .admin-nav::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
     }
     
     .admin-nav li {
@@ -747,18 +769,23 @@
     
     .admin-nav a {
         padding: 8px 12px;
-        flex-direction: column;
-        text-align: center;
-        gap: 5px;
-        font-size: 0.8rem;
+        flex-direction: row;
+        text-align: left;
+        gap: 8px;
+        font-size: 0.85rem;
+        min-width: fit-content;
     }
     
+    /* FIX: Show text in mobile - removed display:none */
     .admin-nav a span {
-        font-size: 0.75rem;
+        display: inline-block !important;
+        font-size: 0.85rem;
     }
     
     .admin-nav i {
         font-size: 1rem;
+        min-width: 20px;
+        text-align: center;
     }
     
     /* Main content */
@@ -833,11 +860,15 @@
     .btn {
         padding: 6px 12px;
         font-size: 0.85rem;
+        min-height: 36px;
+        min-width: 36px;
     }
     
     .btn-sm {
         padding: 4px 8px;
         font-size: 0.75rem;
+        min-height: 32px;
+        min-width: 32px;
     }
     
     /* Modal adjustments */
@@ -944,13 +975,23 @@
 
 /* Small phones */
 @media (max-width: 480px) {
+    .admin-header {
+        padding: 8px 10px;
+    }
+    
+    .admin-header h1 {
+        font-size: 1.1rem;
+        max-width: 45%;
+    }
+    
     .admin-nav a {
-        padding: 6px 8px;
-        font-size: 0.7rem;
+        padding: 6px 10px;
+        font-size: 0.8rem;
+        gap: 6px;
     }
     
     .admin-nav a span {
-        font-size: 0.65rem;
+        font-size: 0.8rem;
     }
     
     .admin-nav i {
@@ -1000,6 +1041,7 @@
     .admin-nav {
         flex-wrap: wrap;
         overflow-x: visible;
+        justify-content: center;
     }
     
     .admin-nav li {
@@ -1009,6 +1051,10 @@
     .admin-nav a {
         flex-direction: row;
         gap: 8px;
+    }
+    
+    .admin-nav a span {
+        display: inline-block !important;
     }
     
     .stats-grid {
@@ -1033,67 +1079,6 @@
     /* Prevent text size adjustment on orientation change */
     html {
         -webkit-text-size-adjust: 100%;
-    }
-}
-
-/* Fix for sticky header on mobile */
-.admin-header {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
-/* Touch-friendly improvements */
-.btn, 
-button {
-    min-height: 44px; /* Minimum touch target size */
-    min-width: 44px;
-}
-
-/* Improve form field touch targets */
-input, 
-select, 
-textarea {
-    min-height: 44px;
-}
-
-/* Fix for iOS form styling */
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-input[type="search"],
-select,
-textarea {
-    -webkit-appearance: none;
-    border-radius: 8px;
-}
-
-/* Hide scrollbars but keep functionality */
-.admin-nav::-webkit-scrollbar {
-    height: 4px;
-}
-
-.admin-nav::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 10px;
-}
-
-/* Print styles for better printing on mobile */
-@media print {
-    .admin-header,
-    .admin-sidebar,
-    .search-filter,
-    .data-table button {
-        display: none !important;
-    }
-    
-    .admin-content {
-        padding: 0;
-    }
-    
-    .content-section {
-        box-shadow: none;
-        border: 1px solid #ddd;
     }
 }
     </style>
@@ -3767,4 +3752,5 @@ document.addEventListener('click', function(e) {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
+
 
