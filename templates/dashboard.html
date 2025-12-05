@@ -96,7 +96,352 @@
         .nav-links a:hover::after {
             width: 100%;
         }
-        
+        /* ============================================ */
+/* MOBILE RESPONSIVE IMPROVEMENTS */
+/* ============================================ */
+
+/* Navigation - Mobile Responsive */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        padding: 15px;
+        align-items: stretch;
+    }
+    
+    .nav-links {
+        flex-direction: column;
+        width: 100%;
+        display: none;
+        margin-top: 20px;
+    }
+    
+    .nav-links.active {
+        display: flex;
+    }
+    
+    .nav-links a {
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .nav-links a:last-child {
+        border-bottom: none;
+    }
+    
+    .mobile-menu-toggle {
+        display: block;
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        font-size: 1.5rem;
+        background: #27ae60;
+        color: white;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+    
+    /* Hero Section - Mobile */
+    .hero {
+        padding: 40px 20px 20px;
+    }
+    
+    .hero h1 {
+        font-size: 2rem;
+        line-height: 1.3;
+    }
+    
+    .hero p {
+        font-size: 1rem;
+        padding: 0 10px;
+    }
+    
+    .hero-stats {
+        flex-direction: column;
+        gap: 25px;
+        margin: 30px 0;
+    }
+    
+    .stat {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .stat i {
+        font-size: 1.8rem;
+        margin-bottom: 0;
+    }
+    
+    .stat-content {
+        text-align: left;
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+    }
+    
+    /* Features Section - Mobile */
+    .features {
+        padding: 40px 20px;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+        margin-bottom: 30px;
+    }
+    
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .feature-card {
+        padding: 20px;
+    }
+    
+    /* Dashboard Cards - Mobile */
+    .access-modules {
+        padding: 40px 20px;
+    }
+    
+    .dashboard {
+        flex-direction: column;
+        align-items: center;
+        gap: 25px;
+    }
+    
+    .card {
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 0;
+    }
+    
+    .card-header {
+        padding: 25px 15px;
+    }
+    
+    .card-icon {
+        font-size: 3.5rem;
+    }
+    
+    .card-title {
+        font-size: 1.6rem;
+    }
+    
+    .card-body {
+        padding: 20px;
+    }
+    
+    .card-description {
+        font-size: 1rem;
+        margin-bottom: 20px;
+    }
+    
+    .features {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+        margin-bottom: 20px;
+    }
+    
+    .feature-tag {
+        justify-content: center;
+        padding: 10px;
+    }
+    
+    .btn {
+        padding: 14px;
+        font-size: 1.1rem;
+    }
+    
+    /* Testimonials - Mobile */
+    .testimonials {
+        padding: 40px 20px;
+    }
+    
+    .testimonial {
+        min-width: 100%;
+        padding: 20px;
+    }
+    
+    /* Footer - Mobile */
+    .footer {
+        padding: 40px 20px 20px;
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .footer-column h3 {
+        margin-bottom: 15px;
+    }
+    
+    .footer-bottom {
+        margin-top: 30px;
+        padding-top: 15px;
+        font-size: 0.9rem;
+    }
+    
+    /* Language Selector - Mobile */
+    .language-selector {
+        position: fixed;
+        bottom: 15px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        z-index: 1000;
+        padding: 0 20px;
+    }
+    
+    .lang-btn {
+        flex: 1;
+        max-width: 140px;
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+    
+    /* Floating Icon - Mobile */
+    .floating-icon {
+        bottom: 80px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+    
+    /* Hide animated elements on mobile for performance */
+    .floating-farm-icon,
+    .bird,
+    .tractor-animation,
+    .particle {
+        display: none;
+    }
+    
+    /* Adjust body background for mobile */
+    body::before,
+    body::after {
+        animation: none;
+        opacity: 0.3;
+    }
+}
+
+/* For very small screens (phones in portrait) */
+@media (max-width: 480px) {
+    .hero h1 {
+        font-size: 1.7rem;
+    }
+    
+    .stat {
+        padding: 12px;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    
+    .card-title {
+        font-size: 1.4rem;
+    }
+    
+    .card-subtitle {
+        font-size: 1rem;
+    }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .navbar {
+        padding: 15px 20px;
+    }
+    
+    .nav-links {
+        gap: 15px;
+    }
+    
+    .hero h1 {
+        font-size: 2.8rem;
+    }
+    
+    .dashboard {
+        flex-wrap: wrap;
+    }
+    
+    .card {
+        width: calc(50% - 20px);
+    }
+    
+    .card:last-child {
+        width: 100%;
+        max-width: 600px;
+        margin-top: 20px;
+    }
+}
+
+/* Mobile menu toggle button (add to HTML) */
+.mobile-menu-toggle {
+    display: none;
+}
+
+/* ============================================ */
+/* ENHANCED TOUCH INTERACTION FOR MOBILE */
+/* ============================================ */
+@media (hover: none) and (pointer: coarse) {
+    /* Better touch targets */
+    .nav-links a,
+    .btn,
+    .lang-btn {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .feature-card {
+        padding: 25px;
+    }
+    
+    /* Prevent hover effects on touch devices */
+    .feature-card:hover {
+        transform: none;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+    
+    .btn:hover {
+        transform: none;
+    }
+    
+    /* Increase font sizes for better readability */
+    body {
+        font-size: 16px;
+    }
+    
+    h1, h2, h3 {
+        line-height: 1.3;
+    }
+    
+    /* Adjust spacing for touch */
+    .hero,
+    .features,
+    .access-modules,
+    .testimonials {
+        padding: 40px 15px;
+    }
+}
         /* Language Selector inside navbar */
         .language-selector {
             position: relative;
@@ -1037,6 +1382,210 @@
         body {
             top: 0 !important;
         }
+        /* ============================================ */
+/* FEATURES SECTION MOBILE RESPONSIVE */
+/* ============================================ */
+
+/* Tablet: 2 columns */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+    }
+    
+    .feature-card {
+        padding: 25px 20px;
+    }
+    
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        font-size: 2.5rem;
+    }
+    
+    .feature-card h3 {
+        font-size: 1.4rem;
+    }
+    
+    .feature-card p {
+        font-size: 1rem;
+    }
+}
+
+/* Mobile: 1 column */
+@media (max-width: 768px) {
+    .features {
+        padding: 50px 20px;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+        margin-bottom: 40px;
+        padding: 0 10px;
+    }
+    
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    
+    .feature-card {
+        padding: 25px;
+        margin: 0 10px;
+        border-radius: 12px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+    }
+    
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        font-size: 2.2rem;
+        margin-bottom: 20px;
+    }
+    
+    .feature-card h3 {
+        font-size: 1.4rem;
+        margin-bottom: 15px;
+        line-height: 1.3;
+    }
+    
+    .feature-card p {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #555;
+    }
+    
+    /* Add touch-friendly hover effects */
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+    .features {
+        padding: 40px 15px;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+        margin-bottom: 30px;
+    }
+    
+    .features-grid {
+        gap: 20px;
+    }
+    
+    .feature-card {
+        padding: 20px;
+        margin: 0 5px;
+    }
+    
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+        margin-bottom: 15px;
+    }
+    
+    .feature-card h3 {
+        font-size: 1.3rem;
+    }
+    
+    .feature-card p {
+        font-size: 0.95rem;
+    }
+}
+
+/* Very small screens (portrait phones) */
+@media (max-width: 360px) {
+    .features {
+        padding: 30px 10px;
+    }
+    
+    .section-title {
+        font-size: 1.6rem;
+    }
+    
+    .feature-card {
+        padding: 18px;
+    }
+    
+    .feature-icon {
+        width: 55px;
+        height: 55px;
+        font-size: 1.8rem;
+    }
+    
+    .feature-card h3 {
+        font-size: 1.2rem;
+    }
+    
+    .feature-card p {
+        font-size: 0.9rem;
+    }
+}
+
+/* Landscape orientation for mobile */
+@media (max-height: 500px) and (max-width: 900px) {
+    .features {
+        padding: 30px 20px;
+    }
+    
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    
+    .feature-card {
+        padding: 20px;
+    }
+    
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+        margin-bottom: 15px;
+    }
+}
+
+/* Tablet portrait mode */
+@media (min-width: 481px) and (max-width: 768px) {
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        max-width: 800px;
+    }
+    
+    .feature-card {
+        padding: 22px;
+    }
+}
+
+/* Ensure proper touch targets on mobile */
+@media (hover: none) and (pointer: coarse) {
+    .feature-card {
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .feature-icon {
+        margin: 0 auto 20px;
+    }
+    
+    .feature-card h3 {
+        margin-bottom: 12px;
+    }
+    
+    .feature-card p {
+        line-height: 1.7;
+    }
+}
     </style>
 </head>
 <body>
@@ -1046,6 +1595,9 @@
             <i class="fas fa-hands-helping"></i>
             <h2>Lend A <span>Hand</span></h2>
         </div>
+        <div class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+    <i class="fas fa-bars"></i>
+</div>
         <div class="nav-links">
             <a href="#home">Home</a>
             <a href="#features">Features</a>
@@ -1423,7 +1975,30 @@
                 document.body.style.top = '0';
             }, 100);
         }
-        
+        // Mobile menu toggle function
+function toggleMobileMenu() {
+    const navLinks = document.querySelector('.nav-links');
+    const toggleBtn = document.querySelector('.mobile-menu-toggle i');
+    
+    navLinks.classList.toggle('active');
+    
+    if (navLinks.classList.contains('active')) {
+        toggleBtn.classList.remove('fa-bars');
+        toggleBtn.classList.add('fa-times');
+    } else {
+        toggleBtn.classList.remove('fa-times');
+        toggleBtn.classList.add('fa-bars');
+    }
+}
+
+// Close mobile menu when clicking a link
+document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            toggleMobileMenu();
+        }
+    });
+});
         // 5. Load Google Translate script
         function loadGoogleTranslate() {
             // Check if already loaded
