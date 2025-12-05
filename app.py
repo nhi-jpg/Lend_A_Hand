@@ -709,6 +709,106 @@ def get_user_orders():
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/admin/farmer/<int:farmer_id>')
+def api_admin_farmer_detail(farmer_id):
+    """Get detailed farmer information for admin dashboard"""
+    if 'admin_id' not in session or session.get('user_type') != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        conn = sqlite3.connect('agriculture.db')
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT * FROM farmers 
+            WHERE id = ?
+        """, (farmer_id,))
+        
+        farmer = cursor.fetchone()
+        conn.close()
+        
+        if not farmer:
+            return jsonify({'error': 'Farmer not found'}), 404
+        
+        # Format farmer details
+        farmer_data = {
+            'id': farmer['id'],
+            'full_name': farmer['full_name'],
+            'last_name': farmer['last_name'],
+            'email': farmer['email'] or 'N/A',
+            'phone': farmer['phone'],
+            'farm_location': farmer['farm_location'],
+            'farm_size': farmer['farm_size'] or 'N/A',
+            'crop_types': farmer['crop_types'] or 'N/A',
+            'additional_info': farmer['additional_info'] or 'N/A',
+            'rtc_document': farmer['rtc_document'],
+            'document_url': url_for('serve_equipment_image', filename=farmer['rtc_document']) if farmer['rtc_document'] else None,
+            'registration_date': farmer['registration_date'],
+            'status': farmer['status']
+        }
+        
+        return jsonify(farmer_data)
+        
+    except Exception as e:
+        print(f"Error fetching farmer details: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/admin/vendor/<int:vendor_id>')
+def api_admin_vendor_detail(vendor_id):
+    """Get detailed vendor information for admin dashboard"""
+    if 'admin_id' not in session or session.get('user_type') != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        conn = sqlite3.connect('vendors.db')
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT * FROM vendors 
+            WHERE id = ?
+        """, (vendor_id,))
+        
+        vendor = cursor.fetchone()
+        
+        if not vendor:
+            conn.close()
+            return jsonify({'error': 'Vendor not found'}), 404
+        
+        # Get additional stats for this vendor
+        cursor.execute("SELECT COUNT(*) FROM equipment WHERE vendor_email = ?", (vendor['email'],))
+        equipment_count = cursor.fetchone()[0] or 0
+        
+        cursor.execute("SELECT COUNT(*) FROM bookings WHERE vendor_email = ?", (vendor['email'],))
+        booking_count = cursor.fetchone()[0] or 0
+        
+        conn.close()
+        
+        # Format vendor details
+        vendor_data = {
+            'id': vendor['id'],
+            'business_name': vendor['business_name'],
+            'contact_name': vendor['contact_name'],
+            'email': vendor['email'],
+            'phone': vendor['phone'],
+            'service_type': vendor['service_type'],
+            'description': vendor['description'] or 'N/A',
+            'business_document': vendor['business_document'],
+            'document_verified': vendor['document_verified'] or 'pending',
+            'document_url': url_for('serve_vendor_document', filename=vendor['business_document']) if vendor['business_document'] else None,
+            'equipment_count': equipment_count,
+            'booking_count': booking_count,
+            'registration_date': vendor['registration_date'],
+            'status': vendor['status']
+        }
+        
+        return jsonify(vendor_data)
+        
+    except Exception as e:
+        print(f"Error fetching vendor details: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/admin/broadcast', methods=['POST'])
 def api_admin_send_broadcast():
     """Send broadcast message to all farmers"""
@@ -4869,5 +4969,6 @@ if __name__ == '__main__':
     add_reminder_columns()  # ✅ ADD THIS LINE
     start_reminder_scheduler()
     app.run(debug=True)
+
 
 
