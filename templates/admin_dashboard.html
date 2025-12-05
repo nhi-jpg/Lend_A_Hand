@@ -679,6 +679,423 @@
             overflow-y: auto;
             padding: 10px;
         }
+        /* ===== MOBILE RESPONSIVE STYLES ===== */
+@media (max-width: 768px) {
+    /* General adjustments */
+    body {
+        font-size: 14px;
+    }
+    
+    /* Admin Header */
+    .admin-header {
+        padding: 10px 15px;
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .admin-header h1 {
+        font-size: 1.3rem;
+    }
+    
+    .admin-header .user-info {
+        width: 100%;
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    /* Main layout */
+    .admin-container {
+        flex-direction: column;
+    }
+    
+    /* Sidebar */
+    .admin-sidebar {
+        width: 100%;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        height: auto;
+        padding: 10px 0;
+    }
+    
+    .admin-logo {
+        padding: 0 15px 10px;
+        margin-bottom: 10px;
+    }
+    
+    .admin-logo h2 {
+        font-size: 1.2rem;
+    }
+    
+    .admin-nav {
+        display: flex;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 0 10px 5px;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .admin-nav::-webkit-scrollbar {
+        height: 3px;
+    }
+    
+    .admin-nav li {
+        margin: 0;
+        flex-shrink: 0;
+    }
+    
+    .admin-nav a {
+        padding: 8px 12px;
+        flex-direction: column;
+        text-align: center;
+        gap: 5px;
+        font-size: 0.8rem;
+    }
+    
+    .admin-nav a span {
+        font-size: 0.75rem;
+    }
+    
+    .admin-nav i {
+        font-size: 1rem;
+    }
+    
+    /* Main content */
+    .admin-content {
+        padding: 15px;
+    }
+    
+    .content-section {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .section-header h2 {
+        font-size: 1.2rem;
+    }
+    
+    /* Stats cards */
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .stat-card {
+        padding: 15px;
+    }
+    
+    .stat-info h3 {
+        font-size: 1.5rem;
+    }
+    
+    /* Search and filter */
+    .search-filter {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .search-box,
+    .filter-dropdown {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .search-box input,
+    select.form-control {
+        padding: 10px 10px 10px 35px;
+        font-size: 0.9rem;
+    }
+    
+    /* Tables */
+    .data-table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        font-size: 0.85rem;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 8px 10px;
+        min-width: 80px;
+    }
+    
+    /* Buttons */
+    .btn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .btn-sm {
+        padding: 4px 8px;
+        font-size: 0.75rem;
+    }
+    
+    /* Modal adjustments */
+    .modal-content {
+        width: 95%;
+        max-height: 85vh;
+    }
+    
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 15px;
+    }
+    
+    .modal-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .detail-row {
+        flex-direction: column;
+        margin-bottom: 10px;
+    }
+    
+    .detail-label {
+        width: 100%;
+        margin-bottom: 3px;
+        font-size: 0.9rem;
+    }
+    
+    .detail-value {
+        width: 100%;
+        font-size: 0.9rem;
+    }
+    
+    /* Forms */
+    .broadcast-form {
+        padding: 10px;
+    }
+    
+    .broadcast-form button {
+        padding: 8px 10px;
+        font-size: 0.85rem;
+    }
+    
+    /* Charts */
+    .chart-card {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+    
+    /* Specific for equipment table */
+    #equipmentTable td:nth-child(1),
+    #equipmentTable th:nth-child(1) { /* ID */
+        min-width: 60px;
+    }
+    
+    #equipmentTable td:nth-child(2),
+    #equipmentTable th:nth-child(2) { /* Name */
+        min-width: 120px;
+    }
+    
+    /* Specific for vendors table */
+    #vendorsTable td:nth-child(1),
+    #vendorsTable th:nth-child(1) { /* ID */
+        min-width: 60px;
+    }
+    
+    #vendorsTable td:nth-child(2),
+    #vendorsTable th:nth-child(2) { /* Business Name */
+        min-width: 130px;
+    }
+    
+    /* Specific for bookings table */
+    #bookingsTable td:nth-child(4),
+    #bookingsTable th:nth-child(4) { /* Equipment */
+        min-width: 120px;
+    }
+    
+    #bookingsTable td:nth-child(5),
+    #bookingsTable th:nth-child(5) { /* Dates */
+        min-width: 150px;
+    }
+    
+    /* Status badges */
+    .status-badge {
+        padding: 3px 8px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+    
+    /* Report section specific */
+    .chart-header h3 {
+        font-size: 1rem;
+    }
+    
+    .chart-header small {
+        font-size: 0.8rem;
+    }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+    .admin-nav a {
+        padding: 6px 8px;
+        font-size: 0.7rem;
+    }
+    
+    .admin-nav a span {
+        font-size: 0.65rem;
+    }
+    
+    .admin-nav i {
+        font-size: 0.9rem;
+    }
+    
+    .stat-info h3 {
+        font-size: 1.3rem;
+    }
+    
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    /* Action buttons in table cells */
+    .data-table td:last-child {
+        min-width: 120px;
+    }
+    
+    /* Adjust modal for very small screens */
+    .modal-content {
+        width: 98%;
+        max-height: 90vh;
+    }
+    
+    /* Form inputs */
+    input[type="text"],
+    textarea,
+    select {
+        font-size: 16px !important; /* Prevents zoom on iOS */
+    }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 992px) {
+    .admin-container {
+        flex-direction: column;
+    }
+    
+    .admin-sidebar {
+        width: 100%;
+        height: auto;
+    }
+    
+    .admin-nav {
+        flex-wrap: wrap;
+        overflow-x: visible;
+    }
+    
+    .admin-nav li {
+        margin: 2px;
+    }
+    
+    .admin-nav a {
+        flex-direction: row;
+        gap: 8px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .data-table {
+        font-size: 0.9rem;
+    }
+}
+
+/* Fix for iOS Safari */
+@supports (-webkit-touch-callout: none) {
+    .admin-nav {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .data-table {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Prevent text size adjustment on orientation change */
+    html {
+        -webkit-text-size-adjust: 100%;
+    }
+}
+
+/* Fix for sticky header on mobile */
+.admin-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* Touch-friendly improvements */
+.btn, 
+button {
+    min-height: 44px; /* Minimum touch target size */
+    min-width: 44px;
+}
+
+/* Improve form field touch targets */
+input, 
+select, 
+textarea {
+    min-height: 44px;
+}
+
+/* Fix for iOS form styling */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="search"],
+select,
+textarea {
+    -webkit-appearance: none;
+    border-radius: 8px;
+}
+
+/* Hide scrollbars but keep functionality */
+.admin-nav::-webkit-scrollbar {
+    height: 4px;
+}
+
+.admin-nav::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+}
+
+/* Print styles for better printing on mobile */
+@media print {
+    .admin-header,
+    .admin-sidebar,
+    .search-filter,
+    .data-table button {
+        display: none !important;
+    }
+    
+    .admin-content {
+        padding: 0;
+    }
+    
+    .content-section {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}
     </style>
 </head>
 <body>
@@ -3350,3 +3767,4 @@ document.addEventListener('click', function(e) {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
+
