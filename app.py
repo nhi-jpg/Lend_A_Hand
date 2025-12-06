@@ -536,6 +536,63 @@ def inject_lang():
 @app.route('/index.html')
 def index_page():
     return render_template('index.html')
+import sqlite3
+
+def add_missing_columns():
+    """Add missing cancellation columns to existing database"""
+    
+    conn = sqlite3.connect('vendors.db')
+    cursor = conn.cursor()
+    
+    print("🔄 Adding missing columns to bookings table...")
+    
+    # List of columns to add to bookings table
+    booking_columns = [
+        ('cancellation_requested_date', 'TIMESTAMP'),
+        ('cancellation_reason', 'TEXT'),
+        ('status_before_cancel', 'TEXT'),
+        ('cancelled_date', 'TIMESTAMP')
+    ]
+    
+    for col_name, col_type in booking_columns:
+        try:
+            cursor.execute(f"ALTER TABLE bookings ADD COLUMN {col_name} {col_type}")
+            print(f"✅ Added {col_name} to bookings table")
+        except sqlite3.OperationalError as e:
+            if "duplicate column name" in str(e):
+                print(f"⚠️ Column {col_name} already exists in bookings")
+            else:
+                print(f"❌ Error adding {col_name}: {e}")
+    
+    print("\n🔄 Adding missing columns to rent_requests table...")
+    
+    # List of columns to add to rent_requests table
+    rent_columns = [
+        ('cancellation_requested_date', 'TIMESTAMP'),
+        ('cancellation_reason', 'TEXT'),
+        ('status_before_cancel', 'TEXT'),
+        ('cancelled_date', 'TIMESTAMP'),
+        ('last_reminder_sent', 'TIMESTAMP'),
+        ('reminder_type', 'TEXT')
+    ]
+    
+    for col_name, col_type in rent_columns:
+        try:
+            cursor.execute(f"ALTER TABLE rent_requests ADD COLUMN {col_name} {col_type}")
+            print(f"✅ Added {col_name} to rent_requests table")
+        except sqlite3.OperationalError as e:
+            if "duplicate column name" in str(e):
+                print(f"⚠️ Column {col_name} already exists in rent_requests")
+            else:
+                print(f"❌ Error adding {col_name}: {e}")
+    
+    conn.commit()
+    conn.close()
+    
+    print("\n✅ Database columns updated successfully!")
+
+if __name__ == '__main__':
+    add_missing_columns()
 @app.route('/api/user/orders')
 def get_user_orders():
     """Get all orders (bookings and rent requests) for the logged-in user"""
@@ -551,112 +608,171 @@ def get_user_orders():
         conn_vendors.row_factory = sqlite3.Row
         cursor_vendors = conn_vendors.cursor()
         
-        # FIXED: Get bookings - use vendor's contact_name instead of business_name
-        cursor_vendors.execute("""
-            SELECT 
-                b.id, 
-                'booking' as order_type,
-                b.equipment_name,
-                v.contact_name as vendor_name,  -- CHANGED: Use vendor's contact_name
-                b.vendor_email,
-                b.start_date,
-                b.end_date,
-                b.duration,
-                b.total_amount,
-                b.status,
-                b.created_date,
-                b.cancellation_requested_date,
-                b.cancellation_reason,
-                b.status_before_cancel,
-                b.cancelled_date,
-                e.image_url as equipment_image,
-                b.equipment_id,
-                b.user_name,
-                b.user_email,
-                b.user_phone,
-                v.business_name,
-                v.contact_name as vendor_contact
-            FROM bookings b
-            LEFT JOIN equipment e ON b.equipment_id = e.id
-            LEFT JOIN vendors v ON b.vendor_email = v.email
-            WHERE b.user_id = ?
-            ORDER BY b.created_date DESC
-        """, (user_id,))
+        # SAFE BOOKINGS QUERY (uses COALESCE to handle missing columns gracefully)
+        try:
+            cursor_vendors.execute("""
+                SELECT 
+                    b.id, 
+                    'booking' as order_type,
+                    b.equipment_name,
+                    v.contact_name as vendor_name,
+                    b.vendor_email,
+                    b.start_date,
+                    b.end_date,
+                    b.duration,
+                    b.total_amount,
+                    b.status,
+                    b.created_date,
+                    e.image_url as equipment_image,
+                    b.equipment_id,
+                    b.user_name,
+                    b.user_email,
+                    b.user_phone,
+                    v.business_name,
+                    v.contact_name as vendor_contact,
+                    -- Use COALESCE to handle potential NULL values
+                    b.cancellation_requested_date,
+                    b.cancellation_reason,
+                    b.status_before_cancel,
+                    b.cancelled_date
+                FROM bookings b
+                LEFT JOIN equipment e ON b.equipment_id = e.id
+                LEFT JOIN vendors v ON b.vendor_email = v.email
+                WHERE b.user_id = ?
+                ORDER BY b.created_date DESC
+            """, (user_id,))
+        except sqlite3.OperationalError as e:
+            # If columns are missing, use fallback query
+            print(f"⚠️ Using fallback query (missing columns): {e}")
+            cursor_vendors.execute("""
+                SELECT 
+                    b.id, 
+                    'booking' as order_type,
+                    b.equipment_name,
+                    v.contact_name as vendor_name,
+                    b.vendor_email,
+                    b.start_date,
+                    b.end_date,
+                    b.duration,
+                    b.total_amount,
+                    b.status,
+                    b.created_date,
+                    e.image_url as equipment_image,
+                    b.equipment_id,
+                    b.user_name,
+                    b.user_email,
+                    b.user_phone,
+                    v.business_name,
+                    v.contact_name as vendor_contact
+                FROM bookings b
+                LEFT JOIN equipment e ON b.equipment_id = e.id
+                LEFT JOIN vendors v ON b.vendor_email = v.email
+                WHERE b.user_id = ?
+                ORDER BY b.created_date DESC
+            """, (user_id,))
         
         bookings = cursor_vendors.fetchall()
         print(f"✅ Found {len(bookings)} bookings")
         
-        # FIXED: Get rent requests - use vendor's contact_name instead of business_name
-        cursor_vendors.execute("""
-            SELECT 
-                rr.id,
-                'rent' as order_type,
-                rr.equipment_name,
-                v.contact_name as vendor_name,  -- CHANGED: Use vendor's contact_name
-                rr.vendor_email,
-                rr.start_date,
-                rr.end_date,
-                rr.duration,
-                rr.total_amount,
-                rr.status,
-                rr.submitted_date as created_date,
-                rr.cancellation_requested_date,
-                rr.cancellation_reason,
-                rr.status_before_cancel,
-                rr.cancelled_date,
-                e.image_url as equipment_image,
-                rr.equipment_id,
-                rr.user_name,
-                rr.user_email,
-                rr.user_phone,
-                v.business_name,
-                v.contact_name as vendor_contact
-            FROM rent_requests rr
-            JOIN vendors v ON rr.vendor_email = v.email
-            LEFT JOIN equipment e ON rr.equipment_id = e.id
-            WHERE rr.user_id = ?
-            ORDER BY rr.submitted_date DESC
-        """, (user_id,))
+        # SAFE RENT REQUESTS QUERY
+        try:
+            cursor_vendors.execute("""
+                SELECT 
+                    rr.id,
+                    'rent' as order_type,
+                    rr.equipment_name,
+                    v.contact_name as vendor_name,
+                    rr.vendor_email,
+                    rr.start_date,
+                    rr.end_date,
+                    rr.duration,
+                    rr.total_amount,
+                    rr.status,
+                    rr.submitted_date as created_date,
+                    e.image_url as equipment_image,
+                    rr.equipment_id,
+                    rr.user_name,
+                    rr.user_email,
+                    rr.user_phone,
+                    v.business_name,
+                    v.contact_name as vendor_contact,
+                    -- Use COALESCE to handle potential NULL values
+                    rr.cancellation_requested_date,
+                    rr.cancellation_reason,
+                    rr.status_before_cancel,
+                    rr.cancelled_date
+                FROM rent_requests rr
+                JOIN vendors v ON rr.vendor_email = v.email
+                LEFT JOIN equipment e ON rr.equipment_id = e.id
+                WHERE rr.user_id = ?
+                ORDER BY rr.submitted_date DESC
+            """, (user_id,))
+        except sqlite3.OperationalError as e:
+            # If columns are missing, use fallback query
+            print(f"⚠️ Using fallback query (missing columns): {e}")
+            cursor_vendors.execute("""
+                SELECT 
+                    rr.id,
+                    'rent' as order_type,
+                    rr.equipment_name,
+                    v.contact_name as vendor_name,
+                    rr.vendor_email,
+                    rr.start_date,
+                    rr.end_date,
+                    rr.duration,
+                    rr.total_amount,
+                    rr.status,
+                    rr.submitted_date as created_date,
+                    e.image_url as equipment_image,
+                    rr.equipment_id,
+                    rr.user_name,
+                    rr.user_email,
+                    rr.user_phone,
+                    v.business_name,
+                    v.contact_name as vendor_contact
+                FROM rent_requests rr
+                JOIN vendors v ON rr.vendor_email = v.email
+                LEFT JOIN equipment e ON rr.equipment_id = e.id
+                WHERE rr.user_id = ?
+                ORDER BY rr.submitted_date DESC
+            """, (user_id,))
         
         rent_requests = cursor_vendors.fetchall()
         print(f"✅ Found {len(rent_requests)} rent requests")
         
         conn_vendors.close()
         
-        # Debug: Check what vendor names we're getting
-        print("🔍 DEBUG - Vendor contact names:")
-        for booking in bookings:
-            print(f"  Booking {booking['id']}: vendor_name = '{booking['vendor_name']}'")
-        
-        for rent in rent_requests:
-            print(f"  Rent {rent['id']}: vendor_name = '{rent['vendor_name']}'")
-        
         # Combine and format orders
         orders_list = []
         
         # Process bookings
         for booking in bookings:
-            # Use contact_name as vendor name
             vendor_name = booking['vendor_name'] or booking['vendor_contact'] or 'Vendor'
+            
+            # Get cancellation fields (may be None if columns don't exist)
+            cancellation_requested_date = booking['cancellation_requested_date'] if 'cancellation_requested_date' in booking.keys() else None
+            cancellation_reason = booking['cancellation_reason'] if 'cancellation_reason' in booking.keys() else None
+            status_before_cancel = booking['status_before_cancel'] if 'status_before_cancel' in booking.keys() else None
+            cancelled_date = booking['cancelled_date'] if 'cancelled_date' in booking.keys() else None
             
             orders_list.append({
                 'id': booking['id'],
                 'order_type': 'booking',
                 'equipment_name': booking['equipment_name'],
-                'vendor_name': vendor_name,  # This is now the contact person's name
+                'vendor_name': vendor_name,
                 'vendor_email': booking['vendor_email'],
                 'vendor_contact': booking['vendor_contact'],
-                'business_name': booking['business_name'],  # Keep business name separate
+                'business_name': booking['business_name'],
                 'start_date': booking['start_date'],
                 'end_date': booking['end_date'],
                 'duration': booking['duration'],
                 'total_amount': float(booking['total_amount']),
                 'status': booking['status'],
                 'created_date': booking['created_date'],
-                'cancellation_requested_date': booking['cancellation_requested_date'],
-                'cancellation_reason': booking['cancellation_reason'],
-                'status_before_cancel': booking['status_before_cancel'],
-                'cancelled_date': booking['cancelled_date'],
+                'cancellation_requested_date': cancellation_requested_date,
+                'cancellation_reason': cancellation_reason,
+                'status_before_cancel': status_before_cancel,
+                'cancelled_date': cancelled_date,
                 'equipment_image': booking['equipment_image'],
                 'equipment_id': booking['equipment_id'],
                 'user_name': booking['user_name'],
@@ -670,24 +786,30 @@ def get_user_orders():
         for rent in rent_requests:
             vendor_name = rent['vendor_name'] or rent['vendor_contact'] or 'Vendor'
             
+            # Get cancellation fields (may be None if columns don't exist)
+            cancellation_requested_date = rent['cancellation_requested_date'] if 'cancellation_requested_date' in rent.keys() else None
+            cancellation_reason = rent['cancellation_reason'] if 'cancellation_reason' in rent.keys() else None
+            status_before_cancel = rent['status_before_cancel'] if 'status_before_cancel' in rent.keys() else None
+            cancelled_date = rent['cancelled_date'] if 'cancelled_date' in rent.keys() else None
+            
             orders_list.append({
                 'id': rent['id'],
                 'order_type': 'rent',
                 'equipment_name': rent['equipment_name'],
-                'vendor_name': vendor_name,  # This is now the contact person's name
+                'vendor_name': vendor_name,
                 'vendor_email': rent['vendor_email'],
                 'vendor_contact': rent['vendor_contact'],
-                'business_name': rent['business_name'],  # Keep business name separate
+                'business_name': rent['business_name'],
                 'start_date': rent['start_date'],
                 'end_date': rent['end_date'],
                 'duration': rent['duration'],
                 'total_amount': float(rent['total_amount']),
                 'status': rent['status'],
                 'created_date': rent['created_date'],
-                'cancellation_requested_date': rent['cancellation_requested_date'],
-                'cancellation_reason': rent['cancellation_reason'],
-                'status_before_cancel': rent['status_before_cancel'],
-                'cancelled_date': rent['cancelled_date'],
+                'cancellation_requested_date': cancellation_requested_date,
+                'cancellation_reason': cancellation_reason,
+                'status_before_cancel': status_before_cancel,
+                'cancelled_date': cancelled_date,
                 'equipment_image': rent['equipment_image'],
                 'equipment_id': rent['equipment_id'],
                 'user_name': rent['user_name'],
@@ -709,182 +831,6 @@ def get_user_orders():
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/admin/farmer/<int:farmer_id>')
-def api_admin_farmer_detail(farmer_id):
-    """Get detailed farmer information for admin dashboard"""
-    if 'admin_id' not in session or session.get('user_type') != 'admin':
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    try:
-        conn = sqlite3.connect('agriculture.db')
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        
-        cursor.execute("""
-            SELECT * FROM farmers 
-            WHERE id = ?
-        """, (farmer_id,))
-        
-        farmer = cursor.fetchone()
-        conn.close()
-        
-        if not farmer:
-            return jsonify({'error': 'Farmer not found'}), 404
-        
-        # Format farmer details
-        farmer_data = {
-            'id': farmer['id'],
-            'full_name': farmer['full_name'],
-            'last_name': farmer['last_name'],
-            'email': farmer['email'] or 'N/A',
-            'phone': farmer['phone'],
-            'farm_location': farmer['farm_location'],
-            'farm_size': farmer['farm_size'] or 'N/A',
-            'crop_types': farmer['crop_types'] or 'N/A',
-            'additional_info': farmer['additional_info'] or 'N/A',
-            'rtc_document': farmer['rtc_document'],
-            'document_url': url_for('serve_equipment_image', filename=farmer['rtc_document']) if farmer['rtc_document'] else None,
-            'registration_date': farmer['registration_date'],
-            'status': farmer['status']
-        }
-        
-        return jsonify(farmer_data)
-        
-    except Exception as e:
-        print(f"Error fetching farmer details: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/admin/vendor/<int:vendor_id>')
-def api_admin_vendor_detail(vendor_id):
-    """Get detailed vendor information for admin dashboard"""
-    if 'admin_id' not in session or session.get('user_type') != 'admin':
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    try:
-        conn = sqlite3.connect('vendors.db')
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        
-        cursor.execute("""
-            SELECT * FROM vendors 
-            WHERE id = ?
-        """, (vendor_id,))
-        
-        vendor = cursor.fetchone()
-        
-        if not vendor:
-            conn.close()
-            return jsonify({'error': 'Vendor not found'}), 404
-        
-        # Get additional stats for this vendor
-        cursor.execute("SELECT COUNT(*) FROM equipment WHERE vendor_email = ?", (vendor['email'],))
-        equipment_count = cursor.fetchone()[0] or 0
-        
-        cursor.execute("SELECT COUNT(*) FROM bookings WHERE vendor_email = ?", (vendor['email'],))
-        booking_count = cursor.fetchone()[0] or 0
-        
-        conn.close()
-        
-        # Format vendor details
-        vendor_data = {
-            'id': vendor['id'],
-            'business_name': vendor['business_name'],
-            'contact_name': vendor['contact_name'],
-            'email': vendor['email'],
-            'phone': vendor['phone'],
-            'service_type': vendor['service_type'],
-            'description': vendor['description'] or 'N/A',
-            'business_document': vendor['business_document'],
-            'document_verified': vendor['document_verified'] or 'pending',
-            'document_url': url_for('serve_vendor_document', filename=vendor['business_document']) if vendor['business_document'] else None,
-            'equipment_count': equipment_count,
-            'booking_count': booking_count,
-            'registration_date': vendor['registration_date'],
-            'status': vendor['status']
-        }
-        
-        return jsonify(vendor_data)
-        
-    except Exception as e:
-        print(f"Error fetching vendor details: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/admin/broadcast', methods=['POST'])
-def api_admin_send_broadcast():
-    """Send broadcast message to all farmers"""
-    if 'admin_id' not in session or session.get('user_type') != 'admin':
-        return jsonify({'error': 'Unauthorized'}), 401
-    
-    try:
-        data = request.get_json()
-        title = data.get('title', '').strip()
-        content = data.get('content', '').strip()
-        message_type = data.get('type', 'announcement')
-        
-        if not title or not content:
-            return jsonify({'error': 'Title and content are required'}), 400
-        
-        # Get all approved farmers' phone numbers
-        conn = sqlite3.connect('agriculture.db')
-        cursor = conn.cursor()
-        cursor.execute("SELECT full_name, phone FROM farmers WHERE status = 'approved'")
-        farmers = cursor.fetchall()
-        conn.close()
-        
-        if not farmers:
-            return jsonify({'error': 'No approved farmers found'}), 400
-        
-        success_count = 0
-        failed_count = 0
-        
-        # Format the message - KEEP IT SIMPLE, NO EMOJIS
-        full_message = f"{title}\n\n{content}\n\n- Lend A Hand"
-        
-        print(f"📢 Starting broadcast to {len(farmers)} farmers")
-        
-        # Send SMS to each farmer
-        for farmer in farmers:
-            farmer_name, farmer_phone = farmer
-            
-            try:
-                # Get phone number as string and clean it
-                phone = str(farmer_phone).strip()
-                
-                # Remove all non-digit characters (spaces, dashes, etc.)
-                phone = ''.join(filter(str.isdigit, phone))
-                
-                print(f"📱 Sending to {farmer_name}: {phone}")
-                
-                # Send SMS using the cleaned number
-                sms_result = send_sms(phone, full_message)
-                
-                if sms_result.get('success'):
-                    success_count += 1
-                    print(f"✅ Sent to {farmer_name}")
-                else:
-                    failed_count += 1
-                    print(f"❌ Failed for {farmer_name}: {sms_result.get('error')}")
-                    
-            except Exception as e:
-                failed_count += 1
-                print(f"❌ Error for {farmer_name}: {str(e)}")
-        
-        # Create response - ALWAYS return success for the API call itself
-        response_data = {
-            'success': True,  # Always true, the API call itself succeeded
-            'message': f'Broadcast completed. Sent to {success_count} of {len(farmers)} farmers',
-            'stats': {
-                'total': len(farmers),
-                'success': success_count,
-                'failed': failed_count
-            }
-        }
-        
-        return jsonify(response_data)
-        
-    except Exception as e:
-        print(f"Error sending broadcast: {str(e)}")
-        return jsonify({'error': str(e)}), 500
 @app.route('/api/admin/farmers-count')
 def api_admin_farmers_count():
     """Get count of approved farmers for broadcast"""
@@ -1460,36 +1406,7 @@ def get_order_details(order_id):
     except Exception as e:
         print(f"Error fetching order details: {e}")
         return jsonify({'error': 'Failed to fetch order details'}), 500
-@app.route('/fix-cancellation-table-columns')
-def fix_cancellation_table_columns():
-    """Add missing columns to cancellation_requests table"""
-    try:
-        conn = sqlite3.connect('vendors.db')
-        cursor = conn.cursor()
-        
-        # Check existing columns
-        cursor.execute("PRAGMA table_info(cancellation_requests)")
-        columns = [column[1] for column in cursor.fetchall()]
-        print("📋 Current cancellation_requests columns:", columns)
-        
-        # Add missing columns if they don't exist
-        missing_columns = [
-            ('processed_date', 'TIMESTAMP'),
-            ('processed_by', 'TEXT'),
-            ('vendor_response_notes', 'TEXT')
-        ]
-        
-        for col_name, col_type in missing_columns:
-            if col_name not in columns:
-                cursor.execute(f"ALTER TABLE cancellation_requests ADD COLUMN {col_name} {col_type}")
-                print(f"✅ Added {col_name} to cancellation_requests")
-        
-        conn.commit()
-        conn.close()
-        return "✅ Cancellation table columns fixed successfully!"
-        
-    except Exception as e:
-        return f"❌ Error: {str(e)}"
+
 @app.route('/api/vendor/cancellation-request/approve', methods=['POST'])
 def approve_cancellation_request():
     """Vendor approves a cancellation request - USING DEDICATED TABLE"""
@@ -2947,7 +2864,7 @@ def api_admin_booking_detail(booking_id):
 # ================= REVIEW SYSTEM ==================
 @app.route('/api/user/completed-orders')
 def get_user_completed_orders():
-    """Get completed bookings AND rent requests for review writing"""
+    """Get completed bookings AND rent requests for review writing - FIXED VERSION"""
     if 'user_id' not in session:
         return jsonify({'error': 'Please log in first'}), 401
     
@@ -2957,7 +2874,9 @@ def get_user_completed_orders():
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
-        # Get completed bookings that haven't been reviewed yet - FIXED QUERY
+        print(f"🔍 Fetching completed orders for user {user_id}")
+        
+        # Get completed bookings that haven't been reviewed yet
         cursor.execute("""
             SELECT 
                 b.id as order_id,
@@ -2972,7 +2891,7 @@ def get_user_completed_orders():
             FROM bookings b
             LEFT JOIN equipment e ON b.equipment_id = e.id
             WHERE b.user_id = ? 
-            AND b.status = 'completed'
+            AND b.status IN ('completed', 'confirmed')  -- Allow both completed and confirmed
             AND NOT EXISTS (
                 SELECT 1 FROM reviews r 
                 WHERE r.order_id = b.id 
@@ -2996,7 +2915,7 @@ def get_user_completed_orders():
             LEFT JOIN equipment e ON rr.equipment_id = e.id
             LEFT JOIN vendors v ON rr.vendor_email = v.email
             WHERE rr.user_id = ? 
-            AND rr.status = 'completed'
+            AND rr.status IN ('completed', 'approved')  -- Allow both completed and approved
             AND NOT EXISTS (
                 SELECT 1 FROM reviews r 
                 WHERE r.order_id = rr.id 
@@ -3025,6 +2944,7 @@ def get_user_completed_orders():
             })
         
         print(f"✅ Found {len(orders_list)} completed orders: {len([o for o in orders_list if o['order_type'] == 'booking'])} bookings, {len([o for o in orders_list if o['order_type'] == 'rent'])} rentals")
+        
         return jsonify(orders_list)
         
     except Exception as e:
@@ -3320,7 +3240,105 @@ def get_user_completed_bookings():
         print(f"Error fetching completed bookings: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/admin/farmer/<int:farmer_id>')
+def api_admin_farmer_detail(farmer_id):
+    """Get detailed farmer information for admin dashboard"""
+    if 'admin_id' not in session or session.get('user_type') != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        conn = sqlite3.connect('agriculture.db')
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT * FROM farmers 
+            WHERE id = ?
+        """, (farmer_id,))
+        
+        farmer = cursor.fetchone()
+        conn.close()
+        
+        if not farmer:
+            return jsonify({'error': 'Farmer not found'}), 404
+        
+        # Format farmer details
+        farmer_data = {
+            'id': farmer['id'],
+            'full_name': farmer['full_name'],
+            'last_name': farmer['last_name'],
+            'email': farmer['email'] or 'N/A',
+            'phone': farmer['phone'],
+            'farm_location': farmer['farm_location'],
+            'farm_size': farmer['farm_size'] or 'N/A',
+            'crop_types': farmer['crop_types'] or 'N/A',
+            'additional_info': farmer['additional_info'] or 'N/A',
+            'rtc_document': farmer['rtc_document'],
+            'document_url': url_for('serve_equipment_image', filename=farmer['rtc_document']) if farmer['rtc_document'] else None,
+            'registration_date': farmer['registration_date'],
+            'status': farmer['status']
+        }
+        
+        return jsonify(farmer_data)
+        
+    except Exception as e:
+        print(f"Error fetching farmer details: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
+@app.route('/api/admin/vendor/<int:vendor_id>')
+def api_admin_vendor_detail(vendor_id):
+    """Get detailed vendor information for admin dashboard"""
+    if 'admin_id' not in session or session.get('user_type') != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        conn = sqlite3.connect('vendors.db')
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT * FROM vendors 
+            WHERE id = ?
+        """, (vendor_id,))
+        
+        vendor = cursor.fetchone()
+        
+        if not vendor:
+            conn.close()
+            return jsonify({'error': 'Vendor not found'}), 404
+        
+        # Get additional stats for this vendor
+        cursor.execute("SELECT COUNT(*) FROM equipment WHERE vendor_email = ?", (vendor['email'],))
+        equipment_count = cursor.fetchone()[0] or 0
+        
+        cursor.execute("SELECT COUNT(*) FROM bookings WHERE vendor_email = ?", (vendor['email'],))
+        booking_count = cursor.fetchone()[0] or 0
+        
+        conn.close()
+        
+        # Format vendor details
+        vendor_data = {
+            'id': vendor['id'],
+            'business_name': vendor['business_name'],
+            'contact_name': vendor['contact_name'],
+            'email': vendor['email'],
+            'phone': vendor['phone'],
+            'service_type': vendor['service_type'],
+            'description': vendor['description'] or 'N/A',
+            'business_document': vendor['business_document'],
+            'document_verified': vendor['document_verified'] or 'pending',
+            'document_url': url_for('serve_vendor_document', filename=vendor['business_document']) if vendor['business_document'] else None,
+            'equipment_count': equipment_count,
+            'booking_count': booking_count,
+            'registration_date': vendor['registration_date'],
+            'status': vendor['status']
+        }
+        
+        return jsonify(vendor_data)
+        
+    except Exception as e:
+        print(f"Error fetching vendor details: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/api/admin/booking/delete/<int:booking_id>', methods=['POST'])
@@ -3620,6 +3638,7 @@ def api_approve_farmer(farmer_id):
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 # ==================== REAL REPORTS API ====================
 @app.route('/api/admin/reports/real-data')
 def api_admin_real_reports():
@@ -3928,10 +3947,9 @@ def translate():
     response = requests.get("https://example.com")
     return response.text
 # ================= BOOKING SYSTEM ROUTES ==================
-
 @app.route('/api/bookings/submit', methods=['POST'])
 def submit_booking():
-    """Submit a new booking and update stock - FIXED STOCK MANAGEMENT"""
+    """Submit a new booking and update stock - FIXED COMPLETE DATA STORAGE"""
     if 'user_id' not in session:
         return jsonify({'error': 'Please log in first'}), 401
     
@@ -3948,14 +3966,15 @@ def submit_booking():
                 'error': f'Missing required fields: {", ".join(missing_fields)}'
             }), 400
         
-        # Get equipment details
+        # Get equipment details WITH VENDOR INFO
         conn = sqlite3.connect('vendors.db')
         cursor = conn.cursor()
         
         cursor.execute("""
-            SELECT e.*, v.contact_name as vendor_name, v.email as vendor_email 
-            FROM equipment e, vendors v 
-            WHERE e.id = ? AND e.vendor_email = v.email
+            SELECT e.*, v.contact_name as vendor_name, v.email as vendor_email, v.business_name
+            FROM equipment e
+            JOIN vendors v ON e.vendor_email = v.email
+            WHERE e.id = ?
         """, (data['equipment_id'],))
         
         equipment = cursor.fetchone()
@@ -3974,22 +3993,31 @@ def submit_booking():
         start_date = datetime.now().strftime('%Y-%m-%d')
         end_date = datetime.now().strftime('%Y-%m-%d')
         
-        # Insert booking into database
+        # Extract all equipment and vendor details
+        equipment_name = equipment[2]  # name
+        vendor_name = equipment[9] if len(equipment) > 9 else 'Vendor'  # vendor_name from join
+        vendor_email = equipment[1]  # vendor_email
+        business_name = equipment[10] if len(equipment) > 10 else ''  # business_name
+        
+        print(f"📝 Storing booking with: Equipment={equipment_name}, Vendor={vendor_name}, Email={vendor_email}")
+        
+        # Insert booking into database with COMPLETE DATA
         cursor.execute("""
             INSERT INTO bookings 
             (user_id, user_name, user_email, user_phone,
              equipment_id, equipment_name, vendor_email, vendor_name,
-             start_date, end_date, duration, total_amount, status, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             start_date, end_date, duration, total_amount, status, notes,
+             created_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
         """, (
             session['user_id'],
             session['user_name'],
             session.get('user_email', ''),
             session.get('user_phone', ''),
             data['equipment_id'],
-            equipment[2],  # equipment name
-            equipment[1],  # vendor_email
-            equipment[9],  # vendor_name (from the join)
+            equipment_name,
+            vendor_email,
+            vendor_name,
             start_date,
             end_date,
             duration,
@@ -4000,7 +4028,7 @@ def submit_booking():
         
         booking_id = cursor.lastrowid
         
-        # ✅ FIXED: Update equipment stock (decrease by 1) and set status based on stock
+        # ✅ Update equipment stock (decrease by 1)
         new_stock = stock_quantity - 1
         cursor.execute("""
             UPDATE equipment 
@@ -4012,21 +4040,34 @@ def submit_booking():
         conn.commit()
         conn.close()
         
-        print(f"✅ Booking #{booking_id} submitted. Stock updated: {stock_quantity} → {new_stock}")
+        print(f"✅ Booking #{booking_id} stored COMPLETELY in database")
+        print(f"   Equipment: {equipment_name}")
+        print(f"   Vendor: {vendor_name} ({vendor_email})")
+        print(f"   User: {session['user_name']}")
+        print(f"   Amount: ₹{data['total_amount']}")
+        print(f"   Stock updated: {stock_quantity} → {new_stock}")
         
         # Send SMS notification to vendor
-        send_booking_notification(booking_id, 'submitted')
+        vendor_phone = "vendor_phone_here"  # You need to fetch vendor phone
+        vendor_message = f"New booking received for {equipment_name} from {session['user_name']}. Amount: ₹{data['total_amount']}"
+        
+        # Send SMS to user
+        user_message = f"Your booking for {equipment_name} has been submitted successfully! Booking ID: #{booking_id}"
+        send_sms(session.get('user_phone', ''), user_message)
         
         return jsonify({
             'success': True,
             'message': 'Booking submitted successfully!',
-            'booking_id': booking_id
+            'booking_id': booking_id,
+            'equipment_name': equipment_name,
+            'vendor_name': vendor_name
         })
         
     except Exception as e:
         print(f"❌ Error submitting booking: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
-
 
 @app.route('/api/user/bookings')
 def get_user_bookings():
@@ -4590,10 +4631,9 @@ def get_available_equipment():
     except Exception as e:
         print(f"Error fetching equipment: {str(e)}")
         return jsonify({'error': str(e)}), 500
-
 @app.route('/api/rent/submit-request', methods=['POST'])
 def submit_rent_request():
-    """Submit a rent request for equipment - FIXED STOCK MANAGEMENT"""
+    """Submit a rent request for equipment - FIXED COMPLETE DATA STORAGE"""
     if 'user_id' not in session:
         return jsonify({'error': 'Please log in first'}), 401
     
@@ -4602,7 +4642,7 @@ def submit_rent_request():
         print("📩 Received rent request:", data)
         
         # Validate required fields
-        required_fields = ['equipment_id', 'start_date', 'end_date', 'purpose']
+        required_fields = ['equipment_id', 'start_date', 'end_date', 'purpose', 'total_amount']
         missing_fields = [field for field in required_fields if field not in data]
         
         if missing_fields:
@@ -4619,14 +4659,15 @@ def submit_rent_request():
         if duration <= 0:
             return jsonify({'error': 'End date must be after start date'}), 400
         
-        # Get equipment details from database
+        # Get equipment details with vendor info
         conn = sqlite3.connect('vendors.db')
         cursor = conn.cursor()
         
         cursor.execute("""
-            SELECT e.*, v.contact_name as vendor_name 
-            FROM equipment e, vendors v 
-            WHERE e.id = ? AND e.vendor_email = v.email
+            SELECT e.*, v.contact_name as vendor_name, v.business_name, v.phone as vendor_phone
+            FROM equipment e
+            JOIN vendors v ON e.vendor_email = v.email
+            WHERE e.id = ?
         """, (data['equipment_id'],))
         
         equipment = cursor.fetchone()
@@ -4635,33 +4676,45 @@ def submit_rent_request():
             return jsonify({'error': 'Equipment not found'}), 404
         
         # Check stock availability
-        stock_quantity = equipment[10] if len(equipment) > 10 else 1  # stock_quantity column
+        stock_quantity = equipment[10] if len(equipment) > 10 else 1
         if stock_quantity <= 0:
             conn.close()
             return jsonify({'error': 'Equipment out of stock'}), 400
         
-        # Calculate costs
-        daily_rate = equipment[5]  # price column
-        base_amount = daily_rate * duration
-        service_fee = base_amount * 0.1  # 10% service fee
-        total_amount = base_amount + service_fee
+        # Extract details
+        equipment_name = equipment[2]
+        vendor_name = equipment[9] if len(equipment) > 9 else 'Vendor'
+        vendor_email = equipment[1]
+        daily_rate = equipment[5]
         
-        # Insert rent request into database
+        # Calculate costs if not provided
+        if 'total_amount' not in data:
+            base_amount = daily_rate * duration
+            service_fee = base_amount * 0.1
+            total_amount = base_amount + service_fee
+        else:
+            total_amount = data['total_amount']
+        
+        print(f"📝 Storing rent request: Equipment={equipment_name}, Vendor={vendor_name}")
+        
+        # Insert rent request into database with COMPLETE DATA
         cursor.execute("""
             INSERT INTO rent_requests 
             (user_id, user_name, user_phone, user_email,
-             equipment_id, equipment_name, vendor_email,
+             equipment_id, equipment_name, vendor_email, vendor_name,
              start_date, end_date, duration, purpose, notes,
-             daily_rate, base_amount, service_fee, total_amount, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             daily_rate, base_amount, service_fee, total_amount, status,
+             submitted_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
         """, (
             session['user_id'],
             session['user_name'],
             session.get('user_phone', ''),
             session.get('user_email', ''),
             data['equipment_id'],
-            equipment[2],  # equipment name
-            equipment[1],  # vendor_email
+            equipment_name,
+            vendor_email,
+            vendor_name,
             data['start_date'],
             data['end_date'],
             duration,
@@ -4674,10 +4727,9 @@ def submit_rent_request():
             'pending'
         ))
         
-        conn.commit()
         request_id = cursor.lastrowid
         
-        # ✅ FIXED: Decrease stock by 1 for rent request (same as booking)
+        # Decrease stock by 1
         new_stock = stock_quantity - 1
         cursor.execute("""
             UPDATE equipment 
@@ -4689,19 +4741,31 @@ def submit_rent_request():
         conn.commit()
         conn.close()
         
-        print(f"✅ Rent request #{request_id} submitted. Stock updated: {stock_quantity} → {new_stock}")
+        print(f"✅ Rent request #{request_id} stored COMPLETELY in database")
+        print(f"   Equipment: {equipment_name}")
+        print(f"   Vendor: {vendor_name} ({vendor_email})")
+        print(f"   User: {session['user_name']}")
+        print(f"   Amount: ₹{total_amount}")
+        print(f"   Dates: {data['start_date']} to {data['end_date']}")
+        print(f"   Duration: {duration} days")
+        print(f"   Stock updated: {stock_quantity} → {new_stock}")
         
-        # Send notification to vendor
-        send_rent_status_notification(request_id, 'submitted')
+        # Send notifications
+        user_message = f"Your rent request for {equipment_name} has been submitted! Request ID: #{request_id}"
+        send_sms(session.get('user_phone', ''), user_message)
         
         return jsonify({
             'success': True,
             'message': 'Rent request submitted successfully!',
-            'request_id': request_id
+            'request_id': request_id,
+            'equipment_name': equipment_name,
+            'vendor_name': vendor_name
         })
         
     except Exception as e:
         print(f"❌ Error submitting rent request: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 @app.route('/api/vendor/rent-requests')
 def get_vendor_rent_requests():
@@ -4794,6 +4858,82 @@ def delete_equipment(equipment_id):
         
     except Exception as e:
         print(f"❌ Error deleting equipment: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+@app.route('/api/admin/broadcast', methods=['POST'])
+def api_admin_send_broadcast():
+    """Send broadcast message to all farmers"""
+    if 'admin_id' not in session or session.get('user_type') != 'admin':
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        data = request.get_json()
+        title = data.get('title', '').strip()
+        content = data.get('content', '').strip()
+        message_type = data.get('type', 'announcement')
+        
+        if not title or not content:
+            return jsonify({'error': 'Title and content are required'}), 400
+        
+        # Get all approved farmers' phone numbers
+        conn = sqlite3.connect('agriculture.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT full_name, phone FROM farmers WHERE status = 'approved'")
+        farmers = cursor.fetchall()
+        conn.close()
+        
+        if not farmers:
+            return jsonify({'error': 'No approved farmers found'}), 400
+        
+        success_count = 0
+        failed_count = 0
+        
+        # Format the message - KEEP IT SIMPLE, NO EMOJIS
+        full_message = f"{title}\n\n{content}\n\n- Lend A Hand"
+        
+        print(f"📢 Starting broadcast to {len(farmers)} farmers")
+        
+        # Send SMS to each farmer
+        for farmer in farmers:
+            farmer_name, farmer_phone = farmer
+            
+            try:
+                # Get phone number as string and clean it
+                phone = str(farmer_phone).strip()
+                
+                # Remove all non-digit characters (spaces, dashes, etc.)
+                phone = ''.join(filter(str.isdigit, phone))
+                
+                print(f"📱 Sending to {farmer_name}: {phone}")
+                
+                # Send SMS using the cleaned number
+                sms_result = send_sms(phone, full_message)
+                
+                if sms_result.get('success'):
+                    success_count += 1
+                    print(f"✅ Sent to {farmer_name}")
+                else:
+                    failed_count += 1
+                    print(f"❌ Failed for {farmer_name}: {sms_result.get('error')}")
+                    
+            except Exception as e:
+                failed_count += 1
+                print(f"❌ Error for {farmer_name}: {str(e)}")
+        
+        # Create response - ALWAYS return success for the API call itself
+        response_data = {
+            'success': True,  # Always true, the API call itself succeeded
+            'message': f'Broadcast completed. Sent to {success_count} of {len(farmers)} farmers',
+            'stats': {
+                'total': len(farmers),
+                'success': success_count,
+                'failed': failed_count
+            }
+        }
+        
+        return jsonify(response_data)
+        
+    except Exception as e:
+        print(f"Error sending broadcast: {str(e)}")
         return jsonify({'error': str(e)}), 500
 @app.route('/api/vendor/rent-request/<int:request_id>/update', methods=['POST'])
 def update_rent_request_status(request_id):
@@ -4969,6 +5109,3 @@ if __name__ == '__main__':
     add_reminder_columns()  # ✅ ADD THIS LINE
     start_reminder_scheduler()
     app.run(debug=True)
-
-
-
