@@ -1217,7 +1217,7 @@
             <div class="header-actions">
                 
                 <div class="user-profile">
-                   
+
                     <span>{{ contact_name }}</span>
                 </div>
             </div>
@@ -1423,12 +1423,7 @@
     <div class="section-header">
         <h2><i class="fas fa-ban"></i> Cancellation Requests</h2>
         <div>
-            <select id="cancellationFilter" class="form-control" style="width: auto; display: inline-block;">
-                <option value="all">All Requests</option>
-                <option value="pending">Pending Only</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-            </select>
+           
             <button class="btn btn-primary" onclick="loadCancellationRequests()">
                 <i class="fas fa-sync-alt"></i> Refresh
             </button>
@@ -1459,10 +1454,7 @@
         <div>
             <select id="rentRequestFilter" class="form-control" style="width: auto; display: inline-block;">
                 <option value="all">All Requests</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="completed">Completed</option>
-                <option value="rejected">Rejected</option>
+
             </select>
         </div>
     </div>
@@ -1896,7 +1888,7 @@ function createCancellationRequestCard(request) {
         
         <div class="request-details">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px;">
-                <div><strong>Order Date:</strong> ${createdDate}</div>
+         
                 ${request.start_date ? `<div><strong>Start Date:</strong> ${request.start_date}</div>` : ''}
                 ${request.end_date ? `<div><strong>End Date:</strong> ${request.end_date}</div>` : ''}
                 <div><strong>Total Amount:</strong> ₹${request.total_amount}</div>
@@ -3476,5 +3468,3 @@ cancelBtn.addEventListener('click', () => {
 <style>.goog-te-banner-frame{display:none!important;}.goog-te-gadget{font-size:0!important;}</style>
 </body>
 </html>
-
-
