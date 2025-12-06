@@ -2382,8 +2382,7 @@
             <div class="filter-dropdown">
                 <select id="orderTypeFilter" class="form-control">
                     <option value="all">All Types</option>
-                    <option value="booking">Bookings</option>
-                    <option value="rental">Rentals</option>
+
                 </select>
             </div>
             <div class="filter-dropdown">
@@ -2392,7 +2391,7 @@
                     <option value="pending">Pending</option>
                     <option value="confirmed">Confirmed</option>
                     <option value="cancellation_requested">Cancellation Requested</option>
-                    <option value="cancelled">Cancelled</option>
+                    
                     <option value="completed">Completed</option>
                 </select>
             </div>
@@ -2656,7 +2655,7 @@
         </div>
     </div>
 </div>
-<!-- Add this NEW rent modal after your booking modal -->
+<!-- Rent Modal - Make sure this ID is unique -->
 <div class="modal" id="rentModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -2719,8 +2718,8 @@
         </div>
         
         <div class="modal-footer">
-            <button class="btn btn-danger" id="cancelRentBtn">Cancel</button>
-            <button class="btn btn-success" id="submitRentRequestBtn">
+            <button class="btn btn-danger" type="button" id="cancelRentBtn">Cancel</button>
+            <button class="btn btn-success" type="button" id="submitRentRequestBtn">
                 <i class="fas fa-paper-plane"></i> Submit Rent Request
             </button>
         </div>
@@ -2920,6 +2919,7 @@ async function initDashboard() {
     // Load equipment from database first
     await loadEquipmentFromDB();
       setupWishlistEvents();
+      setupRentModalEvents();
     
     // Then load all UI components
     loadRecommendedEquipment();
@@ -2992,8 +2992,7 @@ var script = document.createElement('script');
 script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
 document.head.appendChild(script);
 // ================= ORDERS MANAGEMENT =================
-
-// Load user orders from database
+// ================= ORDERS MANAGEMENT =================
 async function loadUserOrders() {
     try {
         const orderTypeFilter = document.getElementById('orderTypeFilter').value;
@@ -3004,15 +3003,21 @@ async function loadUserOrders() {
         
         ordersContainer.innerHTML = '<p style="text-align: center; padding: 20px; color: var(--gray);">Loading orders...</p>';
         
-        // Build query parameters
-        const params = new URLSearchParams();
-        if (orderTypeFilter !== 'all') params.append('type', orderTypeFilter);
-        if (orderStatusFilter !== 'all') params.append('status', orderStatusFilter);
+        // Fetch ALL orders first
+        const response = await fetch('/api/user/orders');
+        let orders = await response.json();
         
-        const response = await fetch(`/api/user/orders?${params}`);
-        const orders = await response.json();
+        console.log('📦 Raw orders loaded:', orders);
         
-        console.log('📦 Orders loaded:', orders);
+        // ======== ADD THIS DEBUG CODE ========
+        // Check what order_type values actually exist
+        if (orders && orders.length > 0) {
+            console.log('🔍 Order types found in data:');
+            orders.forEach(order => {
+                console.log(`Order #${order.id}: order_type="${order.order_type}", status="${order.status}"`);
+            });
+        }
+        // ======== END DEBUG CODE ========
         
         ordersContainer.innerHTML = '';
         
@@ -3021,9 +3026,40 @@ async function loadUserOrders() {
             return;
         }
         
+        // Apply filters on the client side
+        let filteredOrders = orders;
+        
+        // 1. Filter by order type
+        if (orderTypeFilter !== 'all') {
+            filteredOrders = filteredOrders.filter(order => order.order_type === orderTypeFilter);
+            console.log(`Filtered by type '${orderTypeFilter}':`, filteredOrders.length, 'orders');
+        }
+        
+        // 2. Filter by order status
+        if (orderStatusFilter !== 'all') {
+            if (orderStatusFilter === 'cancellation_requested') {
+                // Special handling for cancellation requested status
+                filteredOrders = filteredOrders.filter(order => 
+                    order.is_cancellation_requested === true || 
+                    order.status === 'cancellation_requested'
+                );
+            } else {
+                filteredOrders = filteredOrders.filter(order => order.status === orderStatusFilter);
+            }
+            console.log(`Filtered by status '${orderStatusFilter}':`, filteredOrders.length, 'orders');
+        }
+        
+        if (filteredOrders.length === 0) {
+            noDataMsg.style.display = 'block';
+            return;
+        }
+        
         noDataMsg.style.display = 'none';
         
-        orders.forEach(order => {
+        // Sort orders by date (newest first)
+        filteredOrders.sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+        
+        filteredOrders.forEach(order => {
             const orderCard = createOrderCard(order);
             ordersContainer.appendChild(orderCard);
         });
@@ -3037,6 +3073,7 @@ async function loadUserOrders() {
         ordersContainer.innerHTML = '<p style="text-align: center; padding: 20px; color: var(--accent);">Error loading orders</p>';
     }
 }
+
 // FIXED: Create order card with proper data handling
 function createOrderCard(order) {
     const card = document.createElement('div');
@@ -3254,20 +3291,48 @@ function showReviewModal() {
     // Clear existing options
     reviewOrderSelect.innerHTML = '<option value="">-- Select an order to review --</option>';
     
+    // Reset the modal
+    document.getElementById('reviewForm').reset();
+    document.getElementById('reviewRating').value = 0;
+    document.getElementById('selectedOrderInfo').style.display = 'none';
+    
+    // Reset stars
+    document.querySelectorAll('.rating-stars i').forEach(star => {
+        star.style.color = '#e2e8f0';
+    });
+    
+    // Show the modal immediately
+    reviewModal.style.display = 'flex';
+    
+    // Show loading state
+    const originalContent = reviewOrderSelect.innerHTML;
+    reviewOrderSelect.innerHTML = '<option value="">Loading completed orders...</option>';
+    
     // Fetch completed orders
     fetch('/api/user/completed-orders')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(orders => {
+            console.log('✅ Completed orders loaded:', orders);
+            
             if (orders.error) {
+                reviewOrderSelect.innerHTML = '<option value="">Error loading orders</option>';
                 showToast('Error loading completed orders', 'error');
                 return;
             }
             
-            if (orders.length === 0) {
+            if (!orders || orders.length === 0) {
                 reviewOrderSelect.innerHTML = '<option value="">No completed orders available for review</option>';
                 showToast('No completed orders available for review', 'info');
                 return;
             }
+            
+            // Clear and add options
+            reviewOrderSelect.innerHTML = '<option value="">-- Select an order to review --</option>';
             
             // Add options for each completed order
             orders.forEach(order => {
@@ -3278,46 +3343,30 @@ function showReviewModal() {
                     equipment_id: order.equipment_id,
                     equipment_name: order.equipment_name,
                     vendor_email: order.vendor_email,
-                    vendor_name: order.vendor_name
+                    vendor_name: order.vendor_name || 'Vendor'
                 });
-                option.textContent = `${order.equipment_name} (${order.order_type === 'booking' ? 'Booking' : 'Rental'}) - ${new Date(order.created_date).toLocaleDateString()}`;
+                
+                // Format the display text
+                const orderDate = order.created_date ? 
+                    new Date(order.created_date).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                    }) : 'Recently';
+                
+                option.textContent = `${order.equipment_name} (${order.order_type === 'booking' ? 'Booking' : 'Rental'}) - ${orderDate}`;
                 reviewOrderSelect.appendChild(option);
             });
             
-            // Reset form
-            document.getElementById('reviewForm').reset();
-            document.getElementById('reviewRating').value = 0;
-            document.getElementById('selectedOrderInfo').style.display = 'none';
+            console.log(`✅ Loaded ${orders.length} completed orders`);
             
-            // Reset stars
-            document.querySelectorAll('.rating-stars i').forEach(star => {
-                star.style.color = '#e2e8f0';
-            });
-            
-            // Show modal
-            reviewModal.style.display = 'flex';
         })
         .catch(error => {
-            console.error('Error loading completed orders:', error);
-            showToast('Error loading completed orders', 'error');
+            console.error('❌ Error loading completed orders:', error);
+            reviewOrderSelect.innerHTML = '<option value="">Error loading orders</option>';
+            showToast('Error loading completed orders: ' + error.message, 'error');
         });
 }
-
-// Event listener for order selection
-document.getElementById('reviewOrder').addEventListener('change', function() {
-    const selectedOrderInfo = document.getElementById('selectedOrderInfo');
-    
-    if (this.value) {
-        const orderData = JSON.parse(this.value);
-        document.getElementById('selectedEquipmentName').textContent = orderData.equipment_name;
-        document.getElementById('selectedVendorName').textContent = orderData.vendor_name;
-        document.getElementById('selectedOrderType').textContent = orderData.order_type === 'booking' ? 'Booking' : 'Rental';
-        selectedOrderInfo.style.display = 'block';
-    } else {
-        selectedOrderInfo.style.display = 'none';
-    }
-});
-
 async function submitReview() {
     const reviewOrderSelect = document.getElementById('reviewOrder');
     const rating = document.getElementById('reviewRating').value;
@@ -4115,7 +4164,14 @@ function createEquipmentCard(item, isRecommended) {
     const cartBtn = card.querySelector('.cart-btn');
     
     if (bookBtn && isAvailable) bookBtn.addEventListener('click', () => openBookingModal(item.id));
-    if (rentBtn && isAvailable) rentBtn.addEventListener('click', () => openRentModal(item.id));
+if (rentBtn && isAvailable) {
+    rentBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Rent button clicked for equipment ID:', item.id);
+        openRentModal(item.id);
+    });
+}
     if (wishlistBtn) wishlistBtn.addEventListener('click', () => toggleWishlist(item.id));
     if (cartBtn && isAvailable) cartBtn.addEventListener('click', () => toggleCart(item.id));
     
@@ -4171,7 +4227,218 @@ function filterEquipment() {
         browseEquipmentGrid.appendChild(equipmentCard);
     });
 }
+// Function to close rent modal
+function closeRentModal() {
+    const rentModal = document.getElementById('rentModal');
+    if (rentModal) {
+        rentModal.style.display = 'none';
+        console.log('Rent modal closed');
+    }
+}
+// ================= RENT MODAL FUNCTIONS =================
+// Function to open rent modal
+function openRentModal(equipmentId) {
+    console.log('Opening rent modal for equipment:', equipmentId);
+    
+    // Get equipment details
+    const equipment = equipmentData.find(item => item.id == equipmentId);
+    if (!equipment) {
+        showToast('Equipment not found!', 'error');
+        return;
+    }
+    
+    // Set modal values
+    document.getElementById('rentEquipmentId').value = equipment.id;
+    document.getElementById('rentEquipmentName').textContent = equipment.name;
+    document.getElementById('rentEquipmentDescription').textContent = equipment.description || 'No description available';
+    document.getElementById('rentEquipmentPrice').textContent = equipment.price;
+    document.getElementById('rentEquipmentVendor').textContent = equipment.vendor_name;
+    document.getElementById('rentDailyPrice').textContent = equipment.price;
+    
+    // Set minimum dates
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const todayStr = today.toISOString().split('T')[0];
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    
+    const startDateInput = document.getElementById('rentStartDate');
+    const endDateInput = document.getElementById('rentEndDate');
+    
+    startDateInput.min = todayStr;
+    endDateInput.min = tomorrowStr;
+    
+    // Set default dates (tomorrow for start, 3 days later for end)
+    const defaultEndDate = new Date(tomorrow);
+    defaultEndDate.setDate(defaultEndDate.getDate() + 2);
+    const defaultEndStr = defaultEndDate.toISOString().split('T')[0];
+    
+    startDateInput.value = tomorrowStr;
+    endDateInput.value = defaultEndStr;
+    
+    // Reset form
+    document.getElementById('rentPurpose').value = '';
+    
+    // Update pricing
+    updateRentPricing();
+    
+    // Show modal
+    const rentModal = document.getElementById('rentModal');
+    if (rentModal) {
+        rentModal.style.display = 'flex';
+        console.log('Rent modal displayed');
+        
+        // Add event listener to close button in rent modal
+        const closeBtn = rentModal.querySelector('.close-modal');
+        if (closeBtn) {
+            closeBtn.onclick = function() {
+                rentModal.style.display = 'none';
+            };
+        }
+    } else {
+        console.error('Rent modal not found in DOM');
+    }
+}
 
+// Function to update rent pricing
+function updateRentPricing() {
+    const startDate = document.getElementById('rentStartDate').value;
+    const endDate = document.getElementById('rentEndDate').value;
+    const dailyPrice = parseFloat(document.getElementById('rentDailyPrice').textContent) || 0;
+    
+    if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        // Calculate days difference
+        const timeDiff = end.getTime() - start.getTime();
+        const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+        
+        if (daysDiff > 0) {
+            const baseTotal = dailyPrice * daysDiff;
+            const serviceFee = baseTotal * 0.1;
+            const totalAmount = baseTotal + serviceFee;
+            
+            document.getElementById('rentDaysCount').textContent = daysDiff;
+            document.getElementById('rentBaseTotal').textContent = baseTotal.toFixed(2);
+            document.getElementById('rentServiceFee').textContent = serviceFee.toFixed(2);
+            document.getElementById('rentTotalAmount').textContent = totalAmount.toFixed(2);
+        } else {
+            // Reset if invalid dates
+            document.getElementById('rentDaysCount').textContent = '0';
+            document.getElementById('rentBaseTotal').textContent = '0';
+            document.getElementById('rentServiceFee').textContent = '0';
+            document.getElementById('rentTotalAmount').textContent = '0';
+        }
+    }
+}
+
+// Function to submit rent request
+async function submitRentRequest() {
+    const equipmentId = document.getElementById('rentEquipmentId').value;
+    const startDate = document.getElementById('rentStartDate').value;
+    const endDate = document.getElementById('rentEndDate').value;
+    const purpose = document.getElementById('rentPurpose').value;
+    
+    // Validation
+    if (!equipmentId) {
+        showToast('Equipment ID is missing', 'error');
+        return;
+    }
+    
+    if (!startDate || !endDate) {
+        showToast('Please select both start and end dates', 'error');
+        return;
+    }
+    
+    if (!purpose.trim()) {
+        showToast('Please describe the purpose of rental', 'error');
+        return;
+    }
+    
+    // Date validation
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (start < today) {
+        showToast('Start date cannot be in the past', 'error');
+        return;
+    }
+    
+    if (end <= start) {
+        showToast('End date must be after start date', 'error');
+        return;
+    }
+    
+    // Calculate days and total
+    const timeDiff = end.getTime() - start.getTime();
+    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+    const dailyPrice = parseFloat(document.getElementById('rentDailyPrice').textContent) || 0;
+    const baseTotal = dailyPrice * daysDiff;
+    const serviceFee = baseTotal * 0.1;
+    const totalAmount = baseTotal + serviceFee;
+    
+    const rentData = {
+        equipment_id: parseInt(equipmentId),
+        start_date: startDate,
+        end_date: endDate,
+        duration: daysDiff,
+        purpose: purpose.trim(),
+        total_amount: totalAmount
+    };
+    
+    console.log('Submitting rent request:', rentData);
+    
+    // Show loading state
+    const submitBtn = document.getElementById('submitRentRequestBtn');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    submitBtn.disabled = true;
+    
+    try {
+        const response = await fetch('/api/rent/submit-request', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(rentData)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            showToast('Rent request submitted successfully!');
+            document.getElementById('rentModal').style.display = 'none';
+            
+            // Refresh equipment list
+            loadEquipmentFromDB();
+            loadBrowseEquipment();
+            loadRecommendedEquipment();
+            
+            // Clear form
+            document.getElementById('rentForm').reset();
+            
+        } else {
+            showToast(data.error || 'Error submitting rent request', 'error');
+        }
+    } catch (error) {
+        console.error('Error submitting rent request:', error);
+        showToast('Network error. Please try again.', 'error');
+    } finally {
+        // Restore button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+// Function to close rent modal
+function closeRentModal() {
+    document.getElementById('rentModal').style.display = 'none';
+    document.getElementById('rentForm').reset();
+}
 // ================= BOOKING MODAL FUNCTIONS =================
 
 // Add this function - Open Booking Modal
@@ -4215,7 +4482,6 @@ function openBookingModal(equipmentId) {
     bookingModal.style.display = 'flex';
 }
 
-// Add this function - Confirm Booking
 async function confirmBooking() {
     const equipmentId = parseInt(document.getElementById('equipmentId').value);
     const notes = document.getElementById('bookingNotes').value;
@@ -4230,6 +4496,14 @@ async function confirmBooking() {
     const dailyRate = equipment.price;
     const serviceFee = dailyRate * 0.1;
     const totalAmount = dailyRate + serviceFee;
+    
+    console.log('📤 Sending booking data:', {
+        equipment_id: equipmentId,
+        total_amount: totalAmount,
+        notes: notes,
+        equipment_name: equipment.name,
+        vendor_email: equipment.vendor_email
+    });
     
     const bookingData = {
         equipment_id: equipmentId,
@@ -4247,6 +4521,7 @@ async function confirmBooking() {
         });
         
         const result = await response.json();
+        console.log('📦 Booking response:', result);
         
         if (response.ok && result.success) {
             showToast('Booking submitted successfully!');
@@ -4257,8 +4532,8 @@ async function confirmBooking() {
             loadRecommendedEquipment();
             loadBrowseEquipment();
             
-            // Reload bookings
-            loadUpcomingBookings();
+            // Reload bookings IMMEDIATELY
+            loadUserOrders();
             updateStats();
             
         } else {
@@ -4272,126 +4547,6 @@ async function confirmBooking() {
 
 // ================= RENT FUNCTIONALITY =================
 
-// Rent functionality for user dashboard
-function openRentModal(equipmentId) {
-    // Get equipment details from your existing equipmentData
-    const equipment = equipmentData.find(item => item.id == equipmentId);
-    if (!equipment) {
-        alert('Equipment not found!');
-        return;
-    }
-    
-    document.getElementById('rentEquipmentId').value = equipment.id;
-    document.getElementById('rentEquipmentName').textContent = equipment.name;
-    document.getElementById('rentEquipmentDescription').textContent = equipment.description;
-    document.getElementById('rentEquipmentPrice').textContent = equipment.price;
-    document.getElementById('rentEquipmentVendor').textContent = equipment.owner;
-    document.getElementById('rentDailyPrice').textContent = equipment.price;
-    
-    // Set minimum dates
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('rentStartDate').min = today;
-    document.getElementById('rentEndDate').min = today;
-    
-    // Reset form
-    document.getElementById('rentStartDate').value = '';
-    document.getElementById('rentEndDate').value = '';
-    document.getElementById('rentPurpose').value = '';
-    updateRentPricing();
-    
-    document.getElementById('rentModal').style.display = 'flex';
-}
-
-function updateRentPricing() {
-    const startDate = document.getElementById('rentStartDate').value;
-    const endDate = document.getElementById('rentEndDate').value;
-    const dailyPrice = parseFloat(document.getElementById('rentDailyPrice').textContent) || 0;
-    
-    if (startDate && endDate) {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        const daysDiff = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-        
-        if (daysDiff > 0) {
-            const baseTotal = dailyPrice * daysDiff;
-            const serviceFee = baseTotal * 0.1;
-            const totalAmount = baseTotal + serviceFee;
-            
-            document.getElementById('rentDaysCount').textContent = daysDiff;
-            document.getElementById('rentBaseTotal').textContent = baseTotal.toFixed(2);
-            document.getElementById('rentServiceFee').textContent = serviceFee.toFixed(2);
-            document.getElementById('rentTotalAmount').textContent = totalAmount.toFixed(2);
-        }
-    }
-}
-
-// Update the submitRentRequest function in user dashboard
-function submitRentRequest() {
-    const equipmentId = document.getElementById('rentEquipmentId').value;
-    const startDate = document.getElementById('rentStartDate').value;
-    const endDate = document.getElementById('rentEndDate').value;
-    const purpose = document.getElementById('rentPurpose').value;
-    
-    if (!startDate || !endDate || !purpose) {
-        alert('Please fill in all required fields');
-        return;
-    }
-    
-    // Validate dates
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    if (start < today) {
-        alert('Start date cannot be in the past');
-        return;
-    }
-    
-    if (end <= start) {
-        alert('End date must be after start date');
-        return;
-    }
-    
-    const rentData = {
-        equipment_id: parseInt(equipmentId),
-        start_date: startDate,
-        end_date: endDate,
-        purpose: purpose
-    };
-    
-    fetch('/api/rent/submit-request', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(rentData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showToast('Rent request submitted successfully! The equipment will be automatically restocked after the rental period.');
-            document.getElementById('rentModal').style.display = 'none';
-            
-            // Refresh equipment list to show updated availability
-            loadBrowseEquipment();
-            loadRecommendedEquipment();
-            
-            // Show success details
-            console.log('Rent request details:', {
-                id: data.rent_request_id,
-                end_date: data.end_date,
-                total_amount: data.total_amount
-            });
-        } else {
-            alert('Error: ' + data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error submitting rent request:', error);
-        alert('Error submitting rent request');
-    });
-}
 
 // ================= CART FUNCTIONS =================
 
@@ -4509,7 +4664,7 @@ function removeFromCart(equipmentId) {
 }
 
 // ================= WISHLIST FUNCTIONS =================
-
+// FIXED: Load wishlist - Only show items that exist in current equipmentData
 function loadWishlist() {
     if (!wishlistGrid) return;
     
@@ -4522,14 +4677,36 @@ function loadWishlist() {
             <div style="text-align: center; padding: 40px; color: var(--gray); width: 100%;">
                 <i class="fas fa-heart" style="font-size: 3rem; margin-bottom: 15px;"></i>
                 <h3>Your wishlist is empty</h3>
-                <p>Save equipment by clicking the heart icon</p>
+                <p>Save equipment by clicking the heart icon in Browse Equipment</p>
             </div>
         `;
         return;
     }
     
-    // Show each wishlist item
-    userWishlist.forEach(item => {
+    // Filter wishlist items to only include those in current equipmentData
+    const validWishlistItems = userWishlist.filter(wishItem => {
+        return equipmentData.some(eq => eq.id === wishItem.id);
+    });
+    
+    // Update userWishlist to only keep valid items
+    if (validWishlistItems.length !== userWishlist.length) {
+        userWishlist = validWishlistItems;
+        localStorage.setItem('userWishlist', JSON.stringify(userWishlist));
+    }
+    
+    if (validWishlistItems.length === 0) {
+        wishlistGrid.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--gray); width: 100%;">
+                <i class="fas fa-heart" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                <h3>No wishlist items available</h3>
+                <p>The equipment in your wishlist may no longer be available</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Show each valid wishlist item
+    validWishlistItems.forEach(item => {
         const card = document.createElement('div');
         card.className = 'item-card';
         card.dataset.id = item.id;
@@ -4552,7 +4729,7 @@ function loadWishlist() {
                 <div class="item-price">₹${item.price || '0'} / day</div>
                 
                 <div class="item-actions">
-                    <button class="btn btn-primary btn-sm book-btn">
+                    <button class="btn btn-primary btn-sm book-wishlist-btn" data-id="${item.id}">
                         <i class="fas fa-calendar-check"></i> Book
                     </button>
                     <button class="btn btn-danger btn-sm remove-wishlist-btn" data-id="${item.id}">
@@ -4568,13 +4745,12 @@ function loadWishlist() {
             removeBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Remove button clicked for:', this.dataset.id);
                 toggleWishlist(this.dataset.id);
             });
         }
         
         // Add click event to the BOOK button
-        const bookBtn = card.querySelector('.book-btn');
+        const bookBtn = card.querySelector('.book-wishlist-btn');
         if (bookBtn) {
             bookBtn.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -4822,12 +4998,7 @@ window.addEventListener('click', (e) => {
 
 window.addEventListener('resize', checkScreenSize);
 
-// Cart icon click event
-document.getElementById('cartIcon').addEventListener('click', () => {
-    showSection('cart');
-    setActiveNavLink('cart');
-    loadCartItems();
-});
+
 
 // Rent modal event listeners
 document.getElementById('rentStartDate').addEventListener('change', updateRentPricing);
@@ -5189,7 +5360,106 @@ function filterBookings() {
         bookingsTable.appendChild(row);
     });
 }
-
+// Add this function to setup rent modal event listeners
+function setupRentModalEvents() {
+    console.log('Setting up rent modal events...');
+    
+    // Cancel button
+    const cancelRentBtn = document.getElementById('cancelRentBtn');
+    if (cancelRentBtn) {
+        cancelRentBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Cancel rent button clicked');
+            closeRentModal();
+        });
+    }
+    
+    // Submit button
+    const submitRentBtn = document.getElementById('submitRentRequestBtn');
+    if (submitRentBtn) {
+        submitRentBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Submit rent button clicked');
+            submitRentRequest();
+        });
+    }
+    
+    // Close modal when clicking outside
+    const rentModal = document.getElementById('rentModal');
+    if (rentModal) {
+        rentModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeRentModal();
+            }
+        });
+    }
+    
+    // Close with escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const rentModal = document.getElementById('rentModal');
+            if (rentModal && rentModal.style.display === 'flex') {
+                closeRentModal();
+            }
+        }
+    });
+}
+// Function to setup rent modal event listeners
+function setupRentModalEventListeners() {
+    console.log('Setting up rent modal event listeners...');
+    
+    // Close rent modal when clicking X
+    const closeRentModalBtn = document.getElementById('closeRentModal');
+    if (closeRentModalBtn) {
+        closeRentModalBtn.addEventListener('click', closeRentModal);
+    }
+    
+    // Close rent modal when clicking cancel button
+    const cancelRentBtn = document.getElementById('cancelRentBtn');
+    if (cancelRentBtn) {
+        cancelRentBtn.addEventListener('click', closeRentModal);
+    }
+    
+    // Submit rent request
+    const submitRentBtn = document.getElementById('submitRentRequestBtn');
+    if (submitRentBtn) {
+        submitRentBtn.addEventListener('click', submitRentRequest);
+    }
+    
+    // Update pricing when dates change
+    const rentStartDate = document.getElementById('rentStartDate');
+    const rentEndDate = document.getElementById('rentEndDate');
+    
+    if (rentStartDate) {
+        rentStartDate.addEventListener('change', updateRentPricing);
+    }
+    
+    if (rentEndDate) {
+        rentEndDate.addEventListener('change', updateRentPricing);
+    }
+    
+    // Close modal when clicking outside
+    const rentModal = document.getElementById('rentModal');
+    if (rentModal) {
+        rentModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeRentModal();
+            }
+        });
+    }
+    
+    // Close with escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const rentModal = document.getElementById('rentModal');
+            if (rentModal && rentModal.style.display === 'flex') {
+                closeRentModal();
+            }
+        }
+    });
+}
 // ================= SETUP RATING STARS =================
 
 function setupRatingStars() {
@@ -5215,5 +5485,4 @@ function setupRatingStars() {
 <style>.goog-te-banner-frame{display:none!important;}.goog-te-gadget{font-size:0!important;}</style>
 </body>
 </html>
-
 
