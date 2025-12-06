@@ -33,22 +33,7 @@
             color: var(--dark);
             min-height: 100vh;
         }
-         .goog-te-banner-frame,
-    .goog-te-banner,
-    .goog-te-banner-wrapper,
-    .skiptranslate,
-    #goog-gt-tt,
-    .goog-te-balloon-frame,
-    .goog-tooltip,
-    .goog-tooltip:hover,
-    .goog-text-highlight {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        height: 0 !important;
-        width: 0 !important;
-        position: absolute !important;
-    }
+
     /* Document Status Badges */
 .document-verified {
     background: #c6f6d5;
@@ -115,13 +100,23 @@
     flex: 1;
     word-break: break-word;
 }
-
-/* Small buttons for document actions */
-.btn-doc-action {
-    padding: 3px 8px;
-    font-size: 0.75rem;
-    margin-right: 5px;
-}
+ .goog-te-banner-frame,
+    .goog-te-banner,
+    .goog-te-banner-wrapper,
+    .skiptranslate,
+    #goog-gt-tt,
+    .goog-te-balloon-frame,
+    .goog-tooltip,
+    .goog-tooltip:hover,
+    .goog-text-highlight {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        width: 0 !important;
+        position: absolute !important;
+    }
+    
     /* Prevent body shift */
     body {
         top: 0px !important;
@@ -132,6 +127,13 @@
     .goog-te-menu-frame {
         display: none !important;
     }
+/* Small buttons for document actions */
+.btn-doc-action {
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    margin-right: 5px;
+}
+   
         /* Admin Header */
         .admin-header {
             background: white;
@@ -2559,7 +2561,31 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.addEventListener('click', () => viewEquipment(btn.dataset.id));
         });
     }
-
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'en,kn',
+        autoDisplay: false
+    }, 'google_translate_element');
+    
+    // Apply saved language
+    const savedLang = localStorage.getItem('selectedLanguage');
+    if(savedLang === 'kn') {
+        setTimeout(() => {
+            var iframe = document.querySelector('.goog-te-menu-frame');
+            if(iframe) {
+                var select = iframe.contentWindow.document.querySelector('.goog-te-menu2-select');
+                if(select) {
+                    select.value = 'kn';
+                    select.dispatchEvent(new Event('change'));
+                }
+            }
+        }, 1000);
+    }
+}
+var script = document.createElement('script');
+script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+document.head.appendChild(script);
     function viewEquipment(equipmentId) {
         const equipment = equipmentData.find(e => e.id === parseInt(equipmentId));
         if (!equipment) return;
@@ -3752,5 +3778,6 @@ document.addEventListener('click', function(e) {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
+
 
 
